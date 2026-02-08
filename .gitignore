@@ -1,0 +1,29 @@
+# ML data
+ml/data/raw/
+ml/data/processed/
+
+# Trained models
+ml/models/*.pkl
+ml/models/*.joblib
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+
+# Java
+target/
+*.class
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
