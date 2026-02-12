@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="20"
+      alignment="CENTER"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aqi.controllers.HealthProfileController">
+
+    <padding>
+        <Insets top="30" right="40" bottom="30" left="40"/>
+    </padding>
+
+    <Label text="Health Profile"
+           style="-fx-font-size: 22px; -fx-font-weight: bold;" />
+
+    <GridPane hgap="15" vgap="15">
+
+        <Label text="Age:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="ageField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Gender:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="genderCombo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Location:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="locationField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Asthma:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <CheckBox fx:id="asthmaCheck"
+                  text="Yes"
+                  GridPane.rowIndex="3"
+                  GridPane.columnIndex="1"/>
+
+        <Label text="Breathing Condition:"
+               GridPane.rowIndex="4"
+               GridPane.columnIndex="0"/>
+        <TextField fx:id="breathingConditionField"
+                   GridPane.rowIndex="4"
+                   GridPane.columnIndex="1"/>
+
+    </GridPane>
+
+    <HBox spacing="15" alignment="CENTER">
+        <Button text="Save" onAction="#handleSave"/>
+        <Button text="Cancel" onAction="#handleCancel"/>
+    </HBox>
+
+    <Label fx:id="statusLabel"/>
+</VBox>
