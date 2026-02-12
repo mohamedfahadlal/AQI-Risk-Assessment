@@ -1,0 +1,85 @@
+/* ================= ROOT BACKGROUND ================= */
+
+.root {
+    -fx-background-color: linear-gradient(to bottom right, #e6f2ff, #ffffff);
+    -fx-font-family: "Segoe UI";
+}
+
+/* ================= CARD ================= */
+
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-padding: 35;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0.3, 0, 8);
+}
+
+/* ================= TITLE ================= */
+
+.title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1f2d3d;
+}
+
+/* ================= LABELS ================= */
+
+.form-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #4a5568;
+}
+
+/* ================= INPUT FIELDS ================= */
+
+.text-field, .combo-box {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #cbd5e0;
+    -fx-border-width: 1;
+    -fx-padding: 8;
+}
+
+.text-field:focused, .combo-box:focused {
+    -fx-border-color: #2563eb;
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.3), 10, 0.3, 0, 0);
+}
+
+/* ================= CHECKBOX ================= */
+
+.check-box {
+    -fx-text-fill: #374151;
+}
+
+/* ================= BUTTONS ================= */
+
+.primary-btn {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 8 20 8 20;
+}
+
+.primary-btn:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+.secondary-btn {
+    -fx-background-color: #e5e7eb;
+    -fx-text-fill: #374151;
+    -fx-background-radius: 10;
+    -fx-padding: 8 20 8 20;
+}
+
+/* ================= SUCCESS BOX ================= */
+
+.success-box {
+    -fx-background-color: #d1fae5;
+    -fx-background-radius: 10;
+    -fx-padding: 10;
+}
+
+.success-text {
+    -fx-text-fill: #065f46;
+    -fx-font-weight: bold;
+}
