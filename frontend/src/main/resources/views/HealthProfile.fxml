@@ -1,95 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <StackPane xmlns:fx="http://javafx.com/fxml"
            fx:controller="com.aqi.controllers.HealthProfileController">
 
-    <!-- Main Card -->
     <VBox alignment="CENTER"
           spacing="30"
           styleClass="card"
           maxWidth="520">
 
-        <!-- Title -->
         <Label text="Health Profile"
                styleClass="title"/>
 
-        <!-- Form Section -->
         <GridPane hgap="20" vgap="18">
 
-            <!-- Age -->
-            <Label text="Age:"
-                   styleClass="form-label"
-                   GridPane.rowIndex="0"
-                   GridPane.columnIndex="0"/>
+            <Label text="Age:" styleClass="form-label"
+                   GridPane.rowIndex="0" GridPane.columnIndex="0"/>
             <TextField fx:id="ageField"
                        promptText="Enter age"
                        prefWidth="220"
-                       GridPane.rowIndex="0"
-                       GridPane.columnIndex="1"/>
+                       GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-            <!-- Gender -->
-            <Label text="Gender:"
-                   styleClass="form-label"
-                   GridPane.rowIndex="1"
-                   GridPane.columnIndex="0"/>
+            <Label text="Gender:" styleClass="form-label"
+                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
             <ComboBox fx:id="genderCombo"
                       prefWidth="220"
-                      GridPane.rowIndex="1"
-                      GridPane.columnIndex="1"/>
+                      GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-            <!-- Location -->
-            <Label text="Location:"
-                   styleClass="form-label"
-                   GridPane.rowIndex="2"
-                   GridPane.columnIndex="0"/>
+            <Label text="Location:" styleClass="form-label"
+                   GridPane.rowIndex="2" GridPane.columnIndex="0"/>
             <TextField fx:id="locationField"
                        promptText="Enter city"
                        prefWidth="220"
-                       GridPane.rowIndex="2"
-                       GridPane.columnIndex="1"/>
+                       GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-            <!-- Asthma -->
-            <Label text="Asthma:"
-                   styleClass="form-label"
-                   GridPane.rowIndex="3"
-                   GridPane.columnIndex="0"/>
+            <Label text="Asthma:" styleClass="form-label"
+                   GridPane.rowIndex="3" GridPane.columnIndex="0"/>
             <CheckBox fx:id="asthmaCheck"
                       text="Yes"
-                      GridPane.rowIndex="3"
-                      GridPane.columnIndex="1"/>
+                      GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-            <!-- Breathing Condition -->
-            <Label text="Breathing Condition:"
-                   styleClass="form-label"
-                   GridPane.rowIndex="4"
-                   GridPane.columnIndex="0"/>
+            <Label text="Breathing Condition:" styleClass="form-label"
+                   GridPane.rowIndex="4" GridPane.columnIndex="0"/>
             <ComboBox fx:id="breathingCombo"
                       prefWidth="220"
-                      GridPane.rowIndex="4"
-                      GridPane.columnIndex="1"/>
+                      GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
         </GridPane>
 
-        <!-- Buttons -->
         <HBox spacing="20" alignment="CENTER">
             <Button text="Save"
                     fx:id="saveButton"
                     styleClass="primary-btn"/>
             <Button text="Cancel"
-                    fx:id="cancelButton"
                     styleClass="secondary-btn"/>
         </HBox>
 
-        <!-- Success Message -->
         <HBox alignment="CENTER"
               fx:id="successBox"
               styleClass="success-box"
-              visible="false">
-            <Label text="Profile saved successfully!"
+              visible="false"
+              managed="false">
+
+            <Label text="✔ Profile saved successfully!"
                    styleClass="success-text"/>
         </HBox>
 

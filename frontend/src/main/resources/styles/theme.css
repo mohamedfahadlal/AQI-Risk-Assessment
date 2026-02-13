@@ -1,11 +1,7 @@
-/* ================= ROOT ================= */
-
 .root {
     -fx-background-color: linear-gradient(to bottom right, #edf2f7, #e2e8f0);
     -fx-font-family: "Segoe UI";
 }
-
-/* ================= CARD ================= */
 
 .card {
     -fx-background-color: white;
@@ -14,24 +10,18 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 30, 0.3, 0, 10);
 }
 
-/* ================= TITLE ================= */
-
 .title {
     -fx-font-size: 28px;
     -fx-font-weight: bold;
     -fx-text-fill: #1e293b;
 }
 
-/* ================= LABELS ================= */
-
 .form-label {
     -fx-font-size: 14px;
     -fx-text-fill: #475569;
 }
 
-/* ================= TEXT FIELDS ================= */
-
-.text-field {
+.text-field, .combo-box {
     -fx-background-color: #f8fafc;
     -fx-background-radius: 10;
     -fx-border-radius: 10;
@@ -40,32 +30,10 @@
     -fx-padding: 10;
 }
 
-.text-field:focused {
+.text-field:focused, .combo-box:focused {
     -fx-border-color: #2563eb;
     -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.25), 12, 0.3, 0, 0);
 }
-
-/* ================= COMBO BOX ================= */
-
-.combo-box {
-    -fx-background-color: #f8fafc;
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
-    -fx-border-color: #cbd5e1;
-    -fx-border-width: 1;
-}
-
-.combo-box:focused {
-    -fx-border-color: #2563eb;
-}
-
-/* ================= CHECKBOX ================= */
-
-.check-box {
-    -fx-text-fill: #334155;
-}
-
-/* ================= PRIMARY BUTTON ================= */
 
 .primary-btn {
     -fx-background-color: #2563eb;
@@ -79,12 +47,6 @@
     -fx-background-color: #1d4ed8;
 }
 
-.primary-btn:pressed {
-    -fx-background-color: #1e40af;
-}
-
-/* ================= SECONDARY BUTTON ================= */
-
 .secondary-btn {
     -fx-background-color: #e2e8f0;
     -fx-text-fill: #1e293b;
@@ -94,4 +56,16 @@
 
 .secondary-btn:hover {
     -fx-background-color: #cbd5e1;
+}
+
+.success-box {
+    -fx-background-color: #dcfce7;
+    -fx-background-radius: 14;
+    -fx-padding: 12 20 12 20;
+}
+
+.success-text {
+    -fx-text-fill: #166534;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
 }

@@ -1,8 +1,10 @@
 package com.aqi.controllers;
 
+import javafx.animation.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.util.Duration;
 
 public class HealthProfileController {
 
@@ -17,9 +19,7 @@ public class HealthProfileController {
     @FXML
     public void initialize() {
 
-        // -----------------------------
-        // Gender Setup (No Default Bias)
-        // -----------------------------
+        // Gender options
         genderCombo.getItems().addAll(
                 "Select Gender",
                 "Male",
@@ -28,9 +28,7 @@ public class HealthProfileController {
         );
         genderCombo.setValue("Select Gender");
 
-        // -----------------------------
-        // Breathing Severity Setup
-        // -----------------------------
+        // Breathing condition options
         breathingCombo.getItems().addAll(
                 "None",
                 "Mild",
@@ -39,18 +37,13 @@ public class HealthProfileController {
         );
         breathingCombo.setValue("None");
 
-        // -----------------------------
-        // Age Numeric Constraint
-        // -----------------------------
+        // Age numeric constraint
         ageField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal.matches("\\d*")) {
                 ageField.setText(newVal.replaceAll("[^\\d]", ""));
             }
         });
 
-        // -----------------------------
-        // Save Button Action
-        // -----------------------------
         saveButton.setOnAction(e -> handleSave());
     }
 
@@ -61,22 +54,19 @@ public class HealthProfileController {
             return;
         }
 
-        // TODO: Connect to backend API here
+        // TODO: Call backend API here
 
-        successBox.setVisible(true);
+        showSuccess();
     }
 
     private boolean validateInputs() {
 
-        // Age required
         if (ageField.getText().isEmpty())
             return false;
 
-        // Gender must not be placeholder
         if (genderCombo.getValue().equals("Select Gender"))
             return false;
 
-        // Location required
         if (locationField.getText().trim().isEmpty())
             return false;
 
@@ -90,5 +80,55 @@ public class HealthProfileController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void showSuccess() {
+
+        successBox.setManaged(true);
+        successBox.setVisible(true);
+
+        successBox.setOpacity(0);
+        successBox.setScaleX(0.85);
+        successBox.setScaleY(0.85);
+        successBox.setTranslateY(15);
+
+        FadeTransition fade = new FadeTransition(Duration.millis(350), successBox);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        ScaleTransition scale = new ScaleTransition(Duration.millis(350), successBox);
+        scale.setFromX(0.85);
+        scale.setFromY(0.85);
+        scale.setToX(1);
+        scale.setToY(1);
+
+        TranslateTransition slide = new TranslateTransition(Duration.millis(350), successBox);
+        slide.setFromY(15);
+        slide.setToY(0);
+
+        ParallelTransition show = new ParallelTransition(fade, scale, slide);
+        show.play();
+
+        PauseTransition pause = new PauseTransition(Duration.seconds(3));
+        pause.setOnFinished(e -> hideSuccess());
+        pause.play();
+    }
+
+    private void hideSuccess() {
+
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(250), successBox);
+        fadeOut.setFromValue(1);
+        fadeOut.setToValue(0);
+
+        fadeOut.setOnFinished(e -> {
+            successBox.setVisible(false);
+            successBox.setManaged(false);
+            successBox.setOpacity(1);
+            successBox.setScaleX(1);
+            successBox.setScaleY(1);
+            successBox.setTranslateY(0);
+        });
+
+        fadeOut.play();
     }
 }
