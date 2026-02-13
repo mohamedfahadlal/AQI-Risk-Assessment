@@ -1,7 +1,7 @@
-/* ================= ROOT BACKGROUND ================= */
+/* ================= ROOT ================= */
 
 .root {
-    -fx-background-color: linear-gradient(to bottom right, #e6f2ff, #ffffff);
+    -fx-background-color: linear-gradient(to bottom right, #edf2f7, #e2e8f0);
     -fx-font-family: "Segoe UI";
 }
 
@@ -9,77 +9,89 @@
 
 .card {
     -fx-background-color: white;
-    -fx-background-radius: 20;
-    -fx-padding: 35;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0.3, 0, 8);
+    -fx-background-radius: 22;
+    -fx-padding: 40;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 30, 0.3, 0, 10);
 }
 
 /* ================= TITLE ================= */
 
 .title {
-    -fx-font-size: 26px;
+    -fx-font-size: 28px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1f2d3d;
+    -fx-text-fill: #1e293b;
 }
 
 /* ================= LABELS ================= */
 
 .form-label {
     -fx-font-size: 14px;
-    -fx-text-fill: #4a5568;
+    -fx-text-fill: #475569;
 }
 
-/* ================= INPUT FIELDS ================= */
+/* ================= TEXT FIELDS ================= */
 
-.text-field, .combo-box {
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-    -fx-border-color: #cbd5e0;
+.text-field {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #cbd5e1;
     -fx-border-width: 1;
-    -fx-padding: 8;
+    -fx-padding: 10;
 }
 
-.text-field:focused, .combo-box:focused {
+.text-field:focused {
     -fx-border-color: #2563eb;
-    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.3), 10, 0.3, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.25), 12, 0.3, 0, 0);
+}
+
+/* ================= COMBO BOX ================= */
+
+.combo-box {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 1;
+}
+
+.combo-box:focused {
+    -fx-border-color: #2563eb;
 }
 
 /* ================= CHECKBOX ================= */
 
 .check-box {
-    -fx-text-fill: #374151;
+    -fx-text-fill: #334155;
 }
 
-/* ================= BUTTONS ================= */
+/* ================= PRIMARY BUTTON ================= */
 
 .primary-btn {
     -fx-background-color: #2563eb;
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-background-radius: 10;
-    -fx-padding: 8 20 8 20;
+    -fx-background-radius: 12;
+    -fx-padding: 10 24 10 24;
 }
 
 .primary-btn:hover {
     -fx-background-color: #1d4ed8;
 }
 
+.primary-btn:pressed {
+    -fx-background-color: #1e40af;
+}
+
+/* ================= SECONDARY BUTTON ================= */
+
 .secondary-btn {
-    -fx-background-color: #e5e7eb;
-    -fx-text-fill: #374151;
-    -fx-background-radius: 10;
-    -fx-padding: 8 20 8 20;
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #1e293b;
+    -fx-background-radius: 12;
+    -fx-padding: 10 24 10 24;
 }
 
-/* ================= SUCCESS BOX ================= */
-
-.success-box {
-    -fx-background-color: #d1fae5;
-    -fx-background-radius: 10;
-    -fx-padding: 10;
-}
-
-.success-text {
-    -fx-text-fill: #065f46;
-    -fx-font-weight: bold;
+.secondary-btn:hover {
+    -fx-background-color: #cbd5e1;
 }
