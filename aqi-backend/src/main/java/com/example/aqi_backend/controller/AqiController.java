@@ -8,7 +8,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*") // Allow JavaFX client
+@CrossOrigin(origins = "*")
 public class AqiController {
 
     private final AqiService aqiService;
@@ -17,19 +17,24 @@ public class AqiController {
         this.aqiService = aqiService;
     }
 
-    /**
-     * GET /api/aqi?city=Kochi
-     * Returns real-time AQI + pollutants + weather for a city
-     */
+    // Search by city name: GET /api/aqi?city=Kochi
     @GetMapping("/aqi")
     public ResponseEntity<?> getAqi(@RequestParam String city) {
         try {
-            Map<String, Object> data = aqiService.getAqiByCity(city);
-            return ResponseEntity.ok(data);
+            return ResponseEntity.ok(aqiService.getAqiByCity(city));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                Map.of("error", e.getMessage())
-            );
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Locate Me: GET /api/aqi/locate?lat=9.93&lon=76.26
+    @GetMapping("/aqi/locate")
+    public ResponseEntity<?> getAqiByLocation(@RequestParam double lat,
+                                               @RequestParam double lon) {
+        try {
+            return ResponseEntity.ok(aqiService.getAqiByCoords(lat, lon));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 }
