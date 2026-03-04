@@ -1,0 +1,139 @@
+/* --- Global --- */
+.root {
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+
+#root-pane {
+    -fx-background-color: #1a1a1a;
+}
+
+#map-background {
+    /* Simulating a dark map background */
+    -fx-background-color: linear-gradient(to bottom right, #1e1e1e, #2c2c2c);
+    -fx-opacity: 0.8;
+}
+
+/* --- Top Bar --- */
+#top-bar {
+    -fx-background-color: #2b2d42;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 0);
+}
+
+#logo-text {
+    -fx-text-fill: #4db8ff;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+#search-field {
+    -fx-background-color: #3b3e54;
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+    -fx-border-color: #555;
+    -fx-border-radius: 5;
+}
+
+.nav-item {
+    -fx-text-fill: #ccc;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+#login-btn {
+    -fx-background-color: #4db8ff;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+}
+
+/* --- Main Content Card --- */
+#main-card {
+    /* Glassmorphism effect */
+    -fx-background-color: rgba(43, 45, 66, 0.95);
+    -fx-background-radius: 15;
+    -fx-padding: 30;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 20, 0, 0, 10);
+    /* In JavaFX 21+ you can add -fx-background-blur-radius if supported */
+}
+
+/* Tabs */
+#tab-active {
+    -fx-background-color: transparent;
+    -fx-text-fill: #4db8ff;
+    -fx-font-weight: bold;
+    -fx-border-color: transparent transparent #4db8ff transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+#tab-inactive {
+    -fx-background-color: transparent;
+    -fx-text-fill: #888;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+/* Text Styles */
+#card-title {
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+#location-name {
+    -fx-text-fill: #4db8ff;
+    -fx-font-size: 16px;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+#timestamp {
+    -fx-text-fill: #aaa;
+    -fx-font-style: italic;
+    -fx-font-size: 12px;
+}
+
+#locate-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: #4db8ff;
+    -fx-border-radius: 20;
+    -fx-text-fill: #4db8ff;
+    -fx-cursor: hand;
+}
+
+/* AQI Display */
+#aqi-number {
+    -fx-text-fill: #ff5252; /* The Red color */
+    -fx-font-size: 90px;
+    -fx-font-weight: bold;
+}
+
+#status-box-unhealthy {
+    -fx-background-color: #6e2e34; /* Dark red background */
+    -fx-background-radius: 10;
+    -fx-padding: 5 15 5 15;
+    -fx-border-color: #ff5252;
+    -fx-border-radius: 10;
+}
+
+.pm-text {
+    -fx-text-fill: #ccc;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* Right Panel Weather */
+#weather-panel {
+    -fx-background-color: rgba(255,255,255,0.05);
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-border-color: rgba(255,255,255,0.1);
+    -fx-border-radius: 15;
+}
+
+#temp-text {
+    -fx-text-fill: white;
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+}
