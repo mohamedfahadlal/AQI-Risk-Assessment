@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html style="height:100%; width:100%; margin:0; padding:0;">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQI Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #map {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .legend {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            line-height: 1.8;
+            font-size: 13px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .legend-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #333;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .loading {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            font-size: 16px;
+            font-family: 'Segoe UI', sans-serif;
+            color: #555;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+<div id="loadingDiv" class="loading">🔄 Loading AQI data...</div>
+<div id="map"></div>
+
+<script>
+    // Force map to fill container properly
+    var map = L.map('map', {
+        center: [22.0, 80.0],
+        zoom: 5,
+        zoomControl: true
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18,
+        tileSize: 256,
+        updateWhenIdle: false,
+        keepBuffer: 4
+    }).addTo(map);
+
+    // Fix grey tiles — invalidate size after load
+    setTimeout(function() { map.invalidateSize(); }, 300);
+    setTimeout(function() { map.invalidateSize(); }, 800);
+
+    function getAqiColor(aqi) {
+        if (aqi <= 50)  return '#2ecc71';
+        if (aqi <= 100) return '#f1c40f';
+        if (aqi <= 200) return '#e67e22';
+        if (aqi <= 300) return '#e74c3c';
+        if (aqi <= 400) return '#8e44ad';
+        return '#c0392b';
+    }
+
+    function getAqiLabel(aqi) {
+        if (aqi <= 50)  return 'Good';
+        if (aqi <= 100) return 'Satisfactory';
+        if (aqi <= 200) return 'Moderate';
+        if (aqi <= 300) return 'Poor';
+        if (aqi <= 400) return 'Very Poor';
+        return 'Severe';
+    }
+
+    function createMarker(city) {
+        var color = getAqiColor(city.aqi);
+        var size  = city.aqi > 300 ? 48 : city.aqi > 200 ? 44 : city.aqi > 100 ? 40 : 36;
+
+        var icon = L.divIcon({
+            className: '',
+            html: '<div style="'
+                + 'background:' + color + ';'
+                + 'color:white;'
+                + 'border-radius:50%;'
+                + 'width:' + size + 'px;'
+                + 'height:' + size + 'px;'
+                + 'display:flex;'
+                + 'align-items:center;'
+                + 'justify-content:center;'
+                + 'font-weight:bold;'
+                + 'font-size:' + (size > 40 ? 13 : 11) + 'px;'
+                + 'font-family:Segoe UI,sans-serif;'
+                + 'border:3px solid white;'
+                + 'box-shadow:0 2px 8px rgba(0,0,0,0.35);'
+                + 'cursor:pointer;'
+                + '">' + city.aqi + '</div>',
+            iconSize: [size, size],
+            iconAnchor: [size/2, size/2]
+        });
+
+        var marker = L.marker([city.lat, city.lon], {icon: icon});
+
+        marker.bindPopup(
+            '<div style="font-family:Segoe UI,sans-serif;min-width:190px;">'
+            + '<div style="font-size:15px;font-weight:bold;color:#333;margin-bottom:8px;">📍 ' + city.name + '</div>'
+            + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'
+            + '<div style="background:' + color + ';color:white;padding:4px 12px;border-radius:20px;font-weight:bold;font-size:17px;">AQI ' + city.aqi + '</div>'
+            + '<span style="color:' + color + ';font-weight:bold;">' + getAqiLabel(city.aqi) + '</span>'
+            + '</div>'
+            + '<table style="width:100%;font-size:13px;color:#555;border-collapse:collapse;">'
+            + '<tr><td style="padding:2px 0;">🌫️ PM2.5</td><td><b>' + parseFloat(city.pm25).toFixed(1) + ' µg/m³</b></td></tr>'
+            + '<tr><td style="padding:2px 0;">💨 PM10</td><td><b>' + parseFloat(city.pm10).toFixed(1) + ' µg/m³</b></td></tr>'
+            + '<tr><td style="padding:2px 0;">🌡️ Temp</td><td><b>' + parseFloat(city.temp).toFixed(1) + '°C</b></td></tr>'
+            + '</table></div>',
+            { maxWidth: 250 }
+        );
+
+        return marker;
+    }
+
+    function loadMapData() {
+        fetch('http://localhost:8080/api/aqi/map')
+            .then(function(res) { return res.json(); })
+            .then(function(cities) {
+                document.getElementById('loadingDiv').style.display = 'none';
+                var bounds = [];
+                cities.forEach(function(city) {
+                    if (city.aqi && city.aqi > 0) {
+                        createMarker(city).addTo(map);
+                        bounds.push([city.lat, city.lon]);
+                    }
+                });
+                // Fit map to show all markers
+                if (bounds.length > 0) {
+                    map.fitBounds(bounds, { padding: [40, 40] });
+                }
+                // Re-invalidate after data loads
+                setTimeout(function() { map.invalidateSize(); }, 200);
+            })
+            .catch(function(err) {
+                document.getElementById('loadingDiv').innerText = '❌ Failed to load. Is Spring Boot running?';
+                console.error(err);
+            });
+    }
+
+    // Legend
+    var legend = L.control({ position: 'bottomright' });
+    legend.onAdd = function() {
+        var div = L.DomUtil.create('div', 'legend');
+        div.innerHTML = '<div class="legend-title">🇮🇳 AQI Scale (CPCB)</div>'
+            + '<div class="legend-item"><div class="legend-color" style="background:#2ecc71"></div> 0–50 Good</div>'
+            + '<div class="legend-item"><div class="legend-color" style="background:#f1c40f"></div> 51–100 Satisfactory</div>'
+            + '<div class="legend-item"><div class="legend-color" style="background:#e67e22"></div> 101–200 Moderate</div>'
+            + '<div class="legend-item"><div class="legend-color" style="background:#e74c3c"></div> 201–300 Poor</div>'
+            + '<div class="legend-item"><div class="legend-color" style="background:#8e44ad"></div> 301–400 Very Poor</div>'
+            + '<div class="legend-item"><div class="legend-color" style="background:#c0392b"></div> 401+ Severe</div>';
+        return div;
+    };
+    legend.addTo(map);
+
+    loadMapData();
+</script>
+</body>
+</html>

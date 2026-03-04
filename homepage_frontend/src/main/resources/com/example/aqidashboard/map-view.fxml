@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.web.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.aqidashboard.MapController"
+      spacing="0">
+
+    <HBox alignment="CENTER_LEFT" spacing="15"
+          style="-fx-background-color: #ffffff;
+                 -fx-padding: 12 20;
+                 -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 8, 0, 0, 2);">
+
+        <Button onAction="#handleBack"
+                text="← Back"
+                style="-fx-background-color: #e8f0fe;
+                       -fx-text-fill: #1a73e8;
+                       -fx-background-radius: 20;
+                       -fx-padding: 8 18;
+                       -fx-font-size: 13px;"/>
+
+        <Label text="🗺️  India AQI Map"
+               style="-fx-font-size: 20px;
+                      -fx-font-weight: bold;
+                      -fx-text-fill: #333;"/>
+
+        <Label text="Live air quality across major Indian cities"
+               style="-fx-font-size: 13px; -fx-text-fill: #888;"/>
+    </HBox>
+
+    <WebView fx:id="mapWebView" VBox.vgrow="ALWAYS"/>
+
+</VBox>
