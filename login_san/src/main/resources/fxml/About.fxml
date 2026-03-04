@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<BorderPane styleClass="main-background-light" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.aqi.controllers.AboutController">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-nav">
+            <Label text="AQI" styleClass="logo-text"/>
+            <Region HBox.hgrow="ALWAYS" />
+
+            <Button text="About Us" styleClass="nav-link" style="-fx-text-fill: #0ea5e9;"/> <Button text="Login" onAction="#goToLogin" styleClass="nav-link"/>
+            <Button text="Sign Up ↗" onAction="#goToSignUp" styleClass="nav-btn-login"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER">
+            <VBox styleClass="card-light" alignment="TOP_CENTER" spacing="20" maxWidth="500" maxHeight="400">
+
+                <Label text="About AQI Dashboard" styleClass="title-label-light" />
+
+                <Label text="Welcome to the Real-Time Air Quality Index (AQI) Dashboard. Our mission is to provide accurate, up-to-date environmental data to help you make informed decisions about your health and outdoor activities."
+                       wrapText="true" style="-fx-font-size: 14px; -fx-text-fill: #4b5563; -fx-line-spacing: 5px;" textAlignment="CENTER"/>
+
+                <Separator style="-fx-padding: 10 0 10 0;"/>
+
+                <VBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="✨ Features:" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1f2937;"/>
+                    <Label text="• Live Air Quality Tracking" style="-fx-text-fill: #6b7280; -fx-font-size: 13px;"/>
+                    <Label text="• Personalized Health Recommendations" style="-fx-text-fill: #6b7280; -fx-font-size: 13px;"/>
+                    <Label text="• Secure User Profiles" style="-fx-text-fill: #6b7280; -fx-font-size: 13px;"/>
+                </VBox>
+
+                <Region VBox.vgrow="ALWAYS"/>
+
+                <Label text="Version 1.0.0 | Created for Desktop" style="-fx-font-size: 11px; -fx-text-fill: #9ca3af;"/>
+
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
