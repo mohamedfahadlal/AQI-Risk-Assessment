@@ -7,7 +7,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
-
+import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import com.aqi.utils.EmailUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -16,10 +18,15 @@ import java.sql.SQLIntegrityConstraintViolationException;
 public class SignUpController {
 
     @FXML private TextField nameField;
-    @FXML private TextField emailField;
+    @FXML private TextField emailField; // Replaced duplicate emailInput with this
     @FXML private PasswordField passwordField;
     @FXML private PasswordField confirmPasswordField;
     @FXML private Label statusLabel;
+    @FXML private TextField otpInput;
+    @FXML private Button sendOtpBtn;
+
+    // This will hold the generated OTP temporarily
+    private String generatedOtp;
 
     @FXML
     private void handleSignUp() {
@@ -34,9 +41,9 @@ public class SignUpController {
             return;
         }
 
-        // 2. NEW: Validate Password Strength
+        // 2. Validate Password Strength
         if (!isValidPassword(password)) {
-            showError("Password must be atleast 8 chars with an uppercase, lowercase, number, and special character.");
+            showError("Password must be at least 8 chars with an uppercase, lowercase, number, and special character.");
             return;
         }
 
@@ -46,7 +53,14 @@ public class SignUpController {
             return;
         }
 
-        // 4. Database Insertion
+        // 4. Check OTP Verification
+        String userOtp = otpInput.getText().trim();
+        if (generatedOtp == null || !generatedOtp.equals(userOtp)) {
+            showAlert(Alert.AlertType.ERROR, "Verification Failed", "The OTP entered is incorrect or expired.");
+            return; // Stop registration
+        }
+
+        // 5. Database Insertion
         String query = "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -81,6 +95,40 @@ public class SignUpController {
         }
     }
 
+    @FXML
+    private void handleSendOtp() {
+        String email = emailField.getText().trim(); // Using emailField here now
+
+        if (email.isEmpty() || !email.contains("@")) {
+            showAlert(Alert.AlertType.ERROR, "Invalid Email", "Please enter a valid email address first.");
+            return;
+        }
+
+        // Generate a random 6-digit OTP
+        generatedOtp = String.format("%06d", (int) (Math.random() * 1000000));
+
+        // Change button text to show it's working
+        sendOtpBtn.setText("Sending...");
+        sendOtpBtn.setDisable(true);
+
+        // Run the email sending on a background thread so the UI doesn't freeze
+        new Thread(() -> {
+            boolean success = EmailUtil.sendOtpEmail(email, generatedOtp);
+
+            // Update the UI back on the main JavaFX thread
+            javafx.application.Platform.runLater(() -> {
+                if (success) {
+                    showAlert(Alert.AlertType.INFORMATION, "OTP Sent", "An OTP has been sent to your email!");
+                    sendOtpBtn.setText("Sent ✓");
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Error", "Failed to send OTP. Check your internet or email settings.");
+                    sendOtpBtn.setText("Send OTP");
+                    sendOtpBtn.setDisable(false);
+                }
+            });
+        }).start();
+    }
+
     /**
      * Uses a Regular Expression (Regex) to enforce password rules:
      * - (?=.*[a-z]) : At least one lowercase letter
@@ -99,10 +147,20 @@ public class SignUpController {
         statusLabel.setText(message);
     }
 
+    // NEW METHOD: Handles the pop-up boxes for OTP notifications
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null); // Removes the extra header text area
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
     @FXML
     private void goToLogin() {
         SceneManager.switchScene("/fxml/Login.fxml");
     }
+
     @FXML
     private void goToAbout() {
         SceneManager.switchScene("/fxml/About.fxml");
