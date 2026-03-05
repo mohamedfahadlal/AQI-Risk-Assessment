@@ -6,30 +6,30 @@
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.aqidashboard.MapController"
-      spacing="0">
+      spacing="0"
+      prefWidth="1200"
+      prefHeight="800">
 
+    <!-- Top bar -->
     <HBox alignment="CENTER_LEFT" spacing="15"
+          minHeight="50" maxHeight="50"
           style="-fx-background-color: #ffffff;
-                 -fx-padding: 12 20;
-                 -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 8, 0, 0, 2);">
-
-        <Button onAction="#handleBack"
-                text="← Back"
-                style="-fx-background-color: #e8f0fe;
-                       -fx-text-fill: #1a73e8;
-                       -fx-background-radius: 20;
-                       -fx-padding: 8 18;
-                       -fx-font-size: 13px;"/>
-
+                 -fx-padding: 10 20;
+                 -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 6, 0, 0, 2);">
+        <Button onAction="#handleBack" text="← Back"
+                style="-fx-background-color: #e8f0fe; -fx-text-fill: #1a73e8;
+                       -fx-background-radius: 20; -fx-padding: 7 16; -fx-font-size: 13px;"/>
         <Label text="🗺️  India AQI Map"
-               style="-fx-font-size: 20px;
-                      -fx-font-weight: bold;
-                      -fx-text-fill: #333;"/>
-
+               style="-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
         <Label text="Live air quality across major Indian cities"
                style="-fx-font-size: 13px; -fx-text-fill: #888;"/>
     </HBox>
 
-    <WebView fx:id="mapWebView" VBox.vgrow="ALWAYS"/>
+    <!-- WebView must fill ALL remaining space -->
+    <WebView fx:id="mapWebView"
+             VBox.vgrow="ALWAYS"
+             HBox.hgrow="ALWAYS"
+             maxWidth="Infinity"
+             maxHeight="Infinity"/>
 
 </VBox>

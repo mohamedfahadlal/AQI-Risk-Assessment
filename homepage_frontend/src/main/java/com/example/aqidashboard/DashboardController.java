@@ -117,13 +117,17 @@ public class DashboardController {
         thread.start();
     }
 
+
+
     @FXML
     private void handleOpenMap() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(
-                    "/com/example/aqidashboard/map-view.fxml"));
-            Scene scene = new Scene(loader.load());
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/aqidashboard/map-view.fxml"));
             Stage stage = (Stage) aqiLabel.getScene().getWindow();
+            double w = stage.getScene().getWidth();
+            double h = stage.getScene().getHeight();
+            Scene scene = new Scene(loader.load(), w, h);
             stage.setScene(scene);
             stage.setTitle("AQI Map");
         } catch (Exception e) {
