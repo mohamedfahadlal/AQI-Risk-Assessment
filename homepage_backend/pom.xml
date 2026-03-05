@@ -13,7 +13,11 @@
     <groupId>com.example</groupId>
     <artifactId>aqi-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+<<<<<<< HEAD
     <n>aqi-backend</n>
+=======
+    <name>aqi-backend</name>
+>>>>>>> origin/main
 
     <properties>
         <java.version>17</java.version>
@@ -32,6 +36,7 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+<<<<<<< HEAD
         <!-- NEW: Spring JDBC (simple SQL queries, no JPA needed) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -45,6 +50,8 @@
             <version>42.7.3</version>
         </dependency>
 
+=======
+>>>>>>> origin/main
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -61,4 +68,8 @@
             </plugin>
         </plugins>
     </build>
+<<<<<<< HEAD
 </project>
+=======
+</project>
+>>>>>>> origin/main

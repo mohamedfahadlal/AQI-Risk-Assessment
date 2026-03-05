@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<StackPane styleClass="main-background" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.aqi.controllers.IntroController">
+    <VBox styleClass="card" alignment="CENTER" spacing="20" maxWidth="400" maxHeight="300">
+        <Label text="Welcome to AQI Monitor" styleClass="title-label"/>
+        <Label text="Stay informed about the air you breathe." textFill="#666666"/>
+        <HBox spacing="15" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
+            <Button text="Login" onAction="#goToLogin" styleClass="btn-primary" prefWidth="100"/>
+            <Button text="Sign Up" onAction="#goToSignUp" styleClass="btn-secondary" prefWidth="100"/>
+        </HBox>
+    </VBox>
+</StackPane>

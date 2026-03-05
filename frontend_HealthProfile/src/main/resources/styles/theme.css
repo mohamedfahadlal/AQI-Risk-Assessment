@@ -21,7 +21,10 @@
     -fx-text-fill: #475569;
 }
 
+<<<<<<< HEAD
 /* ── Inputs ── */
+=======
+>>>>>>> origin/main
 .text-field, .combo-box {
     -fx-background-color: #f8fafc;
     -fx-background-radius: 10;
@@ -36,6 +39,7 @@
     -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.25), 12, 0.3, 0, 0);
 }
 
+<<<<<<< HEAD
 /* ── NEW: DatePicker — matches text-field style ── */
 .date-picker {
     -fx-background-color: #f8fafc;
@@ -91,6 +95,8 @@
 }
 
 /* ── Buttons ── */
+=======
+>>>>>>> origin/main
 .primary-btn {
     -fx-background-color: #2563eb;
     -fx-text-fill: white;
@@ -114,7 +120,10 @@
     -fx-background-color: #cbd5e1;
 }
 
+<<<<<<< HEAD
 /* ── Success box ── */
+=======
+>>>>>>> origin/main
 .success-box {
     -fx-background-color: #dcfce7;
     -fx-background-radius: 14;

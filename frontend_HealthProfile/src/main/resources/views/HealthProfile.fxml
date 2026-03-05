@@ -2,7 +2,10 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<<<<<<< HEAD
 <?import javafx.geometry.Insets?>
+=======
+>>>>>>> origin/main
 
 <StackPane xmlns:fx="http://javafx.com/fxml"
            fx:controller="com.aqi.controllers.HealthProfileController">
@@ -10,13 +13,18 @@
     <VBox alignment="CENTER"
           spacing="30"
           styleClass="card"
+<<<<<<< HEAD
           maxWidth="560">
+=======
+          maxWidth="520">
+>>>>>>> origin/main
 
         <Label text="Health Profile"
                styleClass="title"/>
 
         <GridPane hgap="20" vgap="18">
 
+<<<<<<< HEAD
             <!-- Column constraints: label col | input col | age display col -->
             <columnConstraints>
                 <ColumnConstraints minWidth="160" />
@@ -40,20 +48,35 @@
             <!-- Row 1: Gender -->
             <Label text="Gender:"
                    styleClass="form-label"
+=======
+            <Label text="Age:" styleClass="form-label"
+                   GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="ageField"
+                       promptText="Enter age"
+                       prefWidth="220"
+                       GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <Label text="Gender:" styleClass="form-label"
+>>>>>>> origin/main
                    GridPane.rowIndex="1" GridPane.columnIndex="0"/>
             <ComboBox fx:id="genderCombo"
                       prefWidth="220"
                       GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
+<<<<<<< HEAD
             <!-- Row 2: Location -->
             <Label text="Location:"
                    styleClass="form-label"
+=======
+            <Label text="Location:" styleClass="form-label"
+>>>>>>> origin/main
                    GridPane.rowIndex="2" GridPane.columnIndex="0"/>
             <TextField fx:id="locationField"
                        promptText="Enter city"
                        prefWidth="220"
                        GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
+<<<<<<< HEAD
             <!-- Row 3: Breathing Condition (replaces separate asthma checkbox) -->
             <Label text="Breathing Condition:"
                    styleClass="form-label"
@@ -99,18 +122,43 @@
         <!-- Buttons -->
         <HBox spacing="20" alignment="CENTER">
             <Button text="Save Profile"
+=======
+            <Label text="Asthma:" styleClass="form-label"
+                   GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <CheckBox fx:id="asthmaCheck"
+                      text="Yes"
+                      GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+            <Label text="Breathing Condition:" styleClass="form-label"
+                   GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="breathingCombo"
+                      prefWidth="220"
+                      GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        </GridPane>
+
+        <HBox spacing="20" alignment="CENTER">
+            <Button text="Save"
+>>>>>>> origin/main
                     fx:id="saveButton"
                     styleClass="primary-btn"/>
             <Button text="Cancel"
                     styleClass="secondary-btn"/>
         </HBox>
 
+<<<<<<< HEAD
         <!-- Success notification -->
+=======
+>>>>>>> origin/main
         <HBox alignment="CENTER"
               fx:id="successBox"
               styleClass="success-box"
               visible="false"
               managed="false">
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
             <Label text="✔ Profile saved successfully!"
                    styleClass="success-text"/>
         </HBox>
