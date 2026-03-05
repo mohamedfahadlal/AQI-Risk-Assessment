@@ -19,7 +19,7 @@
 
         <VBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity">
             <Label text="Select Location" textFill="#8e9bb0"/>
-            <ComboBox fx:id="cityBox" promptText="Delhi, Kochi..." maxWidth="Infinity"/>
+            <TextField fx:id="cityField" promptText="Enter city (Delhi, Kochi...)" maxWidth="Infinity"/>
         </VBox>
 
         <Button fx:id="predictButton" text="PREDICT NOW" maxWidth="Infinity" onAction="#searchCityAQI"/>
@@ -61,10 +61,10 @@
             <padding>
                 <Insets top="30" right="25" bottom="30" left="25"/>
             </padding>
-            <Label fx:id="adviceTitle" text="Medical Advisory"/>
+            <Label fx:id="adviceTitle" text="MEDICAL ADVISORY"/>
 
             <ScrollPane fx:id="adviceScrollPane" fitToWidth="true" VBox.vgrow="ALWAYS"
-                        style="-fx-background: #1A1C23; -fx-background-color: transparent; -fx-padding: 0; -fx-border-width: 0;">
+                        style="-fx-background: transparent; -fx-background-color: transparent; -fx-padding: 0; -fx-border-width: 0;">
                 <Label fx:id="adviceText" wrapText="true" text="Enter a city to view detailed health recommendations." />
             </ScrollPane>
         </VBox>
