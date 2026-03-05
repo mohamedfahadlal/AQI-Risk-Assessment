@@ -21,7 +21,7 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-public class HealthProfileController {
+public class UpdateHealthProfileController {
 
     @FXML private DatePicker          dobPicker;
     @FXML private Label               ageDisplayLabel;
@@ -38,8 +38,9 @@ public class HealthProfileController {
     @FXML private CheckBox            allergicCheck;
     @FXML private CheckBox            pregnantCheck;
     @FXML private Label               pregnantLabel;
-    @FXML private Button              saveButton;
-    @FXML private Button              updateProfileButton;
+    @FXML private Label               lastUpdatedLabel;
+    @FXML private Button              updateButton;
+    @FXML private Button              backButton;
     @FXML private HBox                successBox;
 
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -117,18 +118,14 @@ public class HealthProfileController {
             if (!isFemale) pregnantCheck.setSelected(false);
         });
 
-        saveButton.setOnAction(e -> handleSave());
+        updateButton.setOnAction(e -> handleUpdate());
+        backButton.setOnAction(e -> goBack());
 
-        // Navigate to Update Profile page
-        updateProfileButton.setOnAction(e -> goToUpdateProfile());
-
-        // TEMPORARY for standalone testing - remove when integrated with login
-        // UserSession.setUserId("paste-a-uuid-from-supabase-users-table-here");
-
+        // Load existing profile to pre-fill
         new Thread(this::loadExistingProfile).start();
     }
 
-    // ── Load existing profile ─────────────────────────────────────────────
+    // ── Load and pre-fill existing profile ───────────────────────────────
 
     private void loadExistingProfile() {
         String userId = UserSession.getUserId();
@@ -139,6 +136,7 @@ public class HealthProfileController {
 
         try {
             JsonObject profile = JsonParser.parseString(json).getAsJsonObject();
+
             Platform.runLater(() -> {
                 if (has(profile, "dob"))
                     dobPicker.setValue(LocalDate.parse(profile.get("dob").getAsString()));
@@ -165,32 +163,30 @@ public class HealthProfileController {
                     allergicCheck.setSelected(profile.get("is_allergic").getAsBoolean());
                 if (has(profile, "is_pregnant"))
                     pregnantCheck.setSelected(profile.get("is_pregnant").getAsBoolean());
+
+                // Show last updated timestamp
+                if (has(profile, "updated_at")) {
+                    String updatedAt = profile.get("updated_at").getAsString();
+                    // Format: 2024-03-05T10:30:00 → "Last updated: 05/03/2024 10:30"
+                    try {
+                        String datePart = updatedAt.substring(0, 10);
+                        String timePart = updatedAt.substring(11, 16);
+                        LocalDate d = LocalDate.parse(datePart);
+                        lastUpdatedLabel.setText("Last updated: "
+                                + dateFormatter.format(d) + " at " + timePart);
+                    } catch (Exception e) {
+                        lastUpdatedLabel.setText("");
+                    }
+                }
             });
+
         } catch (Exception e) {
-            System.err.println("Failed to parse profile JSON: " + e.getMessage());
+            System.err.println("Failed to load profile: " + e.getMessage());
         }
     }
 
     private boolean has(JsonObject obj, String key) {
         return obj.has(key) && !obj.get(key).isJsonNull();
-    }
-
-    // ── Navigate to Update Profile page ──────────────────────────────────
-
-    private void goToUpdateProfile() {
-        try {
-            Parent root = FXMLLoader.load(
-                    getClass().getResource("/views/UpdateHealthProfile.fxml")
-            );
-            Stage stage = (Stage) updateProfileButton.getScene().getWindow();
-            Scene scene = new Scene(root, stage.getScene().getWidth(), stage.getScene().getHeight());
-            scene.getStylesheets().add(
-                    getClass().getResource("/styles/theme.css").toExternalForm()
-            );
-            stage.setScene(scene);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     // ── Collect selected conditions ───────────────────────────────────────
@@ -204,9 +200,9 @@ public class HealthProfileController {
         return arr;
     }
 
-    // ── Save profile ──────────────────────────────────────────────────────
+    // ── Handle update save ────────────────────────────────────────────────
 
-    private void handleSave() {
+    private void handleUpdate() {
         if (!validateInputs()) {
             showAlert("Please complete all required fields correctly.");
             return;
@@ -233,6 +229,24 @@ public class HealthProfileController {
         }).start();
     }
 
+    // ── Navigate back to Health Profile page ─────────────────────────────
+
+    private void goBack() {
+        try {
+            Parent root = FXMLLoader.load(
+                    getClass().getResource("/views/HealthProfile.fxml")
+            );
+            Stage stage = (Stage) backButton.getScene().getWindow();
+            Scene scene = new Scene(root, stage.getScene().getWidth(), stage.getScene().getHeight());
+            scene.getStylesheets().add(
+                    getClass().getResource("/styles/theme.css").toExternalForm()
+            );
+            stage.setScene(scene);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     // ── Validation ────────────────────────────────────────────────────────
 
     private boolean validateInputs() {
@@ -253,6 +267,13 @@ public class HealthProfileController {
     }
 
     private void showSuccess() {
+        // Update the timestamp label immediately after save
+        lastUpdatedLabel.setText("Last updated: "
+                + dateFormatter.format(LocalDate.now()) + " at "
+                + java.time.LocalTime.now().format(
+                java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+        );
+
         successBox.setManaged(true);
         successBox.setVisible(true);
         successBox.setOpacity(0);

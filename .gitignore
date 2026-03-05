@@ -27,3 +27,6 @@ target/
 # OS
 .DS_Store
 Thumbs.db
+
+# Database credentials - never commit these
+homepage_backend/src/main/resources/application.properties
