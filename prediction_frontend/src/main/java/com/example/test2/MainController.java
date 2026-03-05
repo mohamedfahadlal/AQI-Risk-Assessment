@@ -14,6 +14,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.geometry.Insets;
+import javafx.scene.effect.DropShadow;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,56 +80,69 @@ public class MainController {
     }
 
     private void buildProgrammaticUI() {
-        sidebar.setBackground(new Background(new BackgroundFill(Color.web("#1A1C23"), CornerRadii.EMPTY, Insets.EMPTY)));
-        mainArea.setBackground(new Background(new BackgroundFill(Color.web("#111217"), CornerRadii.EMPTY, Insets.EMPTY)));
+        // 1. Light Blue Theme Backgrounds
+        mainArea.setBackground(new Background(new BackgroundFill(Color.web("#F0F4F8"), CornerRadii.EMPTY, Insets.EMPTY)));
 
-        headerLabel.setFont(Font.font("System", FontWeight.BOLD, 24));
-        headerLabel.setTextFill(Color.web("#FFFFFF"));
-        symptomsTitle.setFont(Font.font("System", FontWeight.BOLD, 14));
-        symptomsTitle.setTextFill(Color.web("#8e9bb0"));
+        // Sidebar: Pure White with a subtle shadow
+        sidebar.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        sidebar.setEffect(new DropShadow(10, Color.color(0,0,0,0.05)));
+        sidebar.setViewOrder(-1.0);
 
-        Color checkboxColor = Color.web("#D1D5DB");
+        // 2. Sidebar Typography & Colors
+        headerLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 24));
+        headerLabel.setTextFill(Color.web("#2C3E50"));
+
+        symptomsTitle.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+        symptomsTitle.setTextFill(Color.web("#7F8C8D"));
+
+        Color checkboxColor = Color.web("#34495E");
         symptomBreath.setTextFill(checkboxColor);
         symptomCough.setTextFill(checkboxColor);
         symptomChest.setTextFill(checkboxColor);
         symptomIrritation.setTextFill(checkboxColor);
         symptomFatigue.setTextFill(checkboxColor);
 
-        predictButton.setBackground(new Background(new BackgroundFill(Color.web("#3B82F6"), new CornerRadii(6), Insets.EMPTY)));
+        // 3. Button Styling
+        predictButton.setBackground(new Background(new BackgroundFill(Color.web("#3498DB"), new CornerRadii(6), Insets.EMPTY)));
         predictButton.setTextFill(Color.WHITE);
-        predictButton.setFont(Font.font("System", FontWeight.BOLD, 14));
+        predictButton.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
         predictButton.setPadding(new Insets(12));
 
-        predictButton.setOnMouseEntered(e -> predictButton.setBackground(new Background(new BackgroundFill(Color.web("#60A5FA"), new CornerRadii(6), Insets.EMPTY))));
-        predictButton.setOnMouseExited(e -> predictButton.setBackground(new Background(new BackgroundFill(Color.web("#3B82F6"), new CornerRadii(6), Insets.EMPTY))));
+        predictButton.setOnMouseEntered(e -> predictButton.setBackground(new Background(new BackgroundFill(Color.web("#2980B9"), new CornerRadii(6), Insets.EMPTY))));
+        predictButton.setOnMouseExited(e -> predictButton.setBackground(new Background(new BackgroundFill(Color.web("#3498DB"), new CornerRadii(6), Insets.EMPTY))));
 
-        cityLabel.setFont(Font.font("System", FontWeight.BOLD, 36));
-        cityLabel.setTextFill(Color.WHITE);
+        // 4. Main Area Typography
+        cityLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 36));
+        cityLabel.setTextFill(Color.web("#2C3E50"));
 
-        aqiLabel.setFont(Font.font("System", FontWeight.BOLD, 72));
-        aqiLabel.setTextFill(Color.web("#4B5563"));
+        aqiLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 72));
+        aqiLabel.setTextFill(Color.web("#BDC3C7"));
 
-        aqiStatus.setFont(Font.font("System", FontWeight.BOLD, 22));
-        aqiStatus.setTextFill(Color.web("#8e9bb0"));
+        aqiStatus.setFont(Font.font("Segoe UI", FontWeight.BOLD, 22));
+        aqiStatus.setTextFill(Color.web("#7F8C8D"));
 
-        pm25Label.setFont(Font.font("System", FontWeight.NORMAL, 16));
-        pm25Label.setTextFill(Color.web("#9CA3AF"));
-        pm10Label.setFont(Font.font("System", FontWeight.NORMAL, 16));
-        pm10Label.setTextFill(Color.web("#9CA3AF"));
+        pm25Label.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
+        pm25Label.setTextFill(Color.web("#7F8C8D"));
+        pm10Label.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
+        pm10Label.setTextFill(Color.web("#7F8C8D"));
 
-        aqiCircle.setBackground(new Background(new BackgroundFill(Color.web("#1A1C23"), new CornerRadii(120), Insets.EMPTY)));
-        aqiCircle.setBorder(new Border(new BorderStroke(Color.web("#374151"), BorderStrokeStyle.SOLID, new CornerRadii(120), new BorderWidths(8))));
+        // 5. Setup the Circular AQI Base
+        aqiCircle.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(120), Insets.EMPTY)));
+        aqiCircle.setBorder(new Border(new BorderStroke(Color.web("#E0E0E0"), BorderStrokeStyle.SOLID, new CornerRadii(120), new BorderWidths(8))));
+        aqiCircle.setEffect(new DropShadow(15, Color.color(0,0,0,0.08)));
 
-        // Floating Advice Card styling inside the right panel
-        adviceCard.setBackground(new Background(new BackgroundFill(Color.web("#1A1C23"), new CornerRadii(12), Insets.EMPTY)));
-        HBox.setMargin(adviceCard, new Insets(40, 40, 40, 0)); // Adds margin so it floats inside the main area
+        // 6. Floating Advice Card Styling
+        // 6. Floating Advice Card Styling (Contrasting Dark Navy Panel)
+        adviceCard.setBackground(new Background(new BackgroundFill(Color.web("#2C3E50"), new CornerRadii(12), Insets.EMPTY)));
+        adviceCard.setEffect(new DropShadow(15, Color.color(0,0,0,0.1)));
+        HBox.setMargin(adviceCard, new Insets(40, 40, 40, 0));
 
-        adviceTitle.setFont(Font.font("System", FontWeight.BOLD, 18));
-        adviceTitle.setTextFill(Color.WHITE);
+        adviceTitle.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
+        adviceTitle.setTextFill(Color.web("#3498DB")); // Bright blue header to stand out
 
-        adviceText.setFont(Font.font("System", FontWeight.NORMAL, 15));
-        adviceText.setTextFill(Color.web("#D1D5DB"));
-        adviceText.setTextAlignment(TextAlignment.LEFT); // Left alignment is better for long scrolling text
+        adviceText.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 15));
+        adviceText.setTextFill(Color.WHITE); // Pure white text for readability
+        adviceText.setTextAlignment(TextAlignment.LEFT);
     }
 
     /* =======================
@@ -139,7 +153,7 @@ public class MainController {
         String cityInput = cityBox.getEditor().getText().trim().toLowerCase();
 
         if (!cityData.containsKey(cityInput)) {
-            showAlert("City Not Found", "No AQI data available for this city.", Color.web("#1A1C23"));
+            showAlert("City Not Found", "No AQI data available for this city.", Color.WHITE);
             return;
         }
 
@@ -150,9 +164,9 @@ public class MainController {
         pm25Label.setText("PM2.5: " + data.pm25() + " µg/m³");
         pm10Label.setText("PM10: " + data.pm10() + " µg/m³");
 
-        // 1. Play the count-up animation for the AQI number
+        // 1. Play the count-up animation
         if (aqiTimeline != null) aqiTimeline.stop();
-        currentAqiValue.set(0); // Reset to 0 before animating up
+        currentAqiValue.set(0);
         aqiTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(1.2), new KeyValue(currentAqiValue, predictedAQI))
         );
@@ -161,14 +175,14 @@ public class MainController {
         // 2. Load the advice text
         String advice = buildHealthAdvice(predictedAQI);
 
-        // 3. Immediately snap the colors while the number animates
+        // 3. Apply styles
         if (predictedAQI <= 100) {
-            applyStyles("GOOD", Color.web("#10B981"), advice);
+            applyStyles("GOOD", Color.web("#2ECC71"), advice);
         } else if (predictedAQI <= 200) {
-            applyStyles("MODERATE", Color.web("#F59E0B"), advice);
+            applyStyles("MODERATE", Color.web("#F1C40F"), advice);
         } else {
-            applyStyles("POOR", Color.web("#EF4444"), advice);
-            showAlert("Health Advisory ⚠️", "Air quality is UNHEALTHY.\nTake precautions.", Color.web("#3F1D1D"));
+            applyStyles("POOR", Color.web("#E74C3C"), advice);
+            showAlert("Health Advisory ⚠️", "Air quality is UNHEALTHY.\nTake precautions.", Color.web("#FDEDEC"));
         }
     }
 
@@ -215,7 +229,10 @@ public class MainController {
         aqiStatus.setText(status);
         aqiStatus.setTextFill(alertColor);
         aqiLabel.setTextFill(alertColor);
+
         adviceText.setText(advice);
+        adviceText.setTextFill(Color.WHITE); // Ensure updated text stays white
+
         aqiCircle.setBorder(new Border(new BorderStroke(alertColor, BorderStrokeStyle.SOLID, new CornerRadii(120), new BorderWidths(8))));
     }
 
@@ -226,7 +243,8 @@ public class MainController {
         alert.setContentText(message);
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.setBackground(new Background(new BackgroundFill(bgColor, CornerRadii.EMPTY, Insets.EMPTY)));
-        dialogPane.lookup(".content.label").setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+        // Ensure alert text is readable on light background
+        dialogPane.lookup(".content.label").setStyle("-fx-text-fill: #2C3E50; -fx-font-size: 14px;");
         alert.show();
     }
 }
