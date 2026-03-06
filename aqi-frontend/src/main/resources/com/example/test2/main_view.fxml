@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx/21"
@@ -13,6 +14,14 @@
     <padding>
         <Insets top="30" right="40" bottom="40" left="40"/>
     </padding>
+
+    <!-- Back button row -->
+    <HBox alignment="CENTER_LEFT">
+        <Button text="← Back to Dashboard" onAction="#handleBackToDashboard"
+                style="-fx-background-color: transparent; -fx-text-fill: #3498DB;
+                       -fx-font-size: 14px; -fx-cursor: hand; -fx-underline: true;
+                       -fx-padding: 0 0 10 0;"/>
+    </HBox>
 
     <HBox fx:id="topInputArea" spacing="40" alignment="CENTER_LEFT">
 
@@ -29,11 +38,11 @@
         <VBox spacing="15" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
             <Label fx:id="symptomsTitle" text="PATIENT SYMPTOMS"/>
             <FlowPane hgap="25" vgap="15">
-                <CheckBox fx:id="symptomBreath" text="Shortness of breath"/>
-                <CheckBox fx:id="symptomCough" text="Cough / Wheezing"/>
-                <CheckBox fx:id="symptomChest" text="Chest Tightness"/>
+                <CheckBox fx:id="symptomBreath"     text="Shortness of breath"/>
+                <CheckBox fx:id="symptomCough"      text="Cough / Wheezing"/>
+                <CheckBox fx:id="symptomChest"      text="Chest Tightness"/>
                 <CheckBox fx:id="symptomIrritation" text="Eye / Throat Irritation"/>
-                <CheckBox fx:id="symptomFatigue" text="Headache / Fatigue"/>
+                <CheckBox fx:id="symptomFatigue"    text="Headache / Fatigue"/>
             </FlowPane>
         </VBox>
 
@@ -47,9 +56,12 @@
             <StackPane fx:id="aqiCircle" prefWidth="240" prefHeight="240" maxWidth="240" maxHeight="240">
                 <VBox alignment="CENTER" spacing="0">
                     <Label fx:id="aqiLabel" text="0"/>
-                    <Label text="AQI" textFill="#8e9bb0" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                    <Label text="AQI" textFill="#8e9bb0"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                 </VBox>
             </StackPane>
+
+            <ImageView fx:id="aqiImage" fitHeight="120" fitWidth="120" preserveRatio="true"/>
 
             <Label fx:id="aqiStatus" text="STATUS"/>
 
@@ -61,10 +73,11 @@
 
         <VBox fx:id="adviceCard" prefWidth="450" spacing="15" alignment="TOP_CENTER">
             <Label fx:id="adviceTitle" text="MEDICAL ADVISORY"/>
-
-            <ScrollPane fx:id="adviceScrollPane" fitToWidth="true" VBox.vgrow="ALWAYS"
-                        style="-fx-background: transparent; -fx-background-color: transparent; -fx-padding: 0; -fx-border-width: 0;">
-                <Label fx:id="adviceText" wrapText="true" text="Enter a city to view detailed health recommendations." />
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                        style="-fx-background: transparent; -fx-background-color: transparent;
+                               -fx-padding: 0; -fx-border-width: 0;">
+                <Label fx:id="adviceText" wrapText="true"
+                       text="Enter a city to view detailed health recommendations."/>
             </ScrollPane>
         </VBox>
 

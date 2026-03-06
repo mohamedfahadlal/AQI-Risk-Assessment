@@ -193,7 +193,9 @@ public class DashboardController {
                         suggestionsPopup.getItems().add(item);
                     }
 
-                    if (!suggestionsPopup.isShowing()) {
+                    if (!suggestionsPopup.isShowing()
+                            && citySearchField.getScene() != null
+                            && citySearchField.getScene().getWindow() != null) {
                         suggestionsPopup.show(citySearchField,
                                 javafx.geometry.Side.BOTTOM, 0, 0);
                     }
