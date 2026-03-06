@@ -1,5 +1,7 @@
 package com.example.aqidashboard;
 
+import com.aqi.utils.SceneManager;
+import com.aqi.utils.UserSession;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
@@ -10,10 +12,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.scene.transform.Rotate;
-import javafx.stage.Stage;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.*;
@@ -41,7 +40,6 @@ public class DashboardController {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ContextMenu suggestionsPopup = new ContextMenu();
 
-    // Stores lat/lon from selected suggestion for direct coord lookup
     private double selectedLat = 0, selectedLon = 0;
 
     @FXML
@@ -61,10 +59,102 @@ public class DashboardController {
             fetchSuggestions(newVal);
         });
 
+        // Default load for Kochi
         loadAQIData("Kochi", 0, 0);
     }
 
-    // ── Fetch autocomplete suggestions ───────────────────────────
+    // ── Navigation & Session Handlers ───────────────────────────
+
+    /**
+     * Resolves FXML Error: onAction='#handleOpenPrediction'
+     */
+    @FXML
+    private void handleOpenPrediction() {
+        SceneManager.switchScene("/views/Prediction.fxml", "Health Prediction");
+    }
+
+    /**
+     * Resolves FXML Error: onAction='#handleLogout'
+     */
+    @FXML
+    private void handleLogout() {
+        UserSession.clear(); // Wipes current user data from singleton
+        SceneManager.switchScene("/fxml/Login.fxml", "Login"); // Redirects to login
+    }
+
+    /**
+     * Navigates to the user's health profile
+     */
+    @FXML
+    private void handleViewProfile() {
+        SceneManager.switchScene("/views/ViewProfile.fxml", "Your Profile");
+    }
+
+    @FXML
+    private void handleOpenMap() {
+        try {
+            java.awt.Desktop.getDesktop().browse(
+                    new java.net.URI("http://localhost:8080/map")
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ── Search & Location Logic ──────────────────────────────────
+
+    @FXML
+    private void handleCitySearch() {
+        String text = citySearchField.getText();
+        if (text == null || text.isEmpty()) return;
+
+        if (selectedLat != 0 && selectedLon != 0) {
+            loadAQIData(text, selectedLat, selectedLon);
+        } else {
+            loadAQIData(text, 0, 0);
+        }
+    }
+
+    @FXML
+    private void handleDetectLocation() {
+        Platform.runLater(() -> {
+            aqiLabel.setText("...");
+            statusLabel.setText("Locating...");
+        });
+
+        Thread thread = new Thread(() -> {
+            try {
+                HttpRequest geoRequest = HttpRequest.newBuilder()
+                        .uri(URI.create("https://ipapi.co/json/")).GET().build();
+                HttpResponse<String> geoResponse = httpClient.send(
+                        geoRequest, HttpResponse.BodyHandlers.ofString());
+
+                JsonNode geo = objectMapper.readTree(geoResponse.body());
+                double lat   = geo.path("latitude").asDouble();
+                double lon   = geo.path("longitude").asDouble();
+                String city  = geo.path("city").asText("Your Location");
+
+                Platform.runLater(() -> citySearchField.setText("📍 " + city));
+
+                String url = BACKEND + "/aqi/locate?lat=" + lat + "&lon=" + lon;
+                HttpRequest aqiRequest = HttpRequest.newBuilder()
+                        .uri(URI.create(url)).GET().build();
+                HttpResponse<String> aqiResponse = httpClient.send(
+                        aqiRequest, HttpResponse.BodyHandlers.ofString());
+
+                if (aqiResponse.statusCode() == 200) {
+                    updateUIFromResponse(aqiResponse.body());
+                }
+
+            } catch (Exception e) {
+                Platform.runLater(() -> showError("Could not detect location"));
+                e.printStackTrace();
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
+
     private void fetchSuggestions(String query) {
         Thread thread = new Thread(() -> {
             try {
@@ -117,79 +207,6 @@ public class DashboardController {
         thread.start();
     }
 
-
-
-    @FXML
-
-    private void handleOpenMap() {
-        try {
-            java.awt.Desktop.getDesktop().browse(
-                    new java.net.URI("http://localhost:8080/map")
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // ── Search button ─────────────────────────────────────────────
-    @FXML
-    private void handleCitySearch() {
-        String text = citySearchField.getText();
-        if (text == null || text.isEmpty()) return;
-
-        if (selectedLat != 0 && selectedLon != 0) {
-            // Use coords from suggestion selection
-            loadAQIData(text, selectedLat, selectedLon);
-        } else {
-            // Plain city name search
-            loadAQIData(text, 0, 0);
-        }
-    }
-
-    // ── Locate Me button ──────────────────────────────────────────
-    @FXML
-    private void handleDetectLocation() {
-        Platform.runLater(() -> {
-            aqiLabel.setText("...");
-            statusLabel.setText("Locating...");
-        });
-
-        Thread thread = new Thread(() -> {
-            try {
-                // IP geolocation (free, no key)
-                HttpRequest geoRequest = HttpRequest.newBuilder()
-                        .uri(URI.create("https://ipapi.co/json/")).GET().build();
-                HttpResponse<String> geoResponse = httpClient.send(
-                        geoRequest, HttpResponse.BodyHandlers.ofString());
-
-                JsonNode geo = objectMapper.readTree(geoResponse.body());
-                double lat   = geo.path("latitude").asDouble();
-                double lon   = geo.path("longitude").asDouble();
-                String city  = geo.path("city").asText("Your Location");
-
-                Platform.runLater(() -> citySearchField.setText("📍 " + city));
-
-                // Call locate endpoint
-                String url = BACKEND + "/aqi/locate?lat=" + lat + "&lon=" + lon;
-                HttpRequest aqiRequest = HttpRequest.newBuilder()
-                        .uri(URI.create(url)).GET().build();
-                HttpResponse<String> aqiResponse = httpClient.send(
-                        aqiRequest, HttpResponse.BodyHandlers.ofString());
-
-                if (aqiResponse.statusCode() == 200) {
-                    updateUIFromResponse(aqiResponse.body());
-                }
-
-            } catch (Exception e) {
-                Platform.runLater(() -> showError("Could not detect location"));
-                e.printStackTrace();
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    // ── Load AQI data ─────────────────────────────────────────────
     private void loadAQIData(String city, double lat, double lon) {
         Platform.runLater(() -> {
             aqiLabel.setText("...");
@@ -226,7 +243,6 @@ public class DashboardController {
         thread.start();
     }
 
-    // ── Update UI from JSON response ──────────────────────────────
     private void updateUIFromResponse(String body) throws Exception {
         JsonNode data     = objectMapper.readTree(body);
         int aqi           = data.path("aqi").asInt();
@@ -256,7 +272,6 @@ public class DashboardController {
         cityLabel.setText(message);
     }
 
-    // ── Needle ────────────────────────────────────────────────────
     private void updateNeedle(int aqi) {
         double angle;
         if (aqi <= 50)        angle = (aqi / 50.0) * 30;
@@ -271,7 +286,6 @@ public class DashboardController {
         needle.getTransforms().add(rotate);
     }
 
-    // ── Risk Level ────────────────────────────────────────────────
     private void updateRisk(int aqi) {
         String risk, hexColor, gradientStyle, imageName;
         String baseStyle = "-fx-background-radius: 30; -fx-effect: dropshadow(gaussian,"
