@@ -45,7 +45,7 @@
             <StackPane fx:id="aqiCircle" prefWidth="240" prefHeight="240" maxWidth="240" maxHeight="240">
                 <VBox alignment="CENTER" spacing="0">
                     <Label fx:id="aqiLabel" text="0"/>
-                    <Label text="PREDICTED AQI" textFill="#8e9bb0" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                    <Label text="AQI" textFill="#8e9bb0" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                 </VBox>
             </StackPane>
 
