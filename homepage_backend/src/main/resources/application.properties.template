@@ -1,0 +1,21 @@
+
+// fill Database password and use !
+
+
+spring.application.name=aqi-backend
+server.port=8080
+
+owm.api.key=3d543d0636a4950860b22999f5301793
+
+spring.datasource.url=jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres
+spring.datasource.username=postgres.ileoodctldnhridhabuj
+spring.datasource.password=ENTER_PASSWORD_HERE
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.datasource.hikari.maximum-pool-size=3
+spring.datasource.hikari.minimum-idle=1
+spring.datasource.hikari.connection-timeout=20000
+spring.datasource.hikari.idle-timeout=60000
+spring.datasource.hikari.max-lifetime=120000
+spring.datasource.hikari.keepalive-time=30000
+spring.datasource.hikari.connection-test-query=SELECT 1
