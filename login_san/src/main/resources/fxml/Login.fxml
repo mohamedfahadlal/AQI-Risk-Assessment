@@ -6,7 +6,7 @@
 
     <top>
         <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-nav">
-            <Label text="AQI" styleClass="logo-text"/>
+            <Label text="AiQI" styleClass="logo-text"/>
             <Region HBox.hgrow="ALWAYS" />
 
             <Button text="About Us" onAction="#goToAbout" styleClass="nav-link"/>
