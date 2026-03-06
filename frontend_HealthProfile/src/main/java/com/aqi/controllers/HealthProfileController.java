@@ -6,13 +6,9 @@ import com.google.gson.*;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
@@ -39,7 +35,6 @@ public class HealthProfileController {
     @FXML private CheckBox            pregnantCheck;
     @FXML private Label               pregnantLabel;
     @FXML private Button              saveButton;
-    @FXML private Button              updateProfileButton;
     @FXML private HBox                successBox;
 
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -82,13 +77,20 @@ public class HealthProfileController {
             }
         });
 
-        // Live age display
+        // Hide age label until DOB is entered
+        ageDisplayLabel.setVisible(false);
+        ageDisplayLabel.setManaged(false);
+
+        // Show age live once DOB is picked
         dobPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 int age = Period.between(newVal, LocalDate.now()).getYears();
                 ageDisplayLabel.setText("Age: " + age + " yrs");
+                ageDisplayLabel.setVisible(true);
+                ageDisplayLabel.setManaged(true);
             } else {
-                ageDisplayLabel.setText("");
+                ageDisplayLabel.setVisible(false);
+                ageDisplayLabel.setManaged(false);
             }
         });
 
@@ -118,9 +120,6 @@ public class HealthProfileController {
         });
 
         saveButton.setOnAction(e -> handleSave());
-
-        // Navigate to Update Profile page
-        updateProfileButton.setOnAction(e -> goToUpdateProfile());
 
         // TEMPORARY for standalone testing - remove when integrated with login
         // UserSession.setUserId("paste-a-uuid-from-supabase-users-table-here");
@@ -173,24 +172,6 @@ public class HealthProfileController {
 
     private boolean has(JsonObject obj, String key) {
         return obj.has(key) && !obj.get(key).isJsonNull();
-    }
-
-    // ── Navigate to Update Profile page ──────────────────────────────────
-
-    private void goToUpdateProfile() {
-        try {
-            Parent root = FXMLLoader.load(
-                    getClass().getResource("/views/UpdateHealthProfile.fxml")
-            );
-            Stage stage = (Stage) updateProfileButton.getScene().getWindow();
-            Scene scene = new Scene(root, stage.getScene().getWidth(), stage.getScene().getHeight());
-            scene.getStylesheets().add(
-                    getClass().getResource("/styles/theme.css").toExternalForm()
-            );
-            stage.setScene(scene);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     // ── Collect selected conditions ───────────────────────────────────────

@@ -13,6 +13,7 @@ public class MainApp extends Application {
 
         Parent root = FXMLLoader.load(
                 getClass().getResource("/views/HealthProfile.fxml")
+               // uncomment to load View Profile page for testing getClass().getResource("/views/ViewProfile.fxml")
         );
 
         Scene scene = new Scene(root, 900, 650);

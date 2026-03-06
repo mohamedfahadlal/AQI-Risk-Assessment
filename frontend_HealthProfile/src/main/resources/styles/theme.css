@@ -146,3 +146,109 @@
     -fx-font-weight: bold;
     -fx-font-size: 14px;
 }
+
+/* ══════════════════════════════════════════════════════
+   View Profile Styles
+   ══════════════════════════════════════════════════════ */
+
+/* ── Avatar Section ──────────────────────────────────── */
+.avatar-section {
+    -fx-padding: 32 0 24 0;
+    -fx-background-color: linear-gradient(to bottom, #eff6ff, #ffffff);
+    -fx-background-radius: 22 22 0 0;
+}
+
+.avatar-circle {
+    -fx-fill: linear-gradient(to bottom right, #3b82f6, #1d4ed8);
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.35), 18, 0.3, 0, 5);
+}
+
+.avatar-initials {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.profile-name {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+/* ── Badges ──────────────────────────────────────────── */
+.info-badge {
+    -fx-background-color: #eff6ff;
+    -fx-text-fill: #1d4ed8;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 5 14 5 14;
+    -fx-border-color: #bfdbfe;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+.location-badge {
+    -fx-background-color: #f0fdf4;
+    -fx-text-fill: #15803d;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 5 14 5 14;
+    -fx-border-color: #bbf7d0;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+/* ── Divider ─────────────────────────────────────────── */
+.card-divider {
+    -fx-padding: 4 0 4 0;
+    -fx-opacity: 0.35;
+}
+
+/* ── Detail Cards ────────────────────────────────────── */
+.details-grid {
+    -fx-padding: 20 28 20 28;
+}
+
+.detail-card {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1.5;
+    -fx-padding: 14 18 14 18;
+    -fx-spacing: 6;
+}
+
+.detail-card-wide {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1.5;
+    -fx-padding: 14 18 14 18;
+    -fx-spacing: 6;
+}
+
+.detail-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #94a3b8;
+}
+
+.detail-value {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+.detail-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+}
+
+/* ── Button Row ──────────────────────────────────────── */
+.button-row {
+    -fx-padding: 20 28 28 28;
+}

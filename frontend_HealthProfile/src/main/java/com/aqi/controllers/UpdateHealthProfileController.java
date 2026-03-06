@@ -241,7 +241,7 @@ public class UpdateHealthProfileController {
     private void goBack() {
         try {
             Parent root = FXMLLoader.load(
-                    getClass().getResource("/views/HealthProfile.fxml")
+                    getClass().getResource("/views/ViewProfile.fxml")
             );
             Stage stage = (Stage) backButton.getScene().getWindow();
             Scene scene = new Scene(root, stage.getScene().getWidth(), stage.getScene().getHeight());

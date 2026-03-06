@@ -126,9 +126,6 @@
             <Button text="Save Profile"
                     fx:id="saveButton"
                     styleClass="primary-btn"/>
-            <Button text="Update Profile"
-                    fx:id="updateProfileButton"
-                    styleClass="update-btn"/>
             <Button text="Cancel"
                     styleClass="secondary-btn"/>
         </HBox>

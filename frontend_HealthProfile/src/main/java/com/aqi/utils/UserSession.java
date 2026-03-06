@@ -1,13 +1,13 @@
 package com.aqi.utils;
 
 /**
- * Holds the currently logged-in user's ID for the session.
- * This is set by the login module after successful authentication
- * and read by HealthProfileController to identify the user.
+ * Holds the currently logged-in user's session data.
+ * Set by the login module after successful authentication.
  */
 public class UserSession {
 
-    private static String userId = null;
+    private static String userId   = null;
+    private static String username = null;
 
     public static void setUserId(String id) {
         userId = id;
@@ -17,8 +17,17 @@ public class UserSession {
         return userId;
     }
 
+    public static void setUsername(String name) {
+        username = name;
+    }
+
+    public static String getUsername() {
+        return username;
+    }
+
     public static void clearSession() {
-        userId = null;
+        userId   = null;
+        username = null;
     }
 
     public static boolean isLoggedIn() {
