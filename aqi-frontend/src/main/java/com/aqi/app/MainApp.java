@@ -4,12 +4,16 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import com.aqi.utils.SceneManager;
 
+import java.io.File;
+
 public class MainApp extends Application {
 
     private static Process backendProcess;
+    private static Process mlProcess;
 
     public static void main(String[] args) throws Exception {
         startBackend();
+        startMLServer();
         waitForBackend();
         launch(args);
     }
@@ -18,37 +22,27 @@ public class MainApp extends Application {
         try {
             String projectRoot = System.getProperty("user.dir");
 
-            java.io.File jarFile = new java.io.File(
+            File jarFile = new File(
                     projectRoot + "\\..\\homepage_backend\\target\\aqi-backend-0.0.1-SNAPSHOT.jar"
             ).getCanonicalFile();
 
-            java.io.File propsFile = new java.io.File(
+            File propsFile = new File(
                     projectRoot + "\\..\\homepage_backend\\src\\main\\resources\\application.properties"
             ).getCanonicalFile();
 
-            // Log file to capture backend output
-            java.io.File logFile = new java.io.File(projectRoot + "\\backend.log");
+            File logFile = new File(projectRoot + "\\backend.log");
 
             System.out.println("JAR:   " + jarFile.getAbsolutePath());
             System.out.println("Props: " + propsFile.getAbsolutePath());
-            System.out.println("Log:   " + logFile.getAbsolutePath());
 
-            if (!jarFile.exists()) {
-                System.err.println("JAR not found!");
-                return;
-            }
-            if (!propsFile.exists()) {
-                System.err.println("application.properties not found!");
-                return;
-            }
+            if (!jarFile.exists()) { System.err.println("JAR not found!"); return; }
+            if (!propsFile.exists()) { System.err.println("application.properties not found!"); return; }
 
             ProcessBuilder pb = new ProcessBuilder(
                     "java",
                     "-jar", jarFile.getAbsolutePath(),
                     "--spring.config.location=file:" + propsFile.getAbsolutePath()
             );
-
-            // Redirect backend output to log file so we can read it
             pb.redirectErrorStream(true);
             pb.redirectOutput(logFile);
 
@@ -57,6 +51,46 @@ public class MainApp extends Application {
 
         } catch (Exception e) {
             System.err.println("Failed to start backend: " + e.getMessage());
+        }
+    }
+
+    private static void startMLServer() {
+        try {
+            String projectRoot = System.getProperty("user.dir");
+
+            File serverFile = new File(
+                    projectRoot + "\\..\\ml\\server.py"
+            ).getCanonicalFile();
+
+            File logFile = new File(projectRoot + "\\ml.log");
+
+            System.out.println("ML server: " + serverFile.getAbsolutePath());
+
+            if (!serverFile.exists()) {
+                System.err.println("ML server.py not found at: " + serverFile.getAbsolutePath());
+                System.err.println("Prediction will use fallback mode.");
+                return;
+            }
+
+            // Try 'python' first, then 'python3'
+            ProcessBuilder pb;
+            try {
+                pb = new ProcessBuilder("python", serverFile.getAbsolutePath());
+                pb.redirectErrorStream(true);
+                pb.redirectOutput(logFile);
+                mlProcess = pb.start();
+                System.out.println("ML server starting with 'python'... check ml.log for details");
+            } catch (Exception e) {
+                pb = new ProcessBuilder("python3", serverFile.getAbsolutePath());
+                pb.redirectErrorStream(true);
+                pb.redirectOutput(logFile);
+                mlProcess = pb.start();
+                System.out.println("ML server starting with 'python3'... check ml.log for details");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Failed to start ML server: " + e.getMessage());
+            System.err.println("Prediction will use fallback mode.");
         }
     }
 
@@ -95,6 +129,10 @@ public class MainApp extends Application {
         if (backendProcess != null && backendProcess.isAlive()) {
             backendProcess.destroy();
             System.out.println("Backend stopped.");
+        }
+        if (mlProcess != null && mlProcess.isAlive()) {
+            mlProcess.destroy();
+            System.out.println("ML server stopped.");
         }
     }
 }
