@@ -38,7 +38,7 @@ public class ViewProfileController {
     @FXML
     public void initialize() {
         editButton.setOnAction(e -> SceneManager.switchScene("/views/UpdateHealthProfile.fxml", "Update Profile"));
-        backButton.setOnAction(e -> SceneManager.switchScene("/fxml/Dashboard.fxml"));
+        backButton.setOnAction(e -> SceneManager.switchScene("/com/example/aqidashboard/dashboard-view.fxml", "Dashboard"));
         new Thread(this::loadProfile).start();
     }
 
