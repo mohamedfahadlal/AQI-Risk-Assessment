@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.aqi.controllers.UpdateHealthProfileController">
+
+    <VBox alignment="CENTER"
+          spacing="30"
+          styleClass="card"
+          maxWidth="560">
+
+        <Label text="Update Health Profile"
+               styleClass="title"/>
+
+        <!-- Last updated timestamp -->
+        <Label fx:id="lastUpdatedLabel"
+               text=""
+               styleClass="updated-label"/>
+
+        <GridPane hgap="20" vgap="18">
+
+            <columnConstraints>
+                <ColumnConstraints minWidth="160" />
+                <ColumnConstraints prefWidth="220" />
+                <ColumnConstraints prefWidth="100" />
+            </columnConstraints>
+
+            <!-- Row 0: Date of Birth -->
+            <Label text="Date of Birth:"
+                   styleClass="form-label"
+                   GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <DatePicker fx:id="dobPicker"
+                        prefWidth="220"
+                        promptText="DD/MM/YYYY"
+                        GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label fx:id="ageDisplayLabel"
+                   text=""
+                   styleClass="age-label"
+                   GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+
+            <!-- Row 1: Gender -->
+            <Label text="Gender:"
+                   styleClass="form-label"
+                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="genderCombo"
+                      prefWidth="220"
+                      GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <!-- Row 2: Location -->
+            <Label text="Location:"
+                   styleClass="form-label"
+                   GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="locationField"
+                       promptText="Enter city"
+                       prefWidth="220"
+                       GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+            <!-- Row 3: Breathing Condition severity -->
+            <Label text="Breathing Condition:"
+                   styleClass="form-label"
+                   GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="breathingCombo"
+                      prefWidth="220"
+                      GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+            <!-- Row 4: Specific conditions - shown when severity != None -->
+            <Label fx:id="conditionLabel"
+                   text="Condition Type:"
+                   styleClass="form-label"
+                   GridPane.rowIndex="4" GridPane.columnIndex="0"
+                   visible="false"
+                   managed="false"/>
+            <VBox fx:id="conditionBox"
+                  spacing="8"
+                  GridPane.rowIndex="4" GridPane.columnIndex="1"
+                  visible="false"
+                  managed="false">
+                <CheckBox fx:id="asthmaCheck"
+                          text="Asthma"
+                          styleClass="custom-check"/>
+                <CheckBox fx:id="copdCheck"
+                          text="COPD"
+                          styleClass="custom-check"/>
+                <CheckBox fx:id="bronchitisCheck"
+                          text="Chronic Bronchitis"
+                          styleClass="custom-check"/>
+                <CheckBox fx:id="otherBreathingCheck"
+                          text="Other"
+                          styleClass="custom-check"/>
+            </VBox>
+
+            <!-- Row 5: Smoker -->
+            <Label text="Smoker:"
+                   styleClass="form-label"
+                   GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+            <CheckBox fx:id="smokerCheck"
+                      text="Yes"
+                      styleClass="custom-check"
+                      GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+            <!-- Row 6: Allergies -->
+            <Label text="Allergies:"
+                   styleClass="form-label"
+                   GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+            <CheckBox fx:id="allergicCheck"
+                      text="Yes"
+                      styleClass="custom-check"
+                      GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+            <!-- Row 7: Pregnant - only for Female -->
+            <Label fx:id="pregnantLabel"
+                   text="Pregnant:"
+                   styleClass="form-label"
+                   GridPane.rowIndex="7" GridPane.columnIndex="0"
+                   visible="false"
+                   managed="false"/>
+            <CheckBox fx:id="pregnantCheck"
+                      text="Yes"
+                      styleClass="custom-check"
+                      GridPane.rowIndex="7" GridPane.columnIndex="1"
+                      visible="false"
+                      managed="false"/>
+
+        </GridPane>
+
+        <!-- Buttons -->
+        <HBox spacing="20" alignment="CENTER">
+            <Button text="Update Profile"
+                    fx:id="updateButton"
+                    styleClass="primary-btn"/>
+            <Button text="← Back"
+                    fx:id="backButton"
+                    styleClass="secondary-btn"/>
+        </HBox>
+
+        <!-- Success notification -->
+        <HBox alignment="CENTER"
+              fx:id="successBox"
+              styleClass="success-box"
+              visible="false"
+              managed="false">
+            <Label text="✔ Profile updated successfully!"
+                   styleClass="success-text"/>
+        </HBox>
+
+    </VBox>
+
+</StackPane>

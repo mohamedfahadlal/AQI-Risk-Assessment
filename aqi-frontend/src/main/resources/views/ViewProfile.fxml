@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.Insets?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.aqi.controllers.ViewProfileController">
+
+    <VBox alignment="CENTER" spacing="20" maxWidth="580">
+
+        <!-- ── Profile Card ── -->
+        <VBox styleClass="card" spacing="0">
+
+            <!-- Avatar Header Section -->
+            <VBox alignment="CENTER" spacing="10" styleClass="avatar-section">
+                <!-- Avatar circle with initials -->
+                <StackPane>
+                    <Circle fx:id="avatarCircle"
+                            radius="52"
+                            styleClass="avatar-circle"/>
+                    <Label fx:id="avatarInitials"
+                           text="?"
+                           styleClass="avatar-initials"/>
+                </StackPane>
+
+                <!-- Name / Username -->
+                <Label fx:id="usernameLabel"
+                       text="Loading..."
+                       styleClass="profile-name"/>
+
+                <!-- Age badge -->
+                <HBox alignment="CENTER" spacing="8">
+                    <Label fx:id="ageBadge"
+                           text=""
+                           styleClass="info-badge"/>
+                    <Label fx:id="genderBadge"
+                           text=""
+                           styleClass="info-badge"/>
+                    <Label fx:id="locationBadge"
+                           text=""
+                           styleClass="location-badge"/>
+                </HBox>
+            </VBox>
+
+            <!-- Divider -->
+            <Separator styleClass="card-divider"/>
+
+            <!-- ── Health Details Grid ── -->
+            <GridPane hgap="16" vgap="16" styleClass="details-grid">
+                <columnConstraints>
+                    <ColumnConstraints prefWidth="260"/>
+                    <ColumnConstraints prefWidth="260"/>
+                </columnConstraints>
+
+                <!-- Breathing Condition -->
+                <VBox styleClass="detail-card"
+                      GridPane.rowIndex="0" GridPane.columnIndex="0">
+                    <Label text="🫁  Breathing Condition" styleClass="detail-label"/>
+                    <Label fx:id="breathingValue"    styleClass="detail-value"/>
+                    <Label fx:id="conditionsValue"   styleClass="detail-sub"/>
+                </VBox>
+
+                <!-- Smoker Status -->
+                <VBox styleClass="detail-card"
+                      GridPane.rowIndex="0" GridPane.columnIndex="1">
+                    <Label text="🚬  Smoker" styleClass="detail-label"/>
+                    <Label fx:id="smokerValue" styleClass="detail-value"/>
+                </VBox>
+
+                <!-- Allergies -->
+                <VBox styleClass="detail-card"
+                      GridPane.rowIndex="1" GridPane.columnIndex="0">
+                    <Label text="🤧  Allergies" styleClass="detail-label"/>
+                    <Label fx:id="allergicValue" styleClass="detail-value"/>
+                </VBox>
+
+                <!-- Pregnant (shown only for female) -->
+                <VBox fx:id="pregnantCard"
+                      styleClass="detail-card"
+                      GridPane.rowIndex="1" GridPane.columnIndex="1"
+                      visible="false" managed="false">
+                    <Label text="🤰  Pregnant" styleClass="detail-label"/>
+                    <Label fx:id="pregnantValue" styleClass="detail-value"/>
+                </VBox>
+
+                <!-- Last Updated -->
+                <VBox styleClass="detail-card-wide"
+                      GridPane.rowIndex="2" GridPane.columnIndex="0"
+                      GridPane.columnSpan="2">
+                    <Label text="🕒  Last Updated" styleClass="detail-label"/>
+                    <Label fx:id="updatedAtValue" styleClass="detail-sub"/>
+                </VBox>
+
+            </GridPane>
+
+            <!-- Divider -->
+            <Separator styleClass="card-divider"/>
+
+            <!-- ── Buttons ── -->
+            <HBox spacing="16" alignment="CENTER" styleClass="button-row">
+                <Button fx:id="editButton"
+                        text="✏  Edit Profile"
+                        styleClass="primary-btn"/>
+                <Button fx:id="backButton"
+                        text="← Back"
+                        styleClass="secondary-btn"/>
+            </HBox>
+
+        </VBox>
+
+    </VBox>
+
+</StackPane>

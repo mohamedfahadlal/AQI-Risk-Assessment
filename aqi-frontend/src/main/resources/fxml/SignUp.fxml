@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<?import javafx.geometry.Insets?>
+<BorderPane styleClass="main-background-light" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.aqi.controllers.SignUpController">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-nav">
+            <Label text="AQI" styleClass="logo-text"/>
+            <Region HBox.hgrow="ALWAYS" />
+
+            <Button text="About Us" onAction="#goToAbout" styleClass="nav-link"/>
+            <Button text="Login" onAction="#goToLogin" styleClass="nav-link"/>
+            <Button text="Sign Up ↗" styleClass="nav-btn-login"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER">
+            <VBox styleClass="card-light" alignment="CENTER_LEFT" spacing="18" maxWidth="400" maxHeight="600">
+
+                <Label text="Create Account" styleClass="title-label-light" style="-fx-padding: 0 0 5 0;"/>
+
+                <VBox spacing="6">
+                    <Label text="FULL NAME" styleClass="input-label"/>
+                    <TextField fx:id="nameField" promptText="Enter your name" styleClass="input-field-light"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <Label text="EMAIL ADDRESS" styleClass="input-label"/>
+                    <TextField fx:id="emailField" promptText="Enter email" styleClass="input-field-light"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <Label text="PASSWORD" styleClass="input-label"/>
+                    <PasswordField fx:id="passwordField" promptText="Create password" styleClass="input-field-light"/>
+                </VBox>
+                <VBox spacing="5">
+                    <Label text="Email Address" style="-fx-text-fill: #374151; -fx-font-weight: bold;"/>
+                    <TextField fx:id="emailInput" promptText="Enter your email" styleClass="input-field"/>
+                </VBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <VBox spacing="5" HBox.hgrow="ALWAYS">
+                        <Label text="Verification Code" style="-fx-text-fill: #374151; -fx-font-weight: bold;"/>
+                        <TextField fx:id="otpInput" promptText="6-digit OTP" styleClass="input-field"/>
+                    </VBox>
+                    <Button fx:id="sendOtpBtn" text="Send OTP" onAction="#handleSendOtp" style="-fx-background-color: #e5e7eb; -fx-text-fill: #374151; -fx-cursor: hand; -fx-padding: 8 15;">
+                        <HBox.margin>
+                            <Insets top="20"/> </HBox.margin>
+                    </Button>
+                </HBox>
+                <VBox spacing="6">
+                    <Label text="CONFIRM PASSWORD" styleClass="input-label"/>
+                    <PasswordField fx:id="confirmPasswordField" promptText="Confirm password" styleClass="input-field-light"/>
+                </VBox>
+
+                <Label fx:id="statusLabel" textFill="#ef4444" wrapText="true" minHeight="45" alignment="TOP_LEFT" maxWidth="Infinity"/>
+
+                <Button text="Register Account" onAction="#handleSignUp" styleClass="btn-submit-primary" maxWidth="Infinity" style="-fx-margin: 5 0 0 0;"/>
+
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
