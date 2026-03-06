@@ -3,6 +3,7 @@ package com.aqi.controllers;
 import com.aqi.utils.DatabaseConnection;
 import com.aqi.utils.SceneManager;
 import com.aqi.utils.UserSession;
+import com.aqi.utils.MatrixDatePicker; // MAKE SURE THIS IMPORT IS HERE
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -10,7 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import javafx.util.StringConverter;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -20,7 +20,10 @@ import java.time.format.DateTimeParseException;
 
 public class HealthProfileController {
 
-    @FXML private DatePicker          dobPicker;
+    // --- REPLACED SPINNERS WITH TEXTFIELD AND BUTTON ---
+    @FXML private TextField           dobField;
+    @FXML private Button              calendarBtn;
+
     @FXML private Label               ageDisplayLabel;
     @FXML private ComboBox<String>    genderCombo;
     @FXML private TextField           locationField;
@@ -38,6 +41,7 @@ public class HealthProfileController {
     @FXML private Button              saveButton;
     @FXML private HBox                successBox;
 
+    // Formatter used to bridge the text field and the database
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @FXML
@@ -48,38 +52,15 @@ public class HealthProfileController {
         breathingCombo.getItems().addAll("None", "Mild", "Moderate", "Severe");
         breathingCombo.setValue("None");
 
-        dobPicker.setConverter(new StringConverter<LocalDate>() {
-            @Override public String toString(LocalDate date) {
-                return date != null ? dateFormatter.format(date) : "";
-            }
-            @Override public LocalDate fromString(String text) {
-                if (text != null && !text.trim().isEmpty()) {
-                    try { return LocalDate.parse(text.trim(), dateFormatter); }
-                    catch (DateTimeParseException e) { return null; }
-                }
-                return null;
-            }
-        });
+        // --- INITIALIZE THE CUSTOM MATRIX CALENDAR ---
+        // This links the button and field to your new utility
+        new MatrixDatePicker(dobField, calendarBtn);
 
-        dobPicker.setDayCellFactory(picker -> new DateCell() {
-            @Override public void updateItem(LocalDate date, boolean empty) {
-                super.updateItem(date, empty);
-                setDisabled(empty || date.isAfter(LocalDate.now()));
-            }
-        });
+        // Listen for date changes to update the age display automatically
+        dobField.textProperty().addListener((obs, oldVal, newVal) -> updateAgeDisplay());
 
         ageDisplayLabel.setVisible(false);
         ageDisplayLabel.setManaged(false);
-        dobPicker.valueProperty().addListener((obs, o, newVal) -> {
-            if (newVal != null) {
-                ageDisplayLabel.setText("Age: " + Period.between(newVal, LocalDate.now()).getYears() + " yrs");
-                ageDisplayLabel.setVisible(true);
-                ageDisplayLabel.setManaged(true);
-            } else {
-                ageDisplayLabel.setVisible(false);
-                ageDisplayLabel.setManaged(false);
-            }
-        });
 
         breathingCombo.valueProperty().addListener((obs, o, newVal) -> {
             boolean show = newVal != null && !newVal.equals("None");
@@ -100,6 +81,32 @@ public class HealthProfileController {
 
         saveButton.setOnAction(e -> handleSave());
         new Thread(this::loadExistingProfile).start();
+    }
+
+    // --- REPLACED HELPER METHODS ---
+
+    // Parses the text in the dobField into a LocalDate
+    private LocalDate getSelectedDate() {
+        try {
+            String text = dobField.getText();
+            if (text == null || text.isEmpty()) return null;
+            return LocalDate.parse(text, dateFormatter);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
+
+    private void updateAgeDisplay() {
+        LocalDate dob = getSelectedDate();
+        if (dob != null && !dob.isAfter(LocalDate.now())) {
+            int years = Period.between(dob, LocalDate.now()).getYears();
+            ageDisplayLabel.setText("Age: " + years + " yrs");
+            ageDisplayLabel.setVisible(true);
+            ageDisplayLabel.setManaged(true);
+        } else {
+            ageDisplayLabel.setVisible(false);
+            ageDisplayLabel.setManaged(false);
+        }
     }
 
     // ── Load existing profile from DB ─────────────────────────────────────
@@ -126,7 +133,10 @@ public class HealthProfileController {
                 Array conditions  = rs.getArray("breathing_conditions");
 
                 Platform.runLater(() -> {
-                    if (dob != null)      dobPicker.setValue(dob.toLocalDate());
+                    if (dob != null) {
+                        // SET THE TEXT FIELD INSTEAD OF SPINNERS
+                        dobField.setText(dob.toLocalDate().format(dateFormatter));
+                    }
                     if (gender != null)   genderCombo.setValue(gender);
                     if (location != null) locationField.setText(location);
                     if (breathing != null) breathingCombo.setValue(breathing);
@@ -157,6 +167,14 @@ public class HealthProfileController {
     // ── Save profile to DB ────────────────────────────────────────────────
 
     private void handleSave() {
+        LocalDate validDob = getSelectedDate();
+
+        if (validDob == null) {
+            showAlert("Please select a valid Date of Birth."); return;
+        }
+        if (validDob.isAfter(LocalDate.now())) {
+            showAlert("Date of Birth cannot be in the future."); return;
+        }
         if (!validateInputs()) { showAlert("Please complete all required fields."); return; }
         if (!breathingCombo.getValue().equals("None") && getSelectedConditions().length == 0) {
             showAlert("Please select at least one breathing condition type."); return;
@@ -185,7 +203,7 @@ public class HealthProfileController {
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
                 pstmt.setString(1, userId);
-                pstmt.setDate(2, Date.valueOf(dobPicker.getValue()));
+                pstmt.setDate(2, Date.valueOf(validDob));
                 pstmt.setString(3, genderCombo.getValue());
                 pstmt.setString(4, locationField.getText().trim());
                 pstmt.setString(5, breathingCombo.getValue());
@@ -197,7 +215,6 @@ public class HealthProfileController {
                 pstmt.executeUpdate();
                 Platform.runLater(() -> {
                     showSuccess();
-                    // After saving, navigate to View Profile
                     new java.util.Timer().schedule(new java.util.TimerTask() {
                         @Override public void run() {
                             Platform.runLater(() ->
@@ -224,7 +241,6 @@ public class HealthProfileController {
     }
 
     private boolean validateInputs() {
-        if (dobPicker.getValue() == null)                   return false;
         if ("Select Gender".equals(genderCombo.getValue())) return false;
         if (locationField.getText().trim().isEmpty())       return false;
         return true;
