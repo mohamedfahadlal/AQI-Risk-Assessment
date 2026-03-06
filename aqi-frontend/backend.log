@@ -1,3 +1,4 @@
+Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=IBM437
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -7,29 +8,272 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.0)
 
-2026-03-07T00:10:25.943+05:30  INFO 34696 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : Starting AqiBackendApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 34696 (C:\Users\Fahad\Desktop\my works\Java AP project\AQI-Risk-Assessment\homepage_backend\target\aqi-backend-0.0.1-SNAPSHOT.jar started by Fahad in C:\Users\Fahad\Desktop\my works\Java AP project\AQI-Risk-Assessment\aqi-frontend)
-2026-03-07T00:10:25.945+05:30  INFO 34696 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : No active profile set, falling back to 1 default profile: "default"
-2026-03-07T00:10:27.665+05:30  INFO 34696 --- [aqi-backend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2026-03-07T00:10:27.675+05:30  INFO 34696 --- [aqi-backend] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-03-07T00:10:27.675+05:30  INFO 34696 --- [aqi-backend] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
-2026-03-07T00:10:27.717+05:30  INFO 34696 --- [aqi-backend] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-03-07T00:10:27.718+05:30  INFO 34696 --- [aqi-backend] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1687 ms
-2026-03-07T00:10:28.738+05:30  INFO 34696 --- [aqi-backend] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
-2026-03-07T00:10:28.820+05:30  WARN 34696 --- [aqi-backend] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2026-03-07T00:10:28.847+05:30  INFO 34696 --- [aqi-backend] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+2026-03-07T00:03:28.165+05:30  INFO 22988 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : Starting AqiBackendApplication v0.0.1-SNAPSHOT using Java 24 with PID 22988 (D:\Github\Java AQI\java fx gui\AQI-Risk-Assessment\homepage_backend\target\aqi-backend-0.0.1-SNAPSHOT.jar started by hp in D:\Github\Java AQI\java fx gui\AQI-Risk-Assessment\aqi-frontend)
+2026-03-07T00:03:28.167+05:30  INFO 22988 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : No active profile set, falling back to 1 default profile: "default"
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (jar:nested:/D:/Github/Java AQI/java fx gui/AQI-Risk-Assessment/homepage_backend/target/aqi-backend-0.0.1-SNAPSHOT.jar/!BOOT-INF/lib/tomcat-embed-core-10.1.16.jar!/)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
 
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2026-03-07T00:10:28.872+05:30 ERROR 34696 --- [aqi-backend] [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
-
-***************************
-APPLICATION FAILED TO START
-***************************
-
-Description:
-
-Web server failed to start. Port 8080 was already in use.
-
-Action:
-
-Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
-
+2026-03-07T00:03:30.197+05:30  INFO 22988 --- [aqi-backend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-07T00:03:30.206+05:30  INFO 22988 --- [aqi-backend] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-07T00:03:30.206+05:30  INFO 22988 --- [aqi-backend] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-03-07T00:03:30.278+05:30  INFO 22988 --- [aqi-backend] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-07T00:03:30.279+05:30  INFO 22988 --- [aqi-backend] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2028 ms
+2026-03-07T00:03:31.134+05:30  INFO 22988 --- [aqi-backend] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-03-07T00:03:31.227+05:30  INFO 22988 --- [aqi-backend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2026-03-07T00:03:31.238+05:30  INFO 22988 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : Started AqiBackendApplication in 3.761 seconds (process running for 4.343)
+2026-03-07T00:03:31.340+05:30  INFO 22988 --- [aqi-backend] [nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-07T00:03:31.340+05:30  INFO 22988 --- [aqi-backend] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-07T00:03:31.341+05:30  INFO 22988 --- [aqi-backend] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-03-07T00:03:31.402+05:30  INFO 22988 --- [aqi-backend] [nio-8080-exec-2] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-07T00:03:32.446+05:30  INFO 22988 --- [aqi-backend] [nio-8080-exec-2] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4c66c500
+2026-03-07T00:03:32.452+05:30  INFO 22988 --- [aqi-backend] [nio-8080-exec-2] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Kochi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kochi -> 9.931308,76.2674136
+=== Weather: temp=26.96 humidity=80.0 wind=11.304
+=== Pollution response: {"coord":{"lon":76.2674,"lat":9.9313},"list":[{"main":{"aqi":3},"components":{"co":144.98,"no":0,"no2":0.38,"o3":68.82,"so2":0.6,"pm2_5":25.85,"pm10":35.67,"nh3":0},"dt":1772821896}]}
+=== Pollutants (�g/m�): pm25=25.85 pm10=35.67 no2=0.38 o3=68.82
+=== CPCB Sub-indices: {no2=0.475, pm25=43.083333333333336, o3=69.44359999999999, so2=0.75, pm10=35.67, co=7.249}
+=== Final CPCB AQI: 69
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=burnpur,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Burnpur -> 23.667122,86.9420671
+=== Weather: temp=21.39 humidity=74.0 wind=10.872
+=== Pollution response: {"coord":{"lon":86.9421,"lat":23.6671},"list":[{"main":{"aqi":5},"components":{"co":424.72,"no":0,"no2":10.49,"o3":84.4,"so2":12.98,"pm2_5":93.45,"pm10":118.43,"nh3":5.11},"dt":1772822060}]}
+=== Pollutants (�g/m�): pm25=93.45 pm10=118.43 no2=10.49 o3=84.4
+=== CPCB Sub-indices: {no2=13.1125, pm25=212.38500000000002, o3=84.712, so2=16.225, pm10=113.16380000000001, co=21.236}
+=== Final CPCB AQI: 212
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=New+Delhi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: New Delhi -> 28.6138954,77.2090057
+=== Weather: temp=26.87 humidity=16.0 wind=4.572
+=== Pollution response: {"coord":{"lon":77.21,"lat":28.61},"list":[{"main":{"aqi":4},"components":{"co":652.07,"no":0.05,"no2":26.92,"o3":23.61,"so2":3.25,"pm2_5":70.44,"pm10":129.88,"nh3":36.8},"dt":1772821854}]}
+=== Pollutants (�g/m�): pm25=70.44 pm10=129.88 no2=26.92 o3=23.61
+=== CPCB Sub-indices: {no2=33.650000000000006, pm25=135.452, o3=23.61, so2=4.0625, pm10=120.7208, co=32.603500000000004}
+=== Final CPCB AQI: 135
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=New+Delhi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: New Delhi -> 28.6138954,77.2090057
+=== Weather: temp=26.87 humidity=16.0 wind=4.572
+=== Pollution response: {"coord":{"lon":77.21,"lat":28.61},"list":[{"main":{"aqi":4},"components":{"co":652.07,"no":0.05,"no2":26.92,"o3":23.61,"so2":3.25,"pm2_5":70.44,"pm10":129.88,"nh3":36.8},"dt":1772821854}]}
+=== Pollutants (�g/m�): pm25=70.44 pm10=129.88 no2=26.92 o3=23.61
+=== CPCB Sub-indices: {no2=33.650000000000006, pm25=135.452, o3=23.61, so2=4.0625, pm10=120.7208, co=32.603500000000004}
+=== Final CPCB AQI: 135
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=New+Delhi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: New Delhi -> 28.6138954,77.2090057
+=== Weather: temp=26.87 humidity=16.0 wind=4.572
+=== Pollution response: {"coord":{"lon":77.21,"lat":28.61},"list":[{"main":{"aqi":4},"components":{"co":652.07,"no":0.05,"no2":26.92,"o3":23.61,"so2":3.25,"pm2_5":70.44,"pm10":129.88,"nh3":36.8},"dt":1772821854}]}
+=== Pollutants (�g/m�): pm25=70.44 pm10=129.88 no2=26.92 o3=23.61
+=== CPCB Sub-indices: {no2=33.650000000000006, pm25=135.452, o3=23.61, so2=4.0625, pm10=120.7208, co=32.603500000000004}
+=== Final CPCB AQI: 135
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=New+Delhi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: New Delhi -> 28.6138954,77.2090057
+=== Weather: temp=26.87 humidity=16.0 wind=4.572
+=== Pollution response: {"coord":{"lon":77.21,"lat":28.61},"list":[{"main":{"aqi":4},"components":{"co":652.07,"no":0.05,"no2":26.92,"o3":23.61,"so2":3.25,"pm2_5":70.44,"pm10":129.88,"nh3":36.8},"dt":1772821854}]}
+=== Pollutants (�g/m�): pm25=70.44 pm10=129.88 no2=26.92 o3=23.61
+=== CPCB Sub-indices: {no2=33.650000000000006, pm25=135.452, o3=23.61, so2=4.0625, pm10=120.7208, co=32.603500000000004}
+=== Final CPCB AQI: 135
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=New+Delhi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: New Delhi -> 28.6138954,77.2090057
+=== Weather: temp=26.87 humidity=16.0 wind=4.572
+=== Pollution response: {"coord":{"lon":77.21,"lat":28.61},"list":[{"main":{"aqi":4},"components":{"co":652.07,"no":0.05,"no2":26.92,"o3":23.61,"so2":3.25,"pm2_5":70.44,"pm10":129.88,"nh3":36.8},"dt":1772821854}]}
+=== Pollutants (�g/m�): pm25=70.44 pm10=129.88 no2=26.92 o3=23.61
+=== CPCB Sub-indices: {no2=33.650000000000006, pm25=135.452, o3=23.61, so2=4.0625, pm10=120.7208, co=32.603500000000004}
+=== Final CPCB AQI: 135
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Kochi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kochi -> 9.931308,76.2674136
+=== Weather: temp=26.96 humidity=80.0 wind=11.304
+=== Pollution response: {"coord":{"lon":76.2674,"lat":9.9313},"list":[{"main":{"aqi":3},"components":{"co":144.98,"no":0,"no2":0.38,"o3":68.82,"so2":0.6,"pm2_5":25.85,"pm10":35.67,"nh3":0},"dt":1772821896}]}
+=== Pollutants (�g/m�): pm25=25.85 pm10=35.67 no2=0.38 o3=68.82
+=== CPCB Sub-indices: {no2=0.475, pm25=43.083333333333336, o3=69.44359999999999, so2=0.75, pm10=35.67, co=7.249}
+=== Final CPCB AQI: 69
+=== Weather: temp=26.87 humidity=16.0 wind=4.572
+=== Pollution response: {"coord":{"lon":77.21,"lat":28.61},"list":[{"main":{"aqi":4},"components":{"co":652.07,"no":0.05,"no2":26.92,"o3":23.61,"so2":3.25,"pm2_5":70.44,"pm10":129.88,"nh3":36.8},"dt":1772821854}]}
+=== Pollutants (�g/m�): pm25=70.44 pm10=129.88 no2=26.92 o3=23.61
+=== CPCB Sub-indices: {no2=33.650000000000006, pm25=135.452, o3=23.61, so2=4.0625, pm10=120.7208, co=32.603500000000004}
+=== Final CPCB AQI: 135
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=kochi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kochi -> 9.931308,76.2674136
+=== Weather: temp=26.96 humidity=80.0 wind=11.304
+=== Pollution response: {"coord":{"lon":76.2674,"lat":9.9313},"list":[{"main":{"aqi":3},"components":{"co":144.98,"no":0,"no2":0.38,"o3":68.82,"so2":0.6,"pm2_5":25.85,"pm10":35.67,"nh3":0},"dt":1772821896}]}
+=== Pollutants (�g/m�): pm25=25.85 pm10=35.67 no2=0.38 o3=68.82
+=== CPCB Sub-indices: {no2=0.475, pm25=43.083333333333336, o3=69.44359999999999, so2=0.75, pm10=35.67, co=7.249}
+=== Final CPCB AQI: 69
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Kochi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kochi -> 9.931308,76.2674136
+=== Weather: temp=26.96 humidity=80.0 wind=11.304
+=== Pollution response: {"coord":{"lon":76.2674,"lat":9.9313},"list":[{"main":{"aqi":3},"components":{"co":144.98,"no":0,"no2":0.38,"o3":68.82,"so2":0.6,"pm2_5":25.85,"pm10":35.67,"nh3":0},"dt":1772821896}]}
+=== Pollutants (�g/m�): pm25=25.85 pm10=35.67 no2=0.38 o3=68.82
+=== CPCB Sub-indices: {no2=0.475, pm25=43.083333333333336, o3=69.44359999999999, so2=0.75, pm10=35.67, co=7.249}
+=== Final CPCB AQI: 69
+=== Weather: temp=26.98 humidity=81.0 wind=10.044
+=== Pollution response: {"coord":{"lon":76.2444,"lat":9.9679},"list":[{"main":{"aqi":3},"components":{"co":144.98,"no":0,"no2":0.38,"o3":68.82,"so2":0.6,"pm2_5":25.85,"pm10":35.67,"nh3":0},"dt":1772822172}]}
+=== Pollutants (�g/m�): pm25=25.85 pm10=35.67 no2=0.38 o3=68.82
+=== CPCB Sub-indices: {no2=0.475, pm25=43.083333333333336, o3=69.44359999999999, so2=0.75, pm10=35.67, co=7.249}
+=== Final CPCB AQI: 69
+=== Weather: temp=26.23 humidity=16.0 wind=3.3120000000000003
+=== Pollution response: {"coord":{"lon":77.2198,"lat":28.6328},"list":[{"main":{"aqi":4},"components":{"co":652.07,"no":0.05,"no2":26.92,"o3":23.61,"so2":3.25,"pm2_5":70.44,"pm10":129.88,"nh3":36.8},"dt":1772822182}]}
+=== Pollutants (�g/m�): pm25=70.44 pm10=129.88 no2=26.92 o3=23.61
+=== CPCB Sub-indices: {no2=33.650000000000006, pm25=135.452, o3=23.61, so2=4.0625, pm10=120.7208, co=32.603500000000004}
+=== Final CPCB AQI: 135
+=== Weather: temp=26.87 humidity=16.0 wind=4.572
+=== Pollution response: {"coord":{"lon":77.21,"lat":28.61},"list":[{"main":{"aqi":4},"components":{"co":652.07,"no":0.05,"no2":26.92,"o3":23.61,"so2":3.25,"pm2_5":70.44,"pm10":129.88,"nh3":36.8},"dt":1772821854}]}
+=== Pollutants (�g/m�): pm25=70.44 pm10=129.88 no2=26.92 o3=23.61
+=== CPCB Sub-indices: {no2=33.650000000000006, pm25=135.452, o3=23.61, so2=4.0625, pm10=120.7208, co=32.603500000000004}
+=== Final CPCB AQI: 135
+=== Weather: temp=26.87 humidity=16.0 wind=4.572
+=== Pollution response: {"coord":{"lon":77.21,"lat":28.61},"list":[{"main":{"aqi":4},"components":{"co":652.07,"no":0.05,"no2":26.92,"o3":23.61,"so2":3.25,"pm2_5":70.44,"pm10":129.88,"nh3":36.8},"dt":1772821854}]}
+=== Pollutants (�g/m�): pm25=70.44 pm10=129.88 no2=26.92 o3=23.61
+=== CPCB Sub-indices: {no2=33.650000000000006, pm25=135.452, o3=23.61, so2=4.0625, pm10=120.7208, co=32.603500000000004}
+=== Final CPCB AQI: 135
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=kollam,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kollam -> 8.8879509,76.5955013
+=== Weather: temp=26.44 humidity=80.0 wind=7.704000000000001
+=== Pollution response: {"coord":{"lon":76.5955,"lat":8.888},"list":[{"main":{"aqi":2},"components":{"co":156.66,"no":0,"no2":0.62,"o3":89.59,"so2":0.82,"pm2_5":20.94,"pm10":25.66,"nh3":0},"dt":1772822206}]}
+=== Pollutants (�g/m�): pm25=20.94 pm10=25.66 no2=0.62 o3=89.59
+=== CPCB Sub-indices: {no2=0.775, pm25=34.900000000000006, o3=89.79820000000001, so2=1.025, pm10=25.66, co=7.832999999999999}
+=== Final CPCB AQI: 90
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Kochi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kochi -> 9.931308,76.2674136
+=== Weather: temp=26.96 humidity=80.0 wind=11.304
+=== Pollution response: {"coord":{"lon":76.2674,"lat":9.9313},"list":[{"main":{"aqi":3},"components":{"co":144.98,"no":0,"no2":0.38,"o3":68.82,"so2":0.6,"pm2_5":25.85,"pm10":35.67,"nh3":0},"dt":1772821896}]}
+=== Pollutants (�g/m�): pm25=25.85 pm10=35.67 no2=0.38 o3=68.82
+=== CPCB Sub-indices: {no2=0.475, pm25=43.083333333333336, o3=69.44359999999999, so2=0.75, pm10=35.67, co=7.249}
+=== Final CPCB AQI: 69
+=== Weather: temp=24.76 humidity=89.0 wind=9.936
+=== Pollution response: {"coord":{"lon":76.6487,"lat":10.7739},"list":[{"main":{"aqi":3},"components":{"co":188.72,"no":0,"no2":3.13,"o3":66.87,"so2":2.14,"pm2_5":33.47,"pm10":43.58,"nh3":0.56},"dt":1772822311}]}
+=== Pollutants (�g/m�): pm25=33.47 pm10=43.58 no2=3.13 o3=66.87
+=== CPCB Sub-indices: {no2=3.9124999999999996, pm25=56.66766666666666, o3=67.5326, so2=2.6750000000000003, pm10=43.58, co=9.436}
+=== Final CPCB AQI: 68
+=== Weather: temp=24.76 humidity=89.0 wind=9.936
+=== Pollution response: {"coord":{"lon":76.6487,"lat":10.7739},"list":[{"main":{"aqi":3},"components":{"co":188.72,"no":0,"no2":3.13,"o3":66.87,"so2":2.14,"pm2_5":33.47,"pm10":43.58,"nh3":0.56},"dt":1772822311}]}
+=== Pollutants (�g/m�): pm25=33.47 pm10=43.58 no2=3.13 o3=66.87
+=== CPCB Sub-indices: {no2=3.9124999999999996, pm25=56.66766666666666, o3=67.5326, so2=2.6750000000000003, pm10=43.58, co=9.436}
+=== Final CPCB AQI: 68
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Kochi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kochi -> 9.931308,76.2674136
+=== Weather: temp=27.11 humidity=80.0 wind=9.9
+=== Pollution response: {"coord":{"lon":76.2674,"lat":9.9313},"list":[{"main":{"aqi":3},"components":{"co":144.98,"no":0,"no2":0.38,"o3":68.82,"so2":0.6,"pm2_5":25.85,"pm10":35.67,"nh3":0},"dt":1772821896}]}
+=== Pollutants (�g/m�): pm25=25.85 pm10=35.67 no2=0.38 o3=68.82
+=== CPCB Sub-indices: {no2=0.475, pm25=43.083333333333336, o3=69.44359999999999, so2=0.75, pm10=35.67, co=7.249}
+=== Final CPCB AQI: 69
+=== Weather: temp=24.76 humidity=89.0 wind=9.936
+=== Pollution response: {"coord":{"lon":76.6487,"lat":10.7739},"list":[{"main":{"aqi":3},"components":{"co":188.72,"no":0,"no2":3.13,"o3":66.87,"so2":2.14,"pm2_5":33.47,"pm10":43.58,"nh3":0.56},"dt":1772822311}]}
+=== Pollutants (�g/m�): pm25=33.47 pm10=43.58 no2=3.13 o3=66.87
+=== CPCB Sub-indices: {no2=3.9124999999999996, pm25=56.66766666666666, o3=67.5326, so2=2.6750000000000003, pm10=43.58, co=9.436}
+=== Final CPCB AQI: 68
+=== Weather: temp=24.76 humidity=89.0 wind=9.936
+=== Pollution response: {"coord":{"lon":76.6487,"lat":10.7739},"list":[{"main":{"aqi":3},"components":{"co":188.72,"no":0,"no2":3.13,"o3":66.87,"so2":2.14,"pm2_5":33.47,"pm10":43.58,"nh3":0.56},"dt":1772822311}]}
+=== Pollutants (�g/m�): pm25=33.47 pm10=43.58 no2=3.13 o3=66.87
+=== CPCB Sub-indices: {no2=3.9124999999999996, pm25=56.66766666666666, o3=67.5326, so2=2.6750000000000003, pm10=43.58, co=9.436}
+=== Final CPCB AQI: 68
+=== Weather: temp=24.76 humidity=89.0 wind=9.936
+=== Pollution response: {"coord":{"lon":76.6487,"lat":10.7739},"list":[{"main":{"aqi":3},"components":{"co":188.72,"no":0,"no2":3.13,"o3":66.87,"so2":2.14,"pm2_5":33.47,"pm10":43.58,"nh3":0.56},"dt":1772822311}]}
+=== Pollutants (�g/m�): pm25=33.47 pm10=43.58 no2=3.13 o3=66.87
+=== CPCB Sub-indices: {no2=3.9124999999999996, pm25=56.66766666666666, o3=67.5326, so2=2.6750000000000003, pm10=43.58, co=9.436}
+=== Final CPCB AQI: 68
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Kochi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kochi -> 9.931308,76.2674136
+=== Weather: temp=27.11 humidity=80.0 wind=9.9
+=== Pollution response: {"coord":{"lon":76.2674,"lat":9.9313},"list":[{"main":{"aqi":3},"components":{"co":144.98,"no":0,"no2":0.38,"o3":68.82,"so2":0.6,"pm2_5":25.85,"pm10":35.67,"nh3":0},"dt":1772822516}]}
+=== Pollutants (�g/m�): pm25=25.85 pm10=35.67 no2=0.38 o3=68.82
+=== CPCB Sub-indices: {no2=0.475, pm25=43.083333333333336, o3=69.44359999999999, so2=0.75, pm10=35.67, co=7.249}
+=== Final CPCB AQI: 69
+=== Weather: temp=24.76 humidity=89.0 wind=9.936
+=== Pollution response: {"coord":{"lon":76.6487,"lat":10.7739},"list":[{"main":{"aqi":3},"components":{"co":188.72,"no":0,"no2":3.13,"o3":66.87,"so2":2.14,"pm2_5":33.47,"pm10":43.58,"nh3":0.56},"dt":1772822311}]}
+=== Pollutants (�g/m�): pm25=33.47 pm10=43.58 no2=3.13 o3=66.87
+=== CPCB Sub-indices: {no2=3.9124999999999996, pm25=56.66766666666666, o3=67.5326, so2=2.6750000000000003, pm10=43.58, co=9.436}
+=== Final CPCB AQI: 68
+=== Weather: temp=24.76 humidity=89.0 wind=9.936
+=== Pollution response: {"coord":{"lon":76.6487,"lat":10.7739},"list":[{"main":{"aqi":3},"components":{"co":188.72,"no":0,"no2":3.13,"o3":66.87,"so2":2.14,"pm2_5":33.47,"pm10":43.58,"nh3":0.56},"dt":1772822311}]}
+=== Pollutants (�g/m�): pm25=33.47 pm10=43.58 no2=3.13 o3=66.87
+=== CPCB Sub-indices: {no2=3.9124999999999996, pm25=56.66766666666666, o3=67.5326, so2=2.6750000000000003, pm10=43.58, co=9.436}
+=== Final CPCB AQI: 68
+=== Weather: temp=24.76 humidity=89.0 wind=9.936
+=== Pollution response: {"coord":{"lon":76.6487,"lat":10.7739},"list":[{"main":{"aqi":3},"components":{"co":188.72,"no":0,"no2":3.13,"o3":66.87,"so2":2.14,"pm2_5":33.47,"pm10":43.58,"nh3":0.56},"dt":1772822311}]}
+=== Pollutants (�g/m�): pm25=33.47 pm10=43.58 no2=3.13 o3=66.87
+=== CPCB Sub-indices: {no2=3.9124999999999996, pm25=56.66766666666666, o3=67.5326, so2=2.6750000000000003, pm10=43.58, co=9.436}
+=== Final CPCB AQI: 68
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=?+Palakkad,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Palakkad -> 10.7681928,76.6521319
+=== Weather: temp=24.76 humidity=89.0 wind=9.936
+=== Pollution response: {"coord":{"lon":76.6487,"lat":10.7739},"list":[{"main":{"aqi":3},"components":{"co":188.72,"no":0,"no2":3.13,"o3":66.87,"so2":2.14,"pm2_5":33.47,"pm10":43.58,"nh3":0.56},"dt":1772822311}]}
+=== Pollutants (�g/m�): pm25=33.47 pm10=43.58 no2=3.13 o3=66.87
+=== CPCB Sub-indices: {no2=3.9124999999999996, pm25=56.66766666666666, o3=67.5326, so2=2.6750000000000003, pm10=43.58, co=9.436}
+=== Final CPCB AQI: 68
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Kochi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kochi -> 9.931308,76.2674136
+=== Weather: temp=27.11 humidity=80.0 wind=9.9
+=== Pollution response: {"coord":{"lon":76.2674,"lat":9.9313},"list":[{"main":{"aqi":3},"components":{"co":144.98,"no":0,"no2":0.38,"o3":68.82,"so2":0.6,"pm2_5":25.85,"pm10":35.67,"nh3":0},"dt":1772822516}]}
+=== Pollutants (�g/m�): pm25=25.85 pm10=35.67 no2=0.38 o3=68.82
+=== CPCB Sub-indices: {no2=0.475, pm25=43.083333333333336, o3=69.44359999999999, so2=0.75, pm10=35.67, co=7.249}
+=== Final CPCB AQI: 69
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=delhi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+2026-03-07T00:12:56.677+05:30  WARN 22988 --- [aqi-backend] [l-1 housekeeper] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@4cd67eff (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+=== Geocoded: Delhi -> 28.6517178,77.2219388
+=== Weather: temp=25.76 humidity=21.0 wind=3.3120000000000003
+=== Pollution response: {"coord":{"lon":77.2219,"lat":28.6517},"list":[{"main":{"aqi":4},"components":{"co":652.07,"no":0.05,"no2":26.92,"o3":23.61,"so2":3.25,"pm2_5":70.44,"pm10":129.88,"nh3":36.8},"dt":1772822577}]}
+=== Pollutants (�g/m�): pm25=70.44 pm10=129.88 no2=26.92 o3=23.61
+=== CPCB Sub-indices: {no2=33.650000000000006, pm25=135.452, o3=23.61, so2=4.0625, pm10=120.7208, co=32.603500000000004}
+=== Final CPCB AQI: 135
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=delhi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Delhi -> 28.6517178,77.2219388
+=== Weather: temp=25.76 humidity=21.0 wind=3.3120000000000003
+=== Pollution response: {"coord":{"lon":77.2219,"lat":28.6517},"list":[{"main":{"aqi":4},"components":{"co":652.07,"no":0.05,"no2":26.92,"o3":23.61,"so2":3.25,"pm2_5":70.44,"pm10":129.88,"nh3":36.8},"dt":1772822577}]}
+=== Pollutants (�g/m�): pm25=70.44 pm10=129.88 no2=26.92 o3=23.61
+=== CPCB Sub-indices: {no2=33.650000000000006, pm25=135.452, o3=23.61, so2=4.0625, pm10=120.7208, co=32.603500000000004}
+=== Final CPCB AQI: 135
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=kolk,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kolk -> 46.1011184,14.9295254
+=== Weather: temp=5.54 humidity=78.0 wind=3.42
+=== Pollution response: {"coord":{"lon":14.9295,"lat":46.1011},"list":[{"main":{"aqi":3},"components":{"co":267.63,"no":0,"no2":11.32,"o3":82.41,"so2":1.6,"pm2_5":25.16,"pm10":29.84,"nh3":1.5},"dt":1772822638}]}
+=== Pollutants (�g/m�): pm25=25.16 pm10=29.84 no2=11.32 o3=82.41
+=== CPCB Sub-indices: {no2=14.15, pm25=41.93333333333334, o3=82.7618, so2=2.0, pm10=29.84, co=13.381499999999999}
+=== Final CPCB AQI: 83
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=kolk,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kolk -> 46.1011184,14.9295254
+=== Weather: temp=5.54 humidity=78.0 wind=3.42
+=== Pollution response: {"coord":{"lon":14.9295,"lat":46.1011},"list":[{"main":{"aqi":3},"components":{"co":267.63,"no":0,"no2":11.32,"o3":82.41,"so2":1.6,"pm2_5":25.16,"pm10":29.84,"nh3":1.5},"dt":1772822638}]}
+=== Pollutants (�g/m�): pm25=25.16 pm10=29.84 no2=11.32 o3=82.41
+=== CPCB Sub-indices: {no2=14.15, pm25=41.93333333333334, o3=82.7618, so2=2.0, pm10=29.84, co=13.381499999999999}
+=== Final CPCB AQI: 83
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Jagannathpur,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Jagannathpur -> 22.2211655,85.639168
+=== Weather: temp=21.13 humidity=85.0 wind=18.108
+=== Pollution response: {"coord":{"lon":85.6392,"lat":22.2212},"list":[{"main":{"aqi":5},"components":{"co":295.93,"no":0,"no2":7.61,"o3":92.17,"so2":15.34,"pm2_5":79.5,"pm10":108.38,"nh3":1.18},"dt":1772822680}]}
+=== Pollutants (�g/m�): pm25=79.5 pm10=108.38 no2=7.61 o3=92.17
+=== CPCB Sub-indices: {no2=9.512500000000001, pm25=165.35, o3=92.3266, so2=19.175, pm10=106.5308, co=14.796500000000002}
+=== Final CPCB AQI: 165
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Jagannathpur,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Jagannathpur -> 22.2211655,85.639168
+=== Weather: temp=21.13 humidity=85.0 wind=18.108
+=== Pollution response: {"coord":{"lon":85.6392,"lat":22.2212},"list":[{"main":{"aqi":5},"components":{"co":295.93,"no":0,"no2":7.61,"o3":92.17,"so2":15.34,"pm2_5":79.5,"pm10":108.38,"nh3":1.18},"dt":1772822680}]}
+=== Pollutants (�g/m�): pm25=79.5 pm10=108.38 no2=7.61 o3=92.17
+=== CPCB Sub-indices: {no2=9.512500000000001, pm25=165.35, o3=92.3266, so2=19.175, pm10=106.5308, co=14.796500000000002}
+=== Final CPCB AQI: 165
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Asansol,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Asansol -> 23.6871297,86.9746587
+=== Weather: temp=21.72 humidity=68.0 wind=11.34
+=== Pollution response: {"coord":{"lon":86.9747,"lat":23.6871},"list":[{"main":{"aqi":5},"components":{"co":424.72,"no":0,"no2":10.49,"o3":84.4,"so2":12.98,"pm2_5":93.45,"pm10":118.43,"nh3":5.11},"dt":1772822692}]}
+=== Pollutants (�g/m�): pm25=93.45 pm10=118.43 no2=10.49 o3=84.4
+=== CPCB Sub-indices: {no2=13.1125, pm25=212.38500000000002, o3=84.712, so2=16.225, pm10=113.16380000000001, co=21.236}
+=== Final CPCB AQI: 212
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Asansol,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Asansol -> 23.6871297,86.9746587
+=== Weather: temp=21.72 humidity=68.0 wind=11.34
+=== Pollution response: {"coord":{"lon":86.9747,"lat":23.6871},"list":[{"main":{"aqi":5},"components":{"co":424.72,"no":0,"no2":10.49,"o3":84.4,"so2":12.98,"pm2_5":93.45,"pm10":118.43,"nh3":5.11},"dt":1772822692}]}
+=== Pollutants (�g/m�): pm25=93.45 pm10=118.43 no2=10.49 o3=84.4
+=== CPCB Sub-indices: {no2=13.1125, pm25=212.38500000000002, o3=84.712, so2=16.225, pm10=113.16380000000001, co=21.236}
+=== Final CPCB AQI: 212
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Asansol,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Asansol -> 23.6871297,86.9746587
+=== Weather: temp=21.72 humidity=68.0 wind=11.34
+=== Pollution response: {"coord":{"lon":86.9747,"lat":23.6871},"list":[{"main":{"aqi":5},"components":{"co":424.72,"no":0,"no2":10.49,"o3":84.4,"so2":12.98,"pm2_5":93.45,"pm10":118.43,"nh3":5.11},"dt":1772822692}]}
+=== Pollutants (�g/m�): pm25=93.45 pm10=118.43 no2=10.49 o3=84.4
+=== CPCB Sub-indices: {no2=13.1125, pm25=212.38500000000002, o3=84.712, so2=16.225, pm10=113.16380000000001, co=21.236}
+=== Final CPCB AQI: 212
+=== Geocode URL: https://api.openweathermap.org/geo/1.0/direct?q=Kochi,IN&limit=1&appid=3d543d0636a4950860b22999f5301793
+=== Geocoded: Kochi -> 9.931308,76.2674136
+=== Weather: temp=27.11 humidity=80.0 wind=9.9
+=== Pollution response: {"coord":{"lon":76.2674,"lat":9.9313},"list":[{"main":{"aqi":3},"components":{"co":144.98,"no":0,"no2":0.38,"o3":68.82,"so2":0.6,"pm2_5":25.85,"pm10":35.67,"nh3":0},"dt":1772822516}]}
+=== Pollutants (�g/m�): pm25=25.85 pm10=35.67 no2=0.38 o3=68.82
+=== CPCB Sub-indices: {no2=0.475, pm25=43.083333333333336, o3=69.44359999999999, so2=0.75, pm10=35.67, co=7.249}
+=== Final CPCB AQI: 69
