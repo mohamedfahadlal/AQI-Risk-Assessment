@@ -70,7 +70,7 @@ public class DashboardController {
      */
     @FXML
     private void handleOpenPrediction() {
-        SceneManager.switchScene("/views/Prediction.fxml", "Health Prediction");
+        SceneManager.switchScene("/com/example/test2/main_view.fxml", "AQI Prediction");
     }
 
     /**
