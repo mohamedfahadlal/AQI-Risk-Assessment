@@ -31,9 +31,7 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
-### VS Code ###
-.vscode/
-
+login_san\src\main\java\com\aqi\utils\DatabaseConnection.java"
+login_san\src\main\java\com\aqi\utils\EmailUtil.java"
 ### Mac OS ###
 .DS_Store

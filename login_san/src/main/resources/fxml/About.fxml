@@ -9,7 +9,7 @@
 
     <top>
         <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-nav">
-            <Label text="AQI" styleClass="logo-text"/>
+            <Label text="AiQI" styleClass="logo-text"/>
             <Region HBox.hgrow="ALWAYS" />
 
             <Button text="About Us" styleClass="nav-link" style="-fx-text-fill: #0ea5e9;"/>
@@ -110,7 +110,7 @@
                 <VBox alignment="CENTER_LEFT" maxWidth="950" style="-fx-padding: 20 0 20 0;">
                     <Separator style="-fx-padding: 0 0 15 0;"/>
                     <HBox alignment="CENTER_LEFT">
-                        <Label text="AQI Dashboard v1.0 | 2026" style="-fx-font-size: 13px; -fx-text-fill: #9ca3af;"/>
+                        <Label text="AiQI Dashboard v1.0 | 2026" style="-fx-font-size: 13px; -fx-text-fill: #9ca3af;"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Label text="☁" style="-fx-font-size: 20px; -fx-text-fill: #0ea5e9;"/>
                     </HBox>
