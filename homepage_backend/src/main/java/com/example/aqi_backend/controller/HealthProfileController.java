@@ -33,7 +33,6 @@ public class HealthProfileController {
             );
 
             if (rows.isEmpty()) {
-                // No profile yet — frontend will show a blank form
                 return ResponseEntity.noContent().build();
             }
 
@@ -44,6 +43,12 @@ public class HealthProfileController {
                 LocalDate dob = ((java.sql.Date) row.get("dob")).toLocalDate();
                 int age = Period.between(dob, LocalDate.now()).getYears();
                 row.put("age", age);
+            }
+
+            // Convert PostgreSQL array to Java List for proper JSON serialization
+            if (row.get("breathing_conditions") != null) {
+                java.sql.Array arr = (java.sql.Array) row.get("breathing_conditions");
+                row.put("breathing_conditions", java.util.Arrays.asList((Object[]) arr.getArray()));
             }
 
             return ResponseEntity.ok(row);
@@ -57,32 +62,44 @@ public class HealthProfileController {
     /**
      * POST /api/health-profile
      * Saves or updates a health profile (UPSERT).
-     * If the user already has a profile it updates it,
-     * if not it creates a new one.
      *
      * Expected JSON body:
      * {
-     *   "userId":          "uuid-string",
-     *   "dob":             "YYYY-MM-DD",
-     *   "gender":          "Male" | "Female" | "Other",
-     *   "location":        "city name",
-     *   "asthmaBreathing": "None" | "Mild" | "Moderate" | "Severe",
-     *   "isSmoker":        true | false,
-     *   "isAllergic":      true | false,
-     *   "isPregnant":      true | false
+     *   "userId":               "uuid-string",
+     *   "dob":                  "YYYY-MM-DD",
+     *   "gender":               "Male" | "Female" | "Other",
+     *   "location":             "city name",
+     *   "asthmaBreathing":      "None" | "Mild" | "Moderate" | "Severe",
+     *   "breathingConditions":  ["Asthma", "COPD", ...],  -- empty array if None
+     *   "isSmoker":             true | false,
+     *   "isAllergic":           true | false,
+     *   "isPregnant":           true | false
      * }
      */
     @PostMapping
     public ResponseEntity<?> saveProfile(@RequestBody Map<String, Object> body) {
         try {
-            String  userId   = (String)  body.get("userId");
-            String  dob      = (String)  body.get("dob");
-            String  gender   = (String)  body.get("gender");
-            String  location = (String)  body.get("location");
-            String  asthma   = (String)  body.get("asthmaBreathing");
-            boolean smoker   = Boolean.parseBoolean(body.getOrDefault("isSmoker",   false).toString());
-            boolean allergic = Boolean.parseBoolean(body.getOrDefault("isAllergic", false).toString());
-            boolean pregnant = Boolean.parseBoolean(body.getOrDefault("isPregnant", false).toString());
+            String  userId     = (String)  body.get("userId");
+            String  dob        = (String)  body.get("dob");
+            String  gender     = (String)  body.get("gender");
+            String  location   = (String)  body.get("location");
+            String  asthma     = (String)  body.get("asthmaBreathing");
+            boolean smoker     = Boolean.parseBoolean(body.getOrDefault("isSmoker",   false).toString());
+            boolean allergic   = Boolean.parseBoolean(body.getOrDefault("isAllergic", false).toString());
+            boolean pregnant   = Boolean.parseBoolean(body.getOrDefault("isPregnant", false).toString());
+
+            // Convert breathingConditions list to a PostgreSQL text array string
+            // e.g. ["Asthma", "COPD"] → {"Asthma","COPD"}
+            String conditionsArray = "{}"; // default empty array
+            if (body.get("breathingConditions") instanceof List<?> condList && !condList.isEmpty()) {
+                StringBuilder sb = new StringBuilder("{");
+                for (int i = 0; i < condList.size(); i++) {
+                    sb.append("\"").append(condList.get(i)).append("\"");
+                    if (i < condList.size() - 1) sb.append(",");
+                }
+                sb.append("}");
+                conditionsArray = sb.toString();
+            }
 
             // Validate required fields
             if (userId == null || dob == null || gender == null || location == null) {
@@ -90,26 +107,27 @@ public class HealthProfileController {
                         .body(Map.of("error", "userId, dob, gender and location are required"));
             }
 
-            // UPSERT — insert new profile or update existing one
+            // UPSERT — insert new or update existing profile
             db.update("""
                 INSERT INTO health_profiles
                     (user_id, dob, gender, location, asthma_breathing,
-                     is_smoker, is_allergic, is_pregnant, updated_at)
+                     breathing_conditions, is_smoker, is_allergic, is_pregnant, updated_at)
                 VALUES (?::uuid, ?::date, ?::gender_type, ?, ?::asthma_level,
-                        ?, ?, ?, NOW())
+                        ?::text[], ?, ?, ?, NOW())
                 ON CONFLICT (user_id)
                 DO UPDATE SET
-                    dob              = EXCLUDED.dob,
-                    gender           = EXCLUDED.gender,
-                    location         = EXCLUDED.location,
-                    asthma_breathing = EXCLUDED.asthma_breathing,
-                    is_smoker        = EXCLUDED.is_smoker,
-                    is_allergic      = EXCLUDED.is_allergic,
-                    is_pregnant      = EXCLUDED.is_pregnant,
-                    updated_at       = NOW()
+                    dob                  = EXCLUDED.dob,
+                    gender               = EXCLUDED.gender,
+                    location             = EXCLUDED.location,
+                    asthma_breathing     = EXCLUDED.asthma_breathing,
+                    breathing_conditions = EXCLUDED.breathing_conditions,
+                    is_smoker            = EXCLUDED.is_smoker,
+                    is_allergic          = EXCLUDED.is_allergic,
+                    is_pregnant          = EXCLUDED.is_pregnant,
+                    updated_at           = NOW()
                 """,
                     userId, dob, gender, location, asthma,
-                    smoker, allergic, pregnant
+                    conditionsArray, smoker, allergic, pregnant
             );
 
             return ResponseEntity.ok(Map.of("message", "Profile saved successfully"));
