@@ -7,7 +7,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -30,7 +29,6 @@ public class LoginController {
             return;
         }
 
-        // Search only by email to retrieve the hashed password
         String query = "SELECT user_id, username, password_hash FROM users WHERE email = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -41,21 +39,18 @@ public class LoginController {
 
             if (rs.next()) {
                 String savedHash = rs.getString("password_hash");
-                String userId = rs.getString("user_id");
-                String username = rs.getString("username");
+                String userId    = rs.getString("user_id");
+                String username  = rs.getString("username");
 
-                // Verify the typed password against the BCrypt hash
-                if (BCrypt.checkpw(password, savedHash)) {
+                // SHA-256 to match SignUpController
+                if (hashPassword(password).equals(savedHash)) {
                     UserSession.setUserId(userId);
                     UserSession.setUsername(username);
-
                     System.out.println("User " + username + " logged in successfully.");
 
-                    // Check if health profile exists to decide where to send the user
                     if (!hasHealthProfile(userId)) {
                         SceneManager.switchScene("/views/HealthProfile.fxml", "Health Profile");
                     } else {
-                        // Ensure this path matches your actual dashboard FXML location
                         SceneManager.switchScene("/com/example/aqidashboard/dashboard-view.fxml", "Dashboard");
                     }
                 } else {
@@ -82,13 +77,22 @@ public class LoginController {
         }
     }
 
-    @FXML
-    private void goToSignUp() {
-        SceneManager.switchScene("/fxml/SignUp.fxml", "Sign Up");
+    private String hashPassword(String password) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to hash password", e);
+        }
     }
 
-    @FXML
-    private void goToAbout()  {
-        SceneManager.switchScene("/fxml/About.fxml", "About Us");
-    }
+    @FXML private void goToSignUp() { SceneManager.switchScene("/fxml/SignUp.fxml", "Sign Up"); }
+    @FXML private void goToAbout()  { SceneManager.switchScene("/fxml/About.fxml", "About Us"); }
 }
