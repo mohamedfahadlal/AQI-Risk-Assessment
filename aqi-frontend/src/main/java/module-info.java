@@ -14,6 +14,7 @@ module com.aqi.frontend {
     requires java.mail;
     requires java.sql;
     requires java.net.http;
+    requires org.postgresql.jdbc;
 
     opens com.aqi.app         to javafx.fxml;
     opens com.aqi.controllers to javafx.fxml;
