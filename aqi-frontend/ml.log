@@ -1,33 +1,8 @@
-[OK] Loaded model: xgboost from C:\Users\Fahad\Desktop\my works\Java AP project\AQI-Risk-Assessment\ml\models\xgboost_model.pkl
-[OK] Loaded model: randomforest from C:\Users\Fahad\Desktop\my works\Java AP project\AQI-Risk-Assessment\ml\models\randomforest_model.pkl
-[OK] Loaded model: lightgbm from C:\Users\Fahad\Desktop\my works\Java AP project\AQI-Risk-Assessment\ml\models\lightgbm_model.pkl
- * Serving Flask app 'server'
- * Debug mode: off
-WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:5000
- * Running on http://192.168.20.8:5000
-Press CTRL+C to quit
 Traceback (most recent call last):
-  File "C:\Users\Fahad\Desktop\my works\Java AP project\AQI-Risk-Assessment\ml\server.py", line 102, in predict
-    predicted = model.predict(features_df)[0]
-                ~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "C:\Users\Fahad\AppData\Local\Programs\Python\Python313\Lib\site-packages\xgboost\core.py", line 774, in inner_f
-    return func(**kwargs)
-  File "C:\Users\Fahad\AppData\Local\Programs\Python\Python313\Lib\site-packages\xgboost\sklearn.py", line 1448, in predict
-    predts = self.get_booster().inplace_predict(
-        data=X,
-    ...<4 lines>...
-        validate_features=validate_features,
-    )
-  File "C:\Users\Fahad\AppData\Local\Programs\Python\Python313\Lib\site-packages\xgboost\core.py", line 774, in inner_f
-    return func(**kwargs)
-  File "C:\Users\Fahad\AppData\Local\Programs\Python\Python313\Lib\site-packages\xgboost\core.py", line 2854, in inplace_predict
-    self._validate_features(fns)
-    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^
-  File "C:\Users\Fahad\AppData\Local\Programs\Python\Python313\Lib\site-packages\xgboost\core.py", line 3431, in _validate_features
-    raise ValueError(msg.format(self.feature_names, feature_names))
-ValueError: feature_names mismatch: ['lat', 'lon', 'co', 'no', 'no2', 'o3', 'pm10', 'pm25', 'relativehumidity', 'so2', 'temperature', 'si_pm25', 'si_pm10', 'AQI', 'hour', 'day_of_week', 'month', 'aqi_lag_1', 'aqi_lag_2'] ['co', 'no', 'no2', 'nox', 'o3', 'pm10', 'pm25', 'so2', 'temperature', 'relativehumidity', 'wind_speed', 'wind_direction', 'hour', 'day_of_week', 'month', 'aqi_lag_1', 'aqi_lag_2']
-expected AQI, lat, si_pm25, lon, si_pm10 in input data
-training data did not have the following fields: nox, wind_direction, wind_speed
-127.0.0.1 - - [07/Mar/2026 10:00:18] "POST /predict HTTP/1.1" 500 -
+  File "C:\Users\sanji\IdeaProjects\Aqi\AQI-Risk-Assessment\ml\server.py", line 11, in <module>
+    model = joblib.load(MODEL_PATH)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sanji\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\joblib\numpy_pickle.py", line 735, in load
+    with open(filename, "rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\sanji\\IdeaProjects\\Aqi\\AQI-Risk-Assessment\\ml\\models\\xgboost_model.pkl'

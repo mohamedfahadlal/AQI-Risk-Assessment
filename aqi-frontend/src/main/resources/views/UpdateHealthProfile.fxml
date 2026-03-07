@@ -15,7 +15,6 @@
         <Label text="Update Health Profile"
                styleClass="title"/>
 
-        <!-- Last updated timestamp -->
         <Label fx:id="lastUpdatedLabel"
                text=""
                styleClass="updated-label"/>
@@ -28,20 +27,23 @@
                 <ColumnConstraints prefWidth="100" />
             </columnConstraints>
 
-            <!-- Row 0: Date of Birth -->
             <Label text="Date of Birth:"
                    styleClass="form-label"
                    GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <DatePicker fx:id="dobPicker"
-                        prefWidth="220"
-                        promptText="DD/MM/YYYY"
-                        GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <HBox spacing="5" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                <TextField fx:id="dobField"
+                           editable="false"
+                           prefWidth="180"
+                           promptText="DD/MM/YYYY"/>
+                <Button fx:id="dobButton" text="📅"/>
+            </HBox>
+
             <Label fx:id="ageDisplayLabel"
                    text=""
                    styleClass="age-label"
                    GridPane.rowIndex="0" GridPane.columnIndex="2"/>
 
-            <!-- Row 1: Gender -->
             <Label text="Gender:"
                    styleClass="form-label"
                    GridPane.rowIndex="1" GridPane.columnIndex="0"/>
@@ -49,7 +51,6 @@
                       prefWidth="220"
                       GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-            <!-- Row 2: Location -->
             <Label text="Location:"
                    styleClass="form-label"
                    GridPane.rowIndex="2" GridPane.columnIndex="0"/>
@@ -58,7 +59,6 @@
                        prefWidth="220"
                        GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-            <!-- Row 3: Breathing Condition severity -->
             <Label text="Breathing Condition:"
                    styleClass="form-label"
                    GridPane.rowIndex="3" GridPane.columnIndex="0"/>
@@ -66,7 +66,6 @@
                       prefWidth="220"
                       GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-            <!-- Row 4: Specific conditions - shown when severity != None -->
             <Label fx:id="conditionLabel"
                    text="Condition Type:"
                    styleClass="form-label"
@@ -92,7 +91,6 @@
                           styleClass="custom-check"/>
             </VBox>
 
-            <!-- Row 5: Smoker -->
             <Label text="Smoker:"
                    styleClass="form-label"
                    GridPane.rowIndex="5" GridPane.columnIndex="0"/>
@@ -101,7 +99,6 @@
                       styleClass="custom-check"
                       GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
-            <!-- Row 6: Allergies -->
             <Label text="Allergies:"
                    styleClass="form-label"
                    GridPane.rowIndex="6" GridPane.columnIndex="0"/>
@@ -110,7 +107,6 @@
                       styleClass="custom-check"
                       GridPane.rowIndex="6" GridPane.columnIndex="1"/>
 
-            <!-- Row 7: Pregnant - only for Female -->
             <Label fx:id="pregnantLabel"
                    text="Pregnant:"
                    styleClass="form-label"
@@ -126,7 +122,6 @@
 
         </GridPane>
 
-        <!-- Buttons -->
         <HBox spacing="20" alignment="CENTER">
             <Button text="Update Profile"
                     fx:id="updateButton"
@@ -136,7 +131,6 @@
                     styleClass="secondary-btn"/>
         </HBox>
 
-        <!-- Success notification -->
         <HBox alignment="CENTER"
               fx:id="successBox"
               styleClass="success-box"

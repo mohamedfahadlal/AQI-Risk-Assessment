@@ -1,17 +1,19 @@
-
-// fill Database password and use !
-
-
 spring.application.name=aqi-backend
 server.port=8080
 
+# TODO: Please rotate this API key!
 owm.api.key=3d543d0636a4950860b22999f5301793
 
-spring.datasource.url=jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres
+# CHANGED: Port 6543 and added ?prepareThreshold=0 for Transaction Mode
+spring.datasource.url=jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
 spring.datasource.username=postgres.ileoodctldnhridhabuj
-spring.datasource.password=ENTER_PASSWORD_HERE
+
+# TODO: Please change your DB password in Supabase!
+# (If your actual password contains an '!', it is perfectly safe to put it right here)
+spring.datasource.password=P9n43OJAoK9N8ujU
 spring.datasource.driver-class-name=org.postgresql.Driver
 
+# Your Hikari settings look great!
 spring.datasource.hikari.maximum-pool-size=3
 spring.datasource.hikari.minimum-idle=1
 spring.datasource.hikari.connection-timeout=20000
