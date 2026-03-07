@@ -4,9 +4,7 @@ import com.aqi.utils.DatabaseConnection;
 import com.aqi.utils.SceneManager;
 import com.aqi.utils.EmailUtil;
 import com.aqi.utils.UserSession;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -47,6 +45,9 @@ public class SignUpController {
     @FXML private TextField otpInput;
     @FXML private Button mainActionBtn;
     @FXML private Button backToDashboardBtn;
+    @FXML private Button aboutNavBtnSu;
+    @FXML private Button loginNavBtn;
+    @FXML private VBox   signUpCard;
     @FXML private TextField confirmPasswordVisibleField;
     @FXML private Button toggleConfirmBtn;
     private boolean confirmVisible = false;
@@ -75,8 +76,51 @@ public class SignUpController {
         });
         confirmPasswordField.textProperty().addListener((observable, oldValue, newValue) -> checkPasswordsMatch());
         confirmPasswordVisibleField.textProperty().addListener((obs, o, n) -> {
-            confirmPasswordField.setText(n); // keep in sync for validation
+            confirmPasswordField.setText(n);
             checkPasswordsMatch();
+        });
+
+        Platform.runLater(() -> {
+            // Card pop-in — especially noticeable in guest redirect flow
+            if (signUpCard != null) {
+                signUpCard.setOpacity(0);
+                signUpCard.setScaleX(0.88);
+                signUpCard.setScaleY(0.88);
+                signUpCard.setTranslateY(20);
+                FadeTransition f = new FadeTransition(Duration.millis(400), signUpCard);
+                f.setFromValue(0); f.setToValue(1);
+                ScaleTransition s = new ScaleTransition(Duration.millis(400), signUpCard);
+                s.setFromX(0.88); s.setToX(1.0);
+                s.setFromY(0.88); s.setToY(1.0);
+                s.setInterpolator(Interpolator.EASE_OUT);
+                TranslateTransition t = new TranslateTransition(Duration.millis(400), signUpCard);
+                t.setFromY(20); t.setToY(0);
+                t.setInterpolator(Interpolator.EASE_OUT);
+                new ParallelTransition(f, s, t).play();
+            }
+            // Hovers
+            addHover(mainActionBtn,      "rgba(14,165,233,0.38)");
+            addHover(backToDashboardBtn, "rgba(26,115,232,0.30)");
+            addHover(aboutNavBtnSu,      "rgba(100,100,100,0.18)");
+            addHover(loginNavBtn,        "rgba(100,100,100,0.18)");
+        });
+    }
+
+    private void addHover(Button btn, String glowColor) {
+        if (btn == null) return;
+        String base = btn.getStyle() != null ? btn.getStyle() : "";
+        btn.setOnMouseEntered(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(130), btn);
+            st.setToX(1.06); st.setToY(1.06);
+            st.setInterpolator(Interpolator.EASE_OUT); st.play();
+            btn.setStyle(base + "-fx-effect: dropshadow(gaussian," + glowColor + ",16,0.45,0,2);");
+            btn.setCursor(javafx.scene.Cursor.HAND);
+        });
+        btn.setOnMouseExited(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(130), btn);
+            st.setToX(1.0); st.setToY(1.0);
+            st.setInterpolator(Interpolator.EASE_OUT); st.play();
+            btn.setStyle(base);
         });
         passwordField.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> {
             if (isNowFocused && buttonState == 0) {

@@ -3,11 +3,12 @@ package com.aqi.controllers;
 import com.aqi.utils.DatabaseConnection;
 import com.aqi.utils.SceneManager;
 import com.aqi.utils.UserSession;
+import javafx.animation.*;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 
 import java.sql.Connection;
@@ -20,7 +21,13 @@ public class LoginController {
     @FXML private TextField     emailField;
     @FXML private PasswordField passwordField;
     @FXML private Label         statusLabel;
-    @FXML private CheckBox rememberMeBox;
+    @FXML private CheckBox      rememberMeBox;
+    @FXML private Button        loginBtn;
+    @FXML private Button        guestBtn;
+    @FXML private Hyperlink     forgotBtn;
+    @FXML private Button        aboutNavBtn;
+    @FXML private Button        signUpNavBtn;
+    @FXML private VBox          loginCard;
 
     private static final java.util.prefs.Preferences PREFS =
             java.util.prefs.Preferences.userNodeForPackage(LoginController.class);
@@ -32,6 +39,49 @@ public class LoginController {
             emailField.setText(saved);
             if (rememberMeBox != null) rememberMeBox.setSelected(true);
         }
+        Platform.runLater(() -> {
+            // Card pop-in
+            if (loginCard != null) {
+                loginCard.setOpacity(0);
+                loginCard.setScaleX(0.88);
+                loginCard.setScaleY(0.88);
+                loginCard.setTranslateY(24);
+                FadeTransition f = new FadeTransition(Duration.millis(380), loginCard);
+                f.setFromValue(0); f.setToValue(1);
+                ScaleTransition s = new ScaleTransition(Duration.millis(380), loginCard);
+                s.setFromX(0.88); s.setToX(1.0);
+                s.setFromY(0.88); s.setToY(1.0);
+                s.setInterpolator(Interpolator.EASE_OUT);
+                TranslateTransition t = new TranslateTransition(Duration.millis(380), loginCard);
+                t.setFromY(24); t.setToY(0);
+                t.setInterpolator(Interpolator.EASE_OUT);
+                new ParallelTransition(f, s, t).play();
+            }
+            // Button hovers
+            addHover(loginBtn,    "#1a73e8", "rgba(26,115,232,0.38)");
+            addHover(guestBtn,    "#555",    "rgba(100,100,100,0.22)");
+            addHover(forgotBtn,   "#1a73e8", "rgba(26,115,232,0.22)");
+            addHover(aboutNavBtn, "#555",    "rgba(100,100,100,0.18)");
+            addHover(signUpNavBtn,"#555",    "rgba(100,100,100,0.18)");
+        });
+    }
+
+    private void addHover(javafx.scene.control.Labeled btn, String textColor, String glowColor) {
+        if (btn == null) return;
+        String base = btn.getStyle() != null ? btn.getStyle() : "";
+        btn.setOnMouseEntered(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(130), btn);
+            st.setToX(1.06); st.setToY(1.06);
+            st.setInterpolator(Interpolator.EASE_OUT); st.play();
+            btn.setStyle(base + "-fx-effect: dropshadow(gaussian," + glowColor + ",16,0.45,0,2);");
+            btn.setCursor(javafx.scene.Cursor.HAND);
+        });
+        btn.setOnMouseExited(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(130), btn);
+            st.setToX(1.0); st.setToY(1.0);
+            st.setInterpolator(Interpolator.EASE_OUT); st.play();
+            btn.setStyle(base);
+        });
     }
 
     @FXML
@@ -44,47 +94,81 @@ public class LoginController {
             return;
         }
 
-        // Search only by email to retrieve the hashed password
-        String query = "SELECT user_id, username, password_hash FROM users WHERE email = ?";
+        // Disable button + show loading state while DB call runs on background thread
+        if (loginBtn != null) { loginBtn.setDisable(true); loginBtn.setText("Logging in..."); }
+        statusLabel.setText("");
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
+        Thread t = new Thread(() -> {
+            String query = "SELECT user_id, username, password_hash FROM users WHERE email = ?";
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            pstmt.setString(1, email);
-            ResultSet rs = pstmt.executeQuery();
+                pstmt.setString(1, email);
+                ResultSet rs = pstmt.executeQuery();
 
-            if (rs.next()) {
-                String savedHash = rs.getString("password_hash");
-                String userId = rs.getString("user_id");
-                String username = rs.getString("username");
+                if (rs.next()) {
+                    String savedHash = rs.getString("password_hash");
+                    String userId    = rs.getString("user_id");
+                    String username  = rs.getString("username");
 
-                // Verify password using SHA-256
-                if (sha256(password).equals(savedHash)) {
-                    UserSession.setUserId(userId);
-                    UserSession.setUsername(username);
+                    if (sha256(password).equals(savedHash)) {
+                        UserSession.setUserId(userId);
+                        UserSession.setUsername(username);
 
-                    System.out.println("User " + username + " logged in successfully.");
-                    if (rememberMeBox != null && rememberMeBox.isSelected())
-                        PREFS.put("remembered_email", email);
-                    else PREFS.remove("remembered_email");
+                        if (rememberMeBox != null && rememberMeBox.isSelected())
+                            PREFS.put("remembered_email", email);
+                        else PREFS.remove("remembered_email");
 
-                    // Check if health profile exists to decide where to send the user
-                    if (!hasHealthProfile(userId)) {
-                        SceneManager.switchScene("/views/HealthProfile.fxml", "Health Profile");
+                        boolean needsProfile = !hasHealthProfile(userId);
+                        Platform.runLater(() -> {
+                            if (needsProfile) {
+                                SceneManager.switchScene("/views/HealthProfile.fxml", "Health Profile");
+                            } else {
+                                playExitThenSwitch("/com/example/aqidashboard/dashboard-view.fxml", "Dashboard");
+                            }
+                        });
                     } else {
-                        // Ensure this path matches your actual dashboard FXML location
-                        SceneManager.switchScene("/com/example/aqidashboard/dashboard-view.fxml", "Dashboard");
+                        Platform.runLater(() -> {
+                            statusLabel.setText("Invalid email or password.");
+                            resetLoginBtn();
+                        });
                     }
                 } else {
-                    statusLabel.setText("Invalid email or password.");
+                    Platform.runLater(() -> {
+                        statusLabel.setText("Invalid email or password.");
+                        resetLoginBtn();
+                    });
                 }
-            } else {
-                statusLabel.setText("Invalid email or password.");
-            }
 
-        } catch (SQLException e) {
-            statusLabel.setText("Database error: " + e.getMessage());
-            e.printStackTrace();
+            } catch (SQLException e) {
+                Platform.runLater(() -> {
+                    statusLabel.setText("Database error: " + e.getMessage());
+                    resetLoginBtn();
+                });
+                e.printStackTrace();
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private void resetLoginBtn() {
+        if (loginBtn != null) { loginBtn.setDisable(false); loginBtn.setText("Login to Dashboard"); }
+    }
+
+    /** Fade + scale out the card, then switch scene. */
+    private void playExitThenSwitch(String fxml, String title) {
+        if (loginCard != null) {
+            FadeTransition exitFade = new FadeTransition(Duration.millis(240), loginCard);
+            exitFade.setFromValue(1.0); exitFade.setToValue(0.0);
+            ScaleTransition exitScale = new ScaleTransition(Duration.millis(240), loginCard);
+            exitScale.setToX(0.90); exitScale.setToY(0.90);
+            exitScale.setInterpolator(Interpolator.EASE_IN);
+            ParallelTransition exit = new ParallelTransition(exitFade, exitScale);
+            exit.setOnFinished(ev -> SceneManager.switchScene(fxml, title));
+            exit.play();
+        } else {
+            SceneManager.switchScene(fxml, title);
         }
     }
 
@@ -108,7 +192,7 @@ public class LoginController {
     @FXML
     private void handleGuestLogin() {
         UserSession.loginAsGuest();
-        SceneManager.switchScene("/com/example/aqidashboard/dashboard-view.fxml", "Dashboard — Guest");
+        playExitThenSwitch("/com/example/aqidashboard/dashboard-view.fxml", "Dashboard — Guest");
     }
 
     @FXML

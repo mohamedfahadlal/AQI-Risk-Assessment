@@ -10,8 +10,8 @@
             <Label text="AiQI" styleClass="logo-text"/>
             <Region HBox.hgrow="ALWAYS" />
 
-            <Button text="About Us" onAction="#goToAbout" styleClass="nav-link"/>
-            <Button text="Login" onAction="#goToLogin" styleClass="nav-link"/>
+            <Button fx:id="aboutNavBtnSu" text="About Us" onAction="#goToAbout" styleClass="nav-link"/>
+            <Button fx:id="loginNavBtn" text="Login" onAction="#goToLogin" styleClass="nav-link"/>
             <Button text="Sign Up" styleClass="nav-btn-login"/>
         </HBox>
     </top>
@@ -31,7 +31,7 @@
                                -fx-padding: 8 18; -fx-cursor: hand;"/>
             </HBox>
 
-            <VBox styleClass="card-light" alignment="CENTER_LEFT" spacing="15" maxWidth="400" maxHeight="650">
+            <VBox fx:id="signUpCard" styleClass="card-light" alignment="CENTER_LEFT" spacing="15" maxWidth="400" maxHeight="650">
 
                 <Label text="Create Account" styleClass="title-label-light" style="-fx-padding: 0 0 5 0;"/>
 

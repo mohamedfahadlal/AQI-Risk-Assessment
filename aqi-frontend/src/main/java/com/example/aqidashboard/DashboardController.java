@@ -114,6 +114,13 @@ public class DashboardController {
     @FXML private Button refreshCitiesBtn;
     @FXML private Button refreshPollutantsBtn;
     @FXML private Button aqiMapBtn;
+    @FXML private Button searchBtn;
+    @FXML private Button predictBtn;
+    @FXML private Button myProfileBtn;
+    @FXML private Button logoutBtn;
+    @FXML private Button setAlertBtn;
+    @FXML private Button exportPdfBtn;
+    @FXML private Button sendFeedbackBtn;
 
     // ── Tab 5: Feedback ───────────────────────────────────────────
     @FXML private TextField feedbackName;
@@ -128,6 +135,7 @@ public class DashboardController {
     private final List<Map<String, Object>> citiesData = Collections.synchronizedList(new ArrayList<>());
 
     private double selectedLat = 0, selectedLon = 0;
+    private final boolean[] tabVisited = new boolean[5]; // tracks first-open per tab
     private String currentCity = "Kochi";
     private JsonNode lastAqiData = null;
     private JsonNode lastForecastData = null;
@@ -232,18 +240,22 @@ public class DashboardController {
             });
         }
 
-        // All standalone button hovers
+        // All button hovers — wired after scene is ready
         Platform.runLater(() -> {
-            if (locateMeBtn != null)
-                addButtonHover(locateMeBtn, "rgba(26,115,232,0.35)");
-            if (refreshCitiesBtn != null)
-                addButtonHover(refreshCitiesBtn, "rgba(26,115,232,0.30)");
-            if (sortCitiesBtn != null)
-                addButtonHover(sortCitiesBtn, "rgba(26,115,232,0.30)");
-            if (refreshPollutantsBtn != null)
-                addButtonHover(refreshPollutantsBtn, "rgba(26,115,232,0.30)");
-            if (aqiMapBtn != null)
-                addButtonHover(aqiMapBtn, "rgba(30,132,73,0.35)");
+            // Navbar
+            if (searchBtn     != null) addButtonHover(searchBtn,     "rgba(26,115,232,0.35)");
+            if (locateMeBtn   != null) addButtonHover(locateMeBtn,   "rgba(26,115,232,0.30)");
+            if (predictBtn    != null) addButtonHover(predictBtn,    "rgba(124,58,237,0.35)");
+            if (aqiMapBtn     != null) addButtonHover(aqiMapBtn,     "rgba(30,132,73,0.35)");
+            if (myProfileBtn  != null) addButtonHover(myProfileBtn,  "rgba(26,115,232,0.30)");
+            if (logoutBtn     != null) addButtonHover(logoutBtn,     "rgba(220,38,38,0.28)");
+            if (setAlertBtn   != null) addButtonHover(setAlertBtn,   "rgba(245,158,11,0.35)");
+            // Tab content
+            if (exportPdfBtn        != null) addButtonHover(exportPdfBtn,        "rgba(26,115,232,0.32)");
+            if (sendFeedbackBtn     != null) addButtonHover(sendFeedbackBtn,     "rgba(26,115,232,0.35)");
+            if (refreshPollutantsBtn!= null) addButtonHover(refreshPollutantsBtn,"rgba(26,115,232,0.30)");
+            if (refreshCitiesBtn    != null) addButtonHover(refreshCitiesBtn,    "rgba(26,115,232,0.30)");
+            if (sortCitiesBtn       != null) addButtonHover(sortCitiesBtn,       "rgba(26,115,232,0.30)");
         });
 
         startAutoRefresh();
@@ -344,7 +356,9 @@ public class DashboardController {
                 slideIn.setFromX(22);
                 slideIn.setToX(0);
                 slideIn.setInterpolator(Interpolator.EASE_OUT);
-                new ParallelTransition(fadeIn, slideIn).play();
+                ParallelTransition enterAnim = new ParallelTransition(fadeIn, slideIn);
+                enterAnim.setOnFinished(ef -> onTabFullyVisible(newIndex));
+                enterAnim.play();
             });
             exitAnim.play();
         } else {
@@ -357,7 +371,20 @@ public class DashboardController {
             TranslateTransition slideIn = new TranslateTransition(Duration.millis(200), incoming);
             slideIn.setFromX(22); slideIn.setToX(0);
             slideIn.setInterpolator(Interpolator.EASE_OUT);
-            new ParallelTransition(fadeIn, slideIn).play();
+            ParallelTransition enterAnim2 = new ParallelTransition(fadeIn, slideIn);
+            enterAnim2.setOnFinished(ef -> onTabFullyVisible(newIndex));
+            enterAnim2.play();
+        }
+    }
+
+    /** Called once the tab slide-in animation completes. Triggers first-open animations. */
+    private void onTabFullyVisible(int tabIndex) {
+        if (tabVisited[tabIndex]) return;
+        tabVisited[tabIndex] = true;
+        if (tabIndex == 2 && lastAqiData != null) {
+            // Pollutants tab — rebuild cards so sceneProperty fires fresh
+            pollutantsGrid.getChildren().clear();
+            updatePollutantsTab();
         }
     }
 
@@ -1372,14 +1399,13 @@ public class DashboardController {
 
     @FXML private void handleRefreshPollutants() {
         if (lastAqiData == null) return;
-        // Spin the refresh button icon
+        // Brief pulse on the button — no spin
         if (refreshPollutantsBtn != null) {
-            RotateTransition spin = new RotateTransition(Duration.millis(600), refreshPollutantsBtn);
-            spin.setByAngle(360);
-            spin.setInterpolator(Interpolator.EASE_OUT);
-            spin.play();
+            ScaleTransition pulse = new ScaleTransition(Duration.millis(120), refreshPollutantsBtn);
+            pulse.setToX(0.90); pulse.setToY(0.90);
+            pulse.setAutoReverse(true); pulse.setCycleCount(2);
+            pulse.play();
         }
-        // Clear and re-render with fresh animations
         pollutantsGrid.getChildren().clear();
         updatePollutantsTab();
     }
