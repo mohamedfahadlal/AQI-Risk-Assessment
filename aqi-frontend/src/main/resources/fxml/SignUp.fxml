@@ -38,10 +38,22 @@
                     <Region fx:id="passStrengthLine" prefHeight="3" style="-fx-background-color: #e5e7eb; -fx-background-radius: 2;" />
                 </VBox>
 
-                <VBox spacing="2">
+                <VBox spacing="6">
                     <Label text="CONFIRM PASSWORD" styleClass="input-label"/>
-                    <PasswordField fx:id="confirmPasswordField" promptText="Confirm password" styleClass="input-field-light"/>
-                    <Region fx:id="confirmPassStrengthLine" prefHeight="3" style="-fx-background-color: #e5e7eb; -fx-background-radius: 2;" />
+
+                    <StackPane alignment="CENTER_RIGHT">
+                        <TextField fx:id="confirmPasswordVisibleField" promptText="Re-enter password" styleClass="input-field-light" visible="false" managed="false"/>
+                        <PasswordField fx:id="confirmPasswordField" promptText="Re-enter password" styleClass="input-field-light"/>
+
+                        <Button fx:id="toggleConfirmBtn" text="👁" onAction="#toggleConfirmVisibility"
+                                style="-fx-background-color: transparent; -fx-text-fill: #888; -fx-cursor: hand; -fx-font-size: 14px;">
+                            <StackPane.margin>
+                                <Insets right="5"/>
+                            </StackPane.margin>
+                        </Button>
+                    </StackPane>
+
+                    <Region fx:id="confirmPassStrengthLine" prefHeight="3" style="-fx-background-color: transparent;"/>
                 </VBox>
 
                 <StackPane alignment="CENTER_LEFT">

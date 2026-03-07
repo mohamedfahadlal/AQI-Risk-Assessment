@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.CheckBox;
+import java.util.prefs.Preferences;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,6 +20,24 @@ public class LoginController {
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
     @FXML private Label statusLabel;
+    @FXML private CheckBox rememberMeBox;
+
+    @FXML
+    public void initialize() {
+        // Access Java's built-in preferences storage for this specific class
+        Preferences prefs = Preferences.userNodeForPackage(LoginController.class);
+
+        // Fetch saved data (returns an empty string if nothing is saved)
+        String savedEmail = prefs.get("savedEmail", "");
+        String savedPassword = prefs.get("savedPassword", "");
+
+        // If we have saved data, auto-fill the fields and check the box
+        if (!savedEmail.isEmpty() && !savedPassword.isEmpty()) {
+            emailField.setText(savedEmail);
+            passwordField.setText(savedPassword);
+            rememberMeBox.setSelected(true);
+        }
+    }
 
     @FXML
     private void handleLogin() {
@@ -47,6 +67,17 @@ public class LoginController {
                     UserSession.setUserId(userId);
                     UserSession.setUsername(username);
                     System.out.println("User " + username + " logged in successfully.");
+
+                    // --- SAVE OR CLEAR REMEMBER ME CREDENTIALS ---
+                    Preferences prefs = Preferences.userNodeForPackage(LoginController.class);
+                    if (rememberMeBox.isSelected()) {
+                        prefs.put("savedEmail", email);
+                        prefs.put("savedPassword", password);
+                    } else {
+                        prefs.remove("savedEmail");
+                        prefs.remove("savedPassword");
+                    }
+                    // ---------------------------------------------
 
                     if (!hasHealthProfile(userId)) {
                         SceneManager.switchScene("/views/HealthProfile.fxml", "Health Profile");
@@ -91,6 +122,12 @@ public class LoginController {
         } catch (Exception e) {
             throw new RuntimeException("Failed to hash password", e);
         }
+    }
+
+    @FXML
+    private void handleForgotPassword() {
+        // Make sure this path exactly matches where you save your new FXML file
+        SceneManager.switchScene("/fxml/ForgotPassword.fxml", "Reset Password");
     }
 
     @FXML private void goToSignUp() { SceneManager.switchScene("/fxml/SignUp.fxml", "Sign Up"); }
