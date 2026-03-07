@@ -17,7 +17,6 @@ public class AqiController {
         this.aqiService = aqiService;
     }
 
-    // Search by city name: GET /api/aqi?city=Kochi
     @GetMapping("/aqi")
     public ResponseEntity<?> getAqi(@RequestParam String city) {
         try {
@@ -27,12 +26,50 @@ public class AqiController {
         }
     }
 
-    // Locate Me: GET /api/aqi/locate?lat=9.93&lon=76.26
     @GetMapping("/aqi/locate")
     public ResponseEntity<?> getAqiByLocation(@RequestParam double lat,
-                                               @RequestParam double lon) {
+                                              @RequestParam double lon) {
         try {
             return ResponseEntity.ok(aqiService.getAqiByCoords(lat, lon));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // REMOVED: searchCities method to resolve ambiguity with SearchController
+
+    @GetMapping("/forecast")
+    public ResponseEntity<?> getForecast(@RequestParam String city) {
+        try {
+            return ResponseEntity.ok(aqiService.getForecast(city));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/forecast/locate")
+    public ResponseEntity<?> getForecastByLocation(@RequestParam double lat,
+                                                   @RequestParam double lon) {
+        try {
+            return ResponseEntity.ok(aqiService.getForecastByCoords(lat, lon));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/pollutants")
+    public ResponseEntity<?> getPollutants(@RequestParam String city) {
+        try {
+            return ResponseEntity.ok(aqiService.getPollutants(city));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/cities/india")
+    public ResponseEntity<?> getIndiaCities() {
+        try {
+            return ResponseEntity.ok(aqiService.getIndiaCities());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

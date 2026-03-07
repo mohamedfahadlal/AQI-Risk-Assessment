@@ -17,11 +17,17 @@ module com.aqi.frontend {
     requires org.postgresql.jdbc;
     requires jbcrypt;
 
+    // Added for PDF export and Desktop (Browser) support
+    requires org.apache.pdfbox;
+    requires java.desktop;
+
     opens com.aqi.app         to javafx.fxml;
     opens com.aqi.controllers to javafx.fxml;
     opens com.aqi.utils       to javafx.fxml;
     opens com.aqi.services    to javafx.fxml;
-    opens com.example.aqidashboard to javafx.fxml;
+
+    // Updated: Open to Jackson as well for API data binding
+    opens com.example.aqidashboard to javafx.fxml, com.fasterxml.jackson.databind;
     opens com.example.test2   to javafx.fxml;
     opens images;
 
