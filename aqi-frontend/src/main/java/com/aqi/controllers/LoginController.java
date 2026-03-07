@@ -112,6 +112,7 @@ public class LoginController {
                     String username  = rs.getString("username");
 
                     if (sha256(password).equals(savedHash)) {
+                        UserSession.clearSession(); // wipe any leftover guest state
                         UserSession.setUserId(userId);
                         UserSession.setUsername(username);
 

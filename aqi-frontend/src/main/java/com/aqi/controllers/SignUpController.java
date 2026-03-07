@@ -327,6 +327,9 @@ public class SignUpController {
         SceneManager.switchScene("/com/example/aqidashboard/dashboard-view.fxml", "Dashboard");
     }
 
-    @FXML private void goToLogin() { SceneManager.switchScene("/fxml/Login.fxml", "Login"); }
+    @FXML private void goToLogin() {
+        UserSession.clearSession(); // clear guest flag before going to login
+        SceneManager.switchScene("/fxml/Login.fxml", "Login");
+    }
     @FXML private void goToAbout() { SceneManager.switchScene("/fxml/About.fxml"); }
 }

@@ -168,23 +168,22 @@ public class DashboardController {
         aqiLabel.setText("--");
 
         String username = UserSession.getUsername();
-        // Show/hide logout based on guest status
+        // Show/hide logout based on guest status — use fx:id fields directly
         if (UserSession.isGuest()) {
-            // Find and hide logout button, show sign-up prompt
-            darkModeBtn.getParent().getChildrenUnmodifiable().forEach(node -> {
-                if (node instanceof Button btn) {
-                    if ("Logout".equals(btn.getText())) {
-                        btn.setVisible(false);
-                        btn.setManaged(false);
-                    }
-                    if ("My Profile".equals(btn.getText())) {
-                        btn.setText("Sign Up Free");
-                        btn.setStyle("-fx-background-radius: 20; -fx-background-color: #1a73e8;" +
-                                "-fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 14; -fx-cursor: hand;");
-                        btn.setOnAction(e -> guardGuest());
-                    }
-                }
-            });
+            if (logoutBtn    != null) { logoutBtn.setVisible(false);   logoutBtn.setManaged(false); }
+            if (myProfileBtn != null) {
+                myProfileBtn.setText("Sign Up Free");
+                myProfileBtn.setStyle("-fx-background-radius: 20; -fx-background-color: #1a73e8;" +
+                        "-fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 14; -fx-cursor: hand;");
+                myProfileBtn.setOnAction(e -> guardGuest());
+            }
+        } else {
+            // Logged-in user — restore proper state in case session changed
+            if (logoutBtn    != null) { logoutBtn.setVisible(true);    logoutBtn.setManaged(true); }
+            if (myProfileBtn != null) {
+                myProfileBtn.setText("My Profile");
+                myProfileBtn.setOnAction(e -> handleViewProfile());
+            }
         }
         if (username != null && !username.isEmpty())
             welcomeLabel.setText("Hi, " + username);

@@ -21,6 +21,7 @@ module com.aqi.frontend {
     // Added for PDF export and Desktop (Browser) support
     requires org.apache.pdfbox;
     requires java.desktop;
+    requires jdk.jsobject;
 
     opens com.aqi.app         to javafx.fxml;
     opens com.aqi.controllers to javafx.fxml;

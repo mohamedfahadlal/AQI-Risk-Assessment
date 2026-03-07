@@ -1,0 +1,232 @@
+/* ============================================================
+   prediction.css  –  Modern UI skin for AQI Prediction Page
+   Place in: src/main/resources/styles/prediction.css
+   ============================================================ */
+
+/* ── Root / Page background ──────────────────────────────── */
+.root {
+    -fx-background-color: #F8FAFC;
+    -fx-font-family: "Segoe UI", "Inter", "Roboto", sans-serif;
+}
+
+/* ── Back link ──────────────────────────────────────────── */
+.back-link {
+    -fx-text-fill: #6366F1;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-underline: true;
+}
+
+/* ── Glass card (AQI STATION top panel) ─────────────────── */
+.glass-card {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 16;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 20, 0, 0, 4);
+}
+
+/* ── Section title inside glass card ────────────────────── */
+.section-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;
+    -fx-letter-spacing: 0.5px;
+}
+
+.section-divider {
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* ── Labels ─────────────────────────────────────────────── */
+.field-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #64748B;
+    -fx-letter-spacing: 0.8px;
+}
+
+.symptoms-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #64748B;
+    -fx-letter-spacing: 1px;
+}
+
+/* ── Input fields ────────────────────────────────────────── */
+.modern-field {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 14 10 14;
+    -fx-font-size: 14px;
+    -fx-text-fill: #1E293B;
+    -fx-prompt-text-fill: #94A3B8;
+}
+.modern-field:focused {
+    -fx-border-color: #6366F1;
+    -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.25), 8, 0, 0, 0);
+}
+
+/* ── ComboBox ────────────────────────────────────────────── */
+.modern-combo .list-cell {
+    -fx-padding: 6 12 6 12;
+    -fx-font-size: 14px;
+    -fx-text-fill: #1E293B;
+}
+.modern-combo {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 14px;
+}
+.modern-combo:focused {
+    -fx-border-color: #6366F1;
+}
+
+/* ── Predict button ──────────────────────────────────────── */
+.predict-btn {
+    -fx-background-color: #6366F1;
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 13 0 13 0;
+    -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.4), 12, 0, 0, 5);
+}
+.predict-btn:hover {
+    -fx-background-color: #4F46E5;
+    -fx-effect: dropshadow(gaussian, rgba(79,70,229,0.55), 16, 0, 0, 6);
+}
+.predict-btn:pressed {
+    -fx-background-color: #4338CA;
+    -fx-effect: dropshadow(gaussian, rgba(67,56,202,0.4), 8, 0, 0, 3);
+}
+.predict-btn:disabled {
+    -fx-background-color: #A5B4FC;
+    -fx-effect: none;
+}
+
+/* ── Symptom chip checkboxes ─────────────────────────────── */
+.symptom-chip {
+    -fx-background-color: #F1F5F9;
+    -fx-background-radius: 20;
+    -fx-text-fill: #475569;
+    -fx-font-size: 13px;
+    -fx-padding: 7 16 7 16;
+    -fx-cursor: hand;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 20;
+    -fx-border-width: 1.5;
+}
+.symptom-chip:selected {
+    -fx-background-color: #EEF2FF;
+    -fx-text-fill: #4338CA;
+    -fx-border-color: #6366F1;
+}
+.symptom-chip:hover {
+    -fx-background-color: #E2E8F0;
+}
+/* hide the default checkbox box */
+.symptom-chip .box {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-max-width: 0;
+}
+.symptom-chip .mark {
+    -fx-background-color: transparent;
+}
+
+/* ── Result card ─────────────────────────────────────────── */
+.result-card {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 20, 0, 0, 5);
+}
+
+/* ── City label ──────────────────────────────────────────── */
+.city-label {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;
+    -fx-letter-spacing: 2px;
+}
+
+/* ── Risk circle labels ──────────────────────────────────── */
+.risk-sub-label {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #94A3B8;
+    -fx-letter-spacing: 2px;
+}
+.risk-number {
+    -fx-font-size: 76px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #CBD5E1;
+}
+.risk-outof {
+    -fx-font-size: 13px;
+    -fx-text-fill: #94A3B8;
+}
+
+/* ── Risk level badge ────────────────────────────────────── */
+.risk-level {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 1.5px;
+    -fx-text-fill: #94A3B8;
+}
+
+/* ── Predicted AQI label ─────────────────────────────────── */
+.predicted-aqi {
+    -fx-font-size: 30px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1E293B;
+}
+
+/* ── Pollutant pill labels ───────────────────────────────── */
+.pollutant-pill {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748B;
+    -fx-background-color: #F1F5F9;
+    -fx-background-radius: 8;
+    -fx-padding: 5 12 5 12;
+}
+
+/* ── Model used label ────────────────────────────────────── */
+.model-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #94A3B8;
+    -fx-font-style: italic;
+}
+
+/* ── Advisory card ───────────────────────────────────────── */
+.advisory-card {
+    -fx-background-color: #0F172A;
+    -fx-background-radius: 16;
+    -fx-border-radius: 0 16 16 0;
+    -fx-border-color: #6366F1;
+    -fx-border-width: 0 0 0 4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 20, 0, 0, 5);
+}
+
+.advisory-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-letter-spacing: 2.5px;
+}
+
+.advisory-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #CBD5E1;
+    -fx-line-spacing: 5px;
+}
