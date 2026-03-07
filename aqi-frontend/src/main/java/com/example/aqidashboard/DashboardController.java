@@ -35,7 +35,8 @@ import java.util.concurrent.*;
 
 public class DashboardController {
 
-    private static final String BACKEND = "http://localhost:8080/api";
+    private static final String BACKEND    = "http://localhost:8080/api";
+    private static final String ML_SERVER  = "http://localhost:5000";
 
     // ── Navbar ────────────────────────────────────────────────────
     @FXML private TextField citySearchField;
@@ -46,8 +47,8 @@ public class DashboardController {
     @FXML private Button darkModeBtn;
 
     // ── Capsule tab switcher ──────────────────────────────────────
-    @FXML private Button tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5;
-    @FXML private VBox tabContent1, tabContent2, tabContent3, tabContent4, tabContent5;
+    @FXML private Button tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5, tabBtn6;
+    @FXML private VBox tabContent1, tabContent2, tabContent3, tabContent4, tabContent5, tabContent6;
     private Button[] tabBtns;
     private VBox[]   tabContents;
 
@@ -110,6 +111,17 @@ public class DashboardController {
     // ── Tab 4: India Cities ───────────────────────────────────────
     @FXML private GridPane citiesGrid;
     @FXML private Button sortCitiesBtn;
+
+    // ── Tab 5: ML Model Comparison ────────────────────────────────
+    @FXML private VBox    mlChartContainer;
+    @FXML private Label   mlStatusLabel;
+    @FXML private Label   mlMaeXgb;
+    @FXML private Label   mlMaeRf;
+    @FXML private Label   mlMaeLgb;
+    @FXML private Button  mlRefreshBtn;
+    @FXML private VBox    mlCardXgb;
+    @FXML private VBox    mlCardRf;
+    @FXML private VBox    mlCardLgb;
     @FXML private Button locateMeBtn;
     @FXML private Button refreshCitiesBtn;
     @FXML private Button refreshPollutantsBtn;
@@ -135,7 +147,7 @@ public class DashboardController {
     private final List<Map<String, Object>> citiesData = Collections.synchronizedList(new ArrayList<>());
 
     private double selectedLat = 0, selectedLon = 0;
-    private final boolean[] tabVisited = new boolean[5]; // tracks first-open per tab
+    private final boolean[] tabVisited = new boolean[6]; // tracks first-open per tab
     private String currentCity = "Kochi";
     private JsonNode lastAqiData = null;
     private JsonNode lastForecastData = null;
@@ -215,8 +227,8 @@ public class DashboardController {
         });
 
         // Wire capsule tab switcher
-        tabBtns     = new Button[]{tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5};
-        tabContents = new VBox[]{tabContent1, tabContent2, tabContent3, tabContent4, tabContent5};
+        tabBtns     = new Button[]{tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5, tabBtn6};
+        tabContents = new VBox[]{tabContent1, tabContent2, tabContent3, tabContent4, tabContent5, tabContent6};
 
         // Tab button hovers
         for (Button tb : tabBtns) {
@@ -255,6 +267,12 @@ public class DashboardController {
             if (refreshPollutantsBtn!= null) addButtonHover(refreshPollutantsBtn,"rgba(26,115,232,0.30)");
             if (refreshCitiesBtn    != null) addButtonHover(refreshCitiesBtn,    "rgba(26,115,232,0.30)");
             if (sortCitiesBtn       != null) addButtonHover(sortCitiesBtn,       "rgba(26,115,232,0.30)");
+            if (mlRefreshBtn        != null) addButtonHover(mlRefreshBtn,        "rgba(26,115,232,0.40)");
+
+            // ML stat card hovers — each with its own brand colour
+            addMlCardHover(mlCardXgb, "#10b981", "rgba(16,185,129,0.18)", "rgba(16,185,129,0.55)");
+            addMlCardHover(mlCardRf,  "#f59e0b", "rgba(245,158,11,0.18)", "rgba(245,158,11,0.55)");
+            addMlCardHover(mlCardLgb, "#8b5cf6", "rgba(139,92,246,0.18)", "rgba(139,92,246,0.55)");
         });
 
         startAutoRefresh();
@@ -385,6 +403,17 @@ public class DashboardController {
             pollutantsGrid.getChildren().clear();
             updatePollutantsTab();
         }
+        if (tabIndex == 4) {
+            // ML Comparison tab — load on first open
+            loadMlComparisonData();
+        }
+    }
+
+    @FXML private void handleMlRefresh() {
+        if (mlChartContainer != null) mlChartContainer.getChildren().clear();
+        if (mlStatusLabel   != null) mlStatusLabel.setText("Refreshing…");
+        tabVisited[4] = false;   // allow reload
+        loadMlComparisonData();
     }
 
     private void animateTabButton(Button btn) {
@@ -1923,6 +1952,418 @@ public class DashboardController {
             st.setInterpolator(Interpolator.EASE_OUT); st.play();
             btn.setStyle(base);
         });
+    }
+
+    /**
+     * Hover effect for ML stat cards:
+     * - lifts 6px + scales to 1.04
+     * - white background tints to the model's brand colour
+     * - border appears in brand colour
+     * - MAE number scales up slightly
+     * - drop shadow deepens with brand glow
+     */
+    private void addMlCardHover(VBox card, String brandHex,
+                                String bgTint, String borderColor) {
+        if (card == null) return;
+        String baseStyle = "-fx-background-color: white; -fx-background-radius: 12; " +
+                "-fx-padding: 16; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),10,0,0,2);";
+        String hoverStyle = "-fx-background-color: " + bgTint + "; -fx-background-radius: 12; " +
+                "-fx-padding: 16; " +
+                "-fx-border-color: " + borderColor + "; -fx-border-width: 1.8; -fx-border-radius: 12; " +
+                "-fx-effect: dropshadow(gaussian," + borderColor + ",18,0.35,0,6); " +
+                "-fx-cursor: hand;";
+
+        // The middle Label (MAE value) is at index 1
+        card.setOnMouseEntered(e -> {
+            card.setStyle(hoverStyle);
+            // Lift + scale card
+            ScaleTransition sc = new ScaleTransition(Duration.millis(160), card);
+            sc.setToX(1.045); sc.setToY(1.045);
+            sc.setInterpolator(Interpolator.EASE_OUT); sc.play();
+            TranslateTransition tr = new TranslateTransition(Duration.millis(160), card);
+            tr.setToY(-6); tr.setInterpolator(Interpolator.EASE_OUT); tr.play();
+            // Scale up MAE label
+            if (card.getChildren().size() > 1) {
+                javafx.scene.Node maeLabel = card.getChildren().get(1);
+                ScaleTransition ls = new ScaleTransition(Duration.millis(160), maeLabel);
+                ls.setToX(1.12); ls.setToY(1.12);
+                ls.setInterpolator(Interpolator.EASE_OUT); ls.play();
+            }
+        });
+        card.setOnMouseExited(e -> {
+            card.setStyle(baseStyle);
+            ScaleTransition sc = new ScaleTransition(Duration.millis(180), card);
+            sc.setToX(1.0); sc.setToY(1.0);
+            sc.setInterpolator(Interpolator.EASE_OUT); sc.play();
+            TranslateTransition tr = new TranslateTransition(Duration.millis(180), card);
+            tr.setToY(0); tr.setInterpolator(Interpolator.EASE_OUT); tr.play();
+            if (card.getChildren().size() > 1) {
+                javafx.scene.Node maeLabel = card.getChildren().get(1);
+                ScaleTransition ls = new ScaleTransition(Duration.millis(180), maeLabel);
+                ls.setToX(1.0); ls.setToY(1.0);
+                ls.setInterpolator(Interpolator.EASE_OUT); ls.play();
+            }
+        });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // TAB 5: ML MODEL COMPARISON
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Fetches 24 hourly forecast entries from the Spring backend, then
+     * calls the Flask ML server once per model to get predicted AQI for
+     * each hour, and draws all four lines (actual + 3 models) together.
+     */
+    private void loadMlComparisonData() {
+        if (lastAqiData == null) {
+            Platform.runLater(() -> {
+                if (mlStatusLabel != null)
+                    mlStatusLabel.setText("Load AQI data first by searching a city.");
+            });
+            return;
+        }
+
+        Platform.runLater(() -> {
+            if (mlStatusLabel != null) mlStatusLabel.setText("Fetching forecast data…");
+        });
+
+        Thread t = new Thread(() -> {
+            try {
+                // ── Step 1: fetch 24h forecast from Spring backend ──────────
+                String forecastUrl = (selectedLat != 0 && selectedLon != 0)
+                        ? BACKEND + "/forecast/locate?lat=" + selectedLat + "&lon=" + selectedLon
+                        : BACKEND + "/forecast?city=" + java.net.URLEncoder.encode(currentCity, java.nio.charset.StandardCharsets.UTF_8);
+
+                HttpRequest forecastReq = HttpRequest.newBuilder()
+                        .uri(java.net.URI.create(forecastUrl)).GET().build();
+                HttpResponse<String> forecastResp = httpClient.send(forecastReq,
+                        HttpResponse.BodyHandlers.ofString());
+
+                if (forecastResp.statusCode() != 200) {
+                    Platform.runLater(() -> {
+                        if (mlStatusLabel != null)
+                            mlStatusLabel.setText("Could not load forecast data (status " + forecastResp.statusCode() + ").");
+                    });
+                    return;
+                }
+
+                com.fasterxml.jackson.databind.JsonNode forecastNode =
+                        objectMapper.readTree(forecastResp.body());
+                com.fasterxml.jackson.databind.JsonNode entries = forecastNode.path("entries");
+
+                // Take up to 24 hourly points
+                List<String>  labels     = new ArrayList<>();
+                List<Integer> actualAqi  = new ArrayList<>();
+                List<Double>  temps      = new ArrayList<>();
+                List<Double>  humids     = new ArrayList<>();
+                List<Double>  winds      = new ArrayList<>();
+                List<Double>  pm25s      = new ArrayList<>();
+                List<Double>  pm10s      = new ArrayList<>();
+                List<Double>  no2s       = new ArrayList<>();
+                List<Double>  o3s        = new ArrayList<>();
+                List<Double>  co         = new ArrayList<>();
+                List<Integer> hours      = new ArrayList<>();
+                List<Integer> dows       = new ArrayList<>();
+                List<Integer> months     = new ArrayList<>();
+
+                int count = 0;
+                for (com.fasterxml.jackson.databind.JsonNode e : entries) {
+                    if (count >= 24) break;
+                    String dtTxt = e.path("dtTxt").asText();
+                    labels.add(formatForecastLabel(dtTxt));
+                    actualAqi.add(e.path("aqi").asInt(0));
+                    temps.add(e.path("temp").asDouble(25));
+                    humids.add(e.path("humidity").asDouble(60));
+                    winds.add(e.path("windSpeed").asDouble(5));
+                    pm25s.add(e.path("pm25").asDouble(0));
+                    pm10s.add(e.path("pm10").asDouble(0));
+                    no2s.add(e.path("no2").asDouble(0));
+                    o3s.add(e.path("o3").asDouble(0));
+                    co.add(e.path("co").asDouble(0));
+                    // parse hour/dow/month from dtTxt (format: "2026-03-08 14:00:00")
+                    try {
+                        java.time.LocalDateTime ldt = java.time.LocalDateTime.parse(
+                                dtTxt.trim(), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                        hours.add(ldt.getHour());
+                        dows.add(ldt.getDayOfWeek().getValue() % 7); // Mon=1→1, Sun=7→0
+                        months.add(ldt.getMonthValue());
+                    } catch (Exception ex) {
+                        hours.add(12); dows.add(0); months.add(1);
+                    }
+                    count++;
+                }
+
+                if (labels.isEmpty()) {
+                    Platform.runLater(() -> {
+                        if (mlStatusLabel != null) mlStatusLabel.setText("No forecast entries returned.");
+                    });
+                    return;
+                }
+
+                Platform.runLater(() -> {
+                    if (mlStatusLabel != null)
+                        mlStatusLabel.setText("Querying ML models for " + labels.size() + " hours…");
+                });
+
+                // ── Step 2: call Flask /predict for each hour × 3 models ───
+                double baseAqi = lastAqiData.path("aqi").asDouble(100);
+                double lat     = selectedLat != 0 ? selectedLat : 10.0;
+                double lon     = selectedLon != 0 ? selectedLon : 76.0;
+                double so2     = lastAqiData.path("so2").asDouble(0);
+
+                List<Integer> xgbPreds = new ArrayList<>();
+                List<Integer> rfPreds  = new ArrayList<>();
+                List<Integer> lgbPreds = new ArrayList<>();
+
+                for (int i = 0; i < labels.size(); i++) {
+                    double lagAqi1 = i == 0 ? baseAqi : actualAqi.get(i - 1);
+                    double lagAqi2 = i <= 1 ? baseAqi : actualAqi.get(i - 2);
+                    double siPm25  = calcSiPm25(pm25s.get(i));
+                    double siPm10  = calcSiPm10(pm10s.get(i));
+
+                    com.fasterxml.jackson.databind.node.ObjectNode payload =
+                            objectMapper.createObjectNode();
+                    payload.put("lat",              lat);
+                    payload.put("lon",              lon);
+                    payload.put("co",               co.get(i));
+                    payload.put("no",               0.0);
+                    payload.put("no2",              no2s.get(i));
+                    payload.put("o3",               o3s.get(i));
+                    payload.put("pm10",             pm10s.get(i));
+                    payload.put("pm25",             pm25s.get(i));
+                    payload.put("relativehumidity", humids.get(i));
+                    payload.put("so2",              so2);
+                    payload.put("temperature",      temps.get(i));
+                    payload.put("si_pm25",          siPm25);
+                    payload.put("si_pm10",          siPm10);
+                    payload.put("AQI",              actualAqi.get(i));
+                    payload.put("hour",             hours.get(i));
+                    payload.put("day_of_week",      dows.get(i));
+                    payload.put("month",            months.get(i));
+                    payload.put("aqi_lag_1",        lagAqi1);
+                    payload.put("aqi_lag_2",        lagAqi2);
+                    payload.put("wind_speed",       winds.get(i));
+                    payload.put("wind_direction",   180.0);
+                    payload.put("current_aqi",      actualAqi.get(i));
+
+                    xgbPreds.add(flaskPredict(payload, "xgboost"));
+                    rfPreds.add( flaskPredict(payload, "randomforest"));
+                    lgbPreds.add(flaskPredict(payload, "lightgbm"));
+                }
+
+                // ── Step 3: compute MAE per model ───────────────────────────
+                double maeXgb = computeMae(actualAqi, xgbPreds);
+                double maeRf  = computeMae(actualAqi, rfPreds);
+                double maeLgb = computeMae(actualAqi, lgbPreds);
+
+                // ── Step 4: draw on FX thread ───────────────────────────────
+                final List<String>  fLabels    = new ArrayList<>(labels);
+                final List<Integer> fActual    = new ArrayList<>(actualAqi);
+                final List<Integer> fXgb       = new ArrayList<>(xgbPreds);
+                final List<Integer> fRf        = new ArrayList<>(rfPreds);
+                final List<Integer> fLgb       = new ArrayList<>(lgbPreds);
+
+                Platform.runLater(() -> drawMlChart(fLabels, fActual, fXgb, fRf, fLgb,
+                        maeXgb, maeRf, maeLgb));
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    if (mlStatusLabel != null)
+                        mlStatusLabel.setText("Error: " + ex.getMessage());
+                });
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
+
+    /** POST one prediction request to Flask. Returns predicted AQI or -1 on failure. */
+    private int flaskPredict(com.fasterxml.jackson.databind.node.ObjectNode payload, String modelName) {
+        try {
+            payload.put("model", modelName);
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(java.net.URI.create(ML_SERVER + "/predict"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
+                    .build();
+            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (resp.statusCode() == 200) {
+                return objectMapper.readTree(resp.body()).path("predicted_aqi").asInt(-1);
+            }
+        } catch (Exception e) {
+            System.err.println("[ML] " + modelName + " predict failed: " + e.getMessage());
+        }
+        return -1;
+    }
+
+    private double computeMae(List<Integer> actual, List<Integer> predicted) {
+        if (actual.isEmpty()) return 0;
+        double sum = 0;
+        int valid = 0;
+        for (int i = 0; i < actual.size(); i++) {
+            if (predicted.get(i) >= 0) {
+                sum += Math.abs(actual.get(i) - predicted.get(i));
+                valid++;
+            }
+        }
+        return valid > 0 ? sum / valid : 0;
+    }
+
+    private double calcSiPm25(double pm25) {
+        double[][] table = {{0,30,0,50},{30,60,51,100},{60,90,101,200},
+                {90,120,201,300},{120,250,301,400},{250,500,401,500}};
+        for (double[] r : table)
+            if (pm25 <= r[1]) return ((r[3]-r[2])/(r[1]-r[0]))*(pm25-r[0])+r[2];
+        return 500;
+    }
+
+    private double calcSiPm10(double pm10) {
+        double[][] table = {{0,50,0,50},{50,100,51,100},{100,250,101,200},
+                {250,350,201,300},{350,430,301,400},{430,600,401,500}};
+        for (double[] r : table)
+            if (pm10 <= r[1]) return ((r[3]-r[2])/(r[1]-r[0]))*(pm10-r[0])+r[2];
+        return 500;
+    }
+
+    /** Builds a LineChart with 4 series and animates each line drawing in sequence. */
+    private void drawMlChart(List<String> labels, List<Integer> actual,
+                             List<Integer> xgb, List<Integer> rf, List<Integer> lgb,
+                             double maeXgb, double maeRf, double maeLgb) {
+        if (mlChartContainer == null) return;
+        mlChartContainer.getChildren().clear();
+
+        // ── AQI-based gradient on the card background ───────────
+        int avgAqi = actual.isEmpty() ? 0
+                : (int) actual.stream().mapToInt(Integer::intValue).average().orElse(0);
+
+        String bg1, bg2;
+        if (avgAqi <= 50)       { bg1 = "#e8f8f0"; bg2 = "#d0f0e0"; }
+        else if (avgAqi <= 100) { bg1 = "#fefce8"; bg2 = "#fef08a"; }
+        else if (avgAqi <= 150) { bg1 = "#fff7ed"; bg2 = "#fed7aa"; }
+        else if (avgAqi <= 200) { bg1 = "#fff1f0"; bg2 = "#fecaca"; }
+        else if (avgAqi <= 300) { bg1 = "#faf5ff"; bg2 = "#e9d5ff"; }
+        else                    { bg1 = "#fff0f0"; bg2 = "#fca5a5"; }
+
+        if (mlChartContainer.getParent() instanceof VBox card) {
+            card.setStyle("-fx-background-color: linear-gradient(to bottom right, " + bg1 + ", " + bg2 + "); " +
+                    "-fx-background-radius: 16; -fx-padding: 20; " +
+                    "-fx-effect: dropshadow(gaussian,rgba(0,0,0,0.09),16,0,0,4);");
+        }
+
+        CategoryAxis xAxis = new CategoryAxis();
+        NumberAxis   yAxis = new NumberAxis();
+        xAxis.setTickLabelRotation(-40);
+        xAxis.setTickLabelGap(2);
+        xAxis.setStyle("-fx-tick-label-fill: #374151; -fx-font-size: 10px;");
+        yAxis.setAutoRanging(true);
+        yAxis.setLabel("AQI");
+        yAxis.setStyle("-fx-tick-label-fill: #374151; -fx-font-size: 11px;");
+
+        LineChart<String, Number> chart = new LineChart<>(xAxis, yAxis);
+        chart.setTitle(null);
+        chart.setLegendVisible(false);
+        chart.setAnimated(false);
+        chart.setPrefHeight(350);
+        chart.setCreateSymbols(false);  // no dots
+        chart.setStyle("-fx-background-color: transparent; -fx-plot-background-color: rgba(255,255,255,0.55);");
+        VBox.setVgrow(chart, javafx.scene.layout.Priority.ALWAYS);
+
+        // Start with EMPTY live series — points added one by one by the timeline
+        XYChart.Series<String, Number> sActual = new XYChart.Series<>(); sActual.setName("Actual AQI");
+        XYChart.Series<String, Number> sXgb    = new XYChart.Series<>(); sXgb.setName("XGBoost");
+        XYChart.Series<String, Number> sRf     = new XYChart.Series<>(); sRf.setName("Random Forest");
+        XYChart.Series<String, Number> sLgb    = new XYChart.Series<>(); sLgb.setName("LightGBM");
+
+        chart.getData().addAll(sActual, sXgb, sRf, sLgb);
+        mlChartContainer.getChildren().add(chart);
+
+        // Style lines once chart is in scene
+        Platform.runLater(() -> {
+            styleSeriesLine(sActual, "#1a73e8", 2.5);
+            styleSeriesLine(sXgb,   "#10b981", 2.0);
+            styleSeriesLine(sRf,    "#f59e0b", 2.0);
+            styleSeriesLine(sLgb,   "#8b5cf6", 2.0);
+
+            // ── LIVE DRAW ANIMATION ──────────────────────────────
+            // Each KeyFrame adds one point to ALL 4 series simultaneously.
+            // 3000ms spread across all points = smooth left-to-right draw.
+            int n = labels.size();
+            double msPerPoint = Math.max(20, 3000.0 / Math.max(n, 1));
+            List<KeyFrame> frames = new ArrayList<>();
+
+            for (int pi = 0; pi < n; pi++) {
+                final int idx = pi;
+                frames.add(new KeyFrame(Duration.millis(idx * msPerPoint), kfEv -> {
+                    // Add point to each series
+                    sActual.getData().add(new XYChart.Data<>(labels.get(idx), actual.get(idx)));
+                    if (xgb.get(idx)  >= 0) sXgb.getData().add(new XYChart.Data<>(labels.get(idx), xgb.get(idx)));
+                    if (rf.get(idx)   >= 0) sRf.getData().add( new XYChart.Data<>(labels.get(idx), rf.get(idx)));
+                    if (lgb.get(idx)  >= 0) sLgb.getData().add(new XYChart.Data<>(labels.get(idx), lgb.get(idx)));
+
+                    // Re-apply stroke colours — JavaFX resets them on every data change
+                    styleSeriesLine(sActual, "#1a73e8", 2.5);
+                    styleSeriesLine(sXgb,   "#10b981", 2.0);
+                    styleSeriesLine(sRf,    "#f59e0b", 2.0);
+                    styleSeriesLine(sLgb,   "#8b5cf6", 2.0);
+                }));
+            }
+
+            Timeline tl = new Timeline();
+            tl.getKeyFrames().addAll(frames);
+            tl.play();
+        });
+
+        // Update MAE labels with AQI-colored text
+        String maeColor = aqiColor(avgAqi);
+        if (mlMaeXgb  != null) {
+            mlMaeXgb.setText(String.format("MAE: %.1f", maeXgb));
+            mlMaeXgb.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: " + maeColor + ";");
+        }
+        if (mlMaeRf   != null) {
+            mlMaeRf.setText(String.format("MAE: %.1f", maeRf));
+            mlMaeRf.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: " + maeColor + ";");
+        }
+        if (mlMaeLgb  != null) {
+            mlMaeLgb.setText(String.format("MAE: %.1f", maeLgb));
+            mlMaeLgb.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: " + maeColor + ";");
+        }
+        if (mlStatusLabel != null)
+            mlStatusLabel.setText("✓  " + labels.size() + " hours · avg AQI: " + avgAqi
+                    + " (" + getAqiLevel(avgAqi) + ") · updated "
+                    + java.time.LocalTime.now().format(
+                    java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
+    }
+
+    private void styleSeriesLine(XYChart.Series<String, Number> series,
+                                 String hexColor, double width) {
+        if (series.getNode() != null) {
+            series.getNode().setStyle(
+                    "-fx-stroke: " + hexColor + "; -fx-stroke-width: " + width + "px;");
+        }
+        for (XYChart.Data<String, Number> d : series.getData()) {
+            if (d.getNode() != null) {
+                d.getNode().setStyle(
+                        "-fx-background-color: " + hexColor + ", white;" +
+                                "-fx-background-radius: 5px; -fx-padding: 4px;");
+            }
+        }
+    }
+
+    /** Colors each dot on the Actual AQI series by that point's AQI level. */
+    private void colorDataPointsByAqi(XYChart.Series<String, Number> series) {
+        for (XYChart.Data<String, Number> d : series.getData()) {
+            int val = d.getYValue().intValue();
+            String col = aqiColor(val);
+            String bg  = aqiBgColor(val);
+            if (d.getNode() != null) {
+                d.getNode().setStyle(
+                        "-fx-background-color: " + col + ", " + bg + ";" +
+                                "-fx-background-radius: 6px; -fx-padding: 5px;" +
+                                "-fx-effect: dropshadow(gaussian," + col + ",6,0.4,0,0);");
+            }
+        }
     }
 
 
