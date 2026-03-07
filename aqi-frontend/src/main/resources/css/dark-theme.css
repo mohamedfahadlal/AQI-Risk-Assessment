@@ -1,0 +1,208 @@
+/* ═══════════════════════════════════════════════════════════════
+   AiQI — DARK THEME
+   Applied as an additive stylesheet over the base layout.
+   Every colour here overrides the inline light-mode styles.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root / Scene background ───────────────────────────────── */
+.root {
+    -fx-background-color: #0f1117;
+    -fx-font-family: "Segoe UI";
+}
+
+/* ── ScrollPane backgrounds ─────────────────────────────────── */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+.scroll-bar:vertical .track,
+.scroll-bar:horizontal .track {
+    -fx-background-color: #1e2130;
+}
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: #3a3f55;
+    -fx-background-radius: 4;
+}
+
+/* ── Navbar ──────────────────────────────────────────────────── */
+#navBar {
+    -fx-background-color: #1a1d2e;
+    -fx-border-color: #2a2d3e;
+    -fx-border-width: 0 0 1 0;
+}
+#navBar .label {
+    -fx-text-fill: #e2e8f0;
+}
+
+/* ── Capsule tab switcher bar ───────────────────────────────── */
+.tab-switcher-bar {
+    -fx-background-color: #1a1d2e;
+}
+.tab-pill-container {
+    -fx-background-color: #252838;
+}
+
+/* ── All white card panels → dark surface ───────────────────── */
+.tab-content-panel,
+VBox > ScrollPane > VBox,
+.forecast-container {
+    -fx-background-color: #13151f;
+}
+
+/* ── Page background VBox (the -fx-background-color: #f0f4f8 ones) */
+.scroll-pane .viewport > VBox {
+    -fx-background-color: #13151f;
+}
+
+/* ── White result cards → dark card ─────────────────────────── */
+.result-card {
+    -fx-background-color: #1e2130 !important;
+}
+
+/* ── All Labels default to light text ───────────────────────── */
+.label {
+    -fx-text-fill: #cbd5e1;
+}
+
+/* ── TextField / ComboBox ────────────────────────────────────── */
+.text-field {
+    -fx-background-color: #252838;
+    -fx-text-fill: #e2e8f0;
+    -fx-prompt-text-fill: #64748b;
+    -fx-border-color: #3a3f55;
+}
+.text-field:focused {
+    -fx-border-color: #1a73e8;
+    -fx-background-color: #1e2130;
+}
+.combo-box {
+    -fx-background-color: #252838;
+    -fx-border-color: #3a3f55;
+}
+.combo-box .list-cell {
+    -fx-text-fill: #e2e8f0;
+    -fx-background-color: #252838;
+}
+.combo-box-popup .list-view {
+    -fx-background-color: #1e2130;
+    -fx-border-color: #3a3f55;
+}
+.combo-box-popup .list-cell {
+    -fx-text-fill: #e2e8f0;
+    -fx-background-color: #1e2130;
+}
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #2a2d3e;
+}
+
+/* ── Separator ───────────────────────────────────────────────── */
+.separator .line {
+    -fx-border-color: #2e3347;
+    -fx-border-width: 1;
+}
+
+/* ── Buttons (generic) ───────────────────────────────────────── */
+.button {
+    -fx-text-fill: #cbd5e1;
+}
+
+/* ── AQI gauge needle + circle keep their colour ────────────── */
+
+/* ── AQI card info mini-badges (rgba overlay tiles) ─────────── */
+/* These use inline rgba — override with !important-equivalent */
+
+/* ── Forecast chart ──────────────────────────────────────────── */
+.chart {
+    -fx-background-color: transparent;
+}
+.chart-plot-background {
+    -fx-background-color: #1a1d2e;
+}
+.chart-vertical-grid-lines {
+    -fx-stroke: #2a2d3e;
+}
+.chart-horizontal-grid-lines {
+    -fx-stroke: #2a2d3e;
+}
+.chart-alternative-row-fill {
+    -fx-fill: transparent;
+}
+.chart-legend {
+    -fx-background-color: transparent;
+}
+.chart-legend-item {
+    -fx-text-fill: #cbd5e1;
+}
+.axis {
+    -fx-tick-label-fill: #94a3b8;
+}
+
+/* ── Daily summary cards ─────────────────────────────────────── */
+/* Built programmatically — picked up via .day-summary-card styleClass */
+.day-summary-card {
+    -fx-background-color: #252838;
+    -fx-border-color: #3a3f55;
+}
+
+/* ── Cities list cards ───────────────────────────────────────── */
+.city-card {
+    -fx-background-color: #1e2130;
+    -fx-border-color: #2e3347;
+}
+
+/* ── Pollutant cards ─────────────────────────────────────────── */
+.pollutant-card {
+    -fx-background-color: #1e2130;
+    -fx-border-color: #2e3347;
+}
+
+/* ── AQI classification table rows ──────────────────────────── */
+.aqi-table-row {
+    -fx-opacity: 0.88;
+}
+
+/* ── TitledPane (FAQ accordion) ──────────────────────────────── */
+.titled-pane > .title {
+    -fx-background-color: #1e2130;
+    -fx-border-color: #3a3f55;
+}
+.titled-pane > .title > .text {
+    -fx-fill: #e2e8f0;
+}
+.titled-pane > *.content {
+    -fx-background-color: #181b28;
+    -fx-border-color: #2e3347;
+}
+.titled-pane > .title:hover {
+    -fx-background-color: #252838;
+}
+
+/* ── Tab content inner page bg ───────────────────────────────── */
+/* Targets the spacing VBoxes that carry -fx-background-color: #f0f4f8 */
+/* We use a broad rule; inline styles win so we need the controller
+   to also call applyDarkCardStyles() for programmatic nodes */
+
+/* ── Weather card overlay — darken slightly in dark mode ─────── */
+#weatherCardOverlay {
+    -fx-background-color: rgba(10,12,20,0.45);
+}
+
+/* ── Progress bars ───────────────────────────────────────────── */
+.progress-bar > .track {
+    -fx-background-color: #252838;
+}
+.progress-bar > .bar {
+    -fx-background-color: #1a73e8;
+}
+
+/* ── Tooltip ─────────────────────────────────────────────────── */
+.tooltip {
+    -fx-background-color: #1e2130;
+    -fx-text-fill: #e2e8f0;
+    -fx-border-color: #3a3f55;
+    -fx-background-radius: 8;
+}

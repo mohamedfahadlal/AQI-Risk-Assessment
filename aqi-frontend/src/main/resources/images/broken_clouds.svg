@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="300">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8baac4"/>
+      <stop offset="100%" stop-color="#c9d8e8"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="300" fill="url(#sky)"/>
+  <!-- Back cloud layer -->
+  <g opacity="0.6" fill="#d8e4ee">
+    <ellipse cx="150" cy="140" rx="130" ry="55"/>
+    <ellipse cx="60"  cy="160" rx="80"  ry="40"/>
+    <ellipse cx="230" cy="158" rx="90"  ry="44"/>
+    <ellipse cx="150" cy="110" rx="85"  ry="56"/>
+  </g>
+  <!-- Main cloud 1 -->
+  <g opacity="0.92" fill="white">
+    <ellipse cx="380" cy="105" rx="140" ry="58"/>
+    <ellipse cx="270" cy="125" rx="90"  ry="46"/>
+    <ellipse cx="480" cy="118" rx="100" ry="50"/>
+    <ellipse cx="380" cy="72"  rx="88"  ry="54"/>
+  </g>
+  <!-- Main cloud 2 -->
+  <g opacity="0.85" fill="#eef3f8">
+    <ellipse cx="650" cy="130" rx="120" ry="52"/>
+    <ellipse cx="550" cy="148" rx="82"  ry="42"/>
+    <ellipse cx="740" cy="142" rx="85"  ry="44"/>
+    <ellipse cx="650" cy="98"  rx="76"  ry="50"/>
+  </g>
+  <!-- Ground -->
+  <rect x="0" y="268" width="800" height="32" fill="#9eb8c4" opacity="0.4"/>
+</svg>
