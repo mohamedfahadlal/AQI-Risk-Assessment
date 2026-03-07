@@ -1,64 +1,49 @@
 package com.aqi.utils;
 
-/**
- * Singleton session store. Holds the currently logged-in user's data
- * so all controllers (Login, Dashboard, HealthProfile, Prediction, etc.)
- * can share the same state within one JVM process.
- */
 public class UserSession {
 
-    private static UserSession instance;
+    private static String  userId   = null;
+    private static String  username = null;
+    private static boolean isNewUser = false;
+    private static boolean guest    = false;
+    private static boolean guestReturnToDashboard = false;
 
-    private String userId;       // UUID string from Supabase
-    private String username;     // Full name
-    private boolean isNewUser;   // true = just registered, needs health profile
+    // ── Regular user ─────────────────────────────────────────────
+    public static void setUserId(String id)      { userId   = id; }
+    public static String getUserId()             { return userId; }
 
-    private UserSession() {}
+    public static void setUsername(String name)  { username = name; }
+    public static String getUsername()           { return username; }
 
-    public static UserSession getInstance() {
-        if (instance == null) {
-            instance = new UserSession();
-        }
-        return instance;
+    public static void setNewUser(boolean value) { isNewUser = value; }
+    public static boolean isNewUser()            { return isNewUser; }
+
+    public static boolean isLoggedIn()           { return userId != null; }
+
+    // ── Guest mode ───────────────────────────────────────────────
+    public static void loginAsGuest() {
+        clearSession();
+        guest    = true;
+        username = "Guest";
     }
 
-    // ---- Getters ----
+    public static boolean isGuest() { return guest; }
 
-    public static String getUserId() {
-        return getInstance().userId;
+    /** Set true when guest hits a restricted action so SignUp shows back button */
+    public static void setGuestReturnToDashboard(boolean flag) {
+        guestReturnToDashboard = flag;
+    }
+    public static boolean isGuestReturnToDashboard() { return guestReturnToDashboard; }
+
+    // ── Clear ────────────────────────────────────────────────────
+    public static void clearSession() {
+        userId                 = null;
+        username               = null;
+        isNewUser              = false;
+        guest                  = false;
+        guestReturnToDashboard = false;
     }
 
-    public static String getUsername() {
-        return getInstance().username;
-    }
-
-    public static boolean isNewUser() {
-        return getInstance().isNewUser;
-    }
-
-    // ---- Setters ----
-
-    public static void setUserId(String id) {
-        getInstance().userId = id;
-    }
-
-    /** Backward-compat overload for int-based IDs */
-    public static void setUserId(int id) {
-        getInstance().userId = String.valueOf(id);
-    }
-
-    public static void setUsername(String name) {
-        getInstance().username = name;
-    }
-
-    public static void setNewUser(boolean value) {
-        getInstance().isNewUser = value;
-    }
-
-    /** Call on logout to wipe all session data */
-    public static void clear() {
-        getInstance().userId   = null;
-        getInstance().username = null;
-        getInstance().isNewUser = false;
-    }
+    /** Alias kept for compatibility */
+    public static void clear() { clearSession(); }
 }

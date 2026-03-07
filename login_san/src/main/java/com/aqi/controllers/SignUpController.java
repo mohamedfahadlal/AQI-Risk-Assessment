@@ -9,6 +9,7 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -332,4 +333,7 @@ public class SignUpController {
 
     @FXML private void goToLogin() { SceneManager.switchScene("/fxml/Login.fxml"); }
     @FXML private void goToAbout() { SceneManager.switchScene("/fxml/About.fxml"); }
+
+    public void handleBackToDashboard(ActionEvent actionEvent) {
+    }
 }

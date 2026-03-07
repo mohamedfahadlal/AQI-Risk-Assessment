@@ -110,6 +110,17 @@ public class DashboardController {
     // ── Tab 4: India Cities ───────────────────────────────────────
     @FXML private GridPane citiesGrid;
     @FXML private Button sortCitiesBtn;
+    @FXML private Button locateMeBtn;
+    @FXML private Button refreshCitiesBtn;
+    @FXML private Button refreshPollutantsBtn;
+    @FXML private Button aqiMapBtn;
+    @FXML private Button searchBtn;
+    @FXML private Button predictBtn;
+    @FXML private Button myProfileBtn;
+    @FXML private Button logoutBtn;
+    @FXML private Button setAlertBtn;
+    @FXML private Button exportPdfBtn;
+    @FXML private Button sendFeedbackBtn;
 
     // ── Tab 5: Feedback ───────────────────────────────────────────
     @FXML private TextField feedbackName;
@@ -124,6 +135,7 @@ public class DashboardController {
     private final List<Map<String, Object>> citiesData = Collections.synchronizedList(new ArrayList<>());
 
     private double selectedLat = 0, selectedLon = 0;
+    private final boolean[] tabVisited = new boolean[5]; // tracks first-open per tab
     private String currentCity = "Kochi";
     private JsonNode lastAqiData = null;
     private JsonNode lastForecastData = null;
@@ -156,8 +168,37 @@ public class DashboardController {
         aqiLabel.setText("--");
 
         String username = UserSession.getUsername();
+        // Show/hide logout based on guest status
+        if (UserSession.isGuest()) {
+            // Find and hide logout button, show sign-up prompt
+            darkModeBtn.getParent().getChildrenUnmodifiable().forEach(node -> {
+                if (node instanceof Button btn) {
+                    if ("Logout".equals(btn.getText())) {
+                        btn.setVisible(false);
+                        btn.setManaged(false);
+                    }
+                    if ("My Profile".equals(btn.getText())) {
+                        btn.setText("Sign Up Free");
+                        btn.setStyle("-fx-background-radius: 20; -fx-background-color: #1a73e8;" +
+                                "-fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 14; -fx-cursor: hand;");
+                        btn.setOnAction(e -> guardGuest());
+                    }
+                }
+            });
+        }
         if (username != null && !username.isEmpty())
             welcomeLabel.setText("Hi, " + username);
+
+        // Nav button hover glow — applied after scene is ready
+        Platform.runLater(() -> {
+            if (darkModeBtn.getParent() != null) {
+                for (javafx.scene.Node n : darkModeBtn.getParent().getChildrenUnmodifiable()) {
+                    if (n instanceof Button navBtn) {
+                        addButtonHover(navBtn, "rgba(26,115,232,0.32)");
+                    }
+                }
+            }
+        });
 
         forecastIntervalBox.setItems(FXCollections.observableArrayList(
                 "Every 3 hrs", "Every 6 hrs", "Every 12 hrs", "Every 24 hrs"));
@@ -178,6 +219,45 @@ public class DashboardController {
         tabBtns     = new Button[]{tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5};
         tabContents = new VBox[]{tabContent1, tabContent2, tabContent3, tabContent4, tabContent5};
 
+        // Tab button hovers
+        for (Button tb : tabBtns) {
+            String baseTab = tb.getStyle() != null ? tb.getStyle() : "";
+            tb.setOnMouseEntered(e -> {
+                if (!tb.getStyle().contains("#1a73e8")) { // not active
+                    ScaleTransition st = new ScaleTransition(Duration.millis(120), tb);
+                    st.setToX(1.05); st.setToY(1.05); st.play();
+                    tb.setStyle(TAB_INACTIVE +
+                            " -fx-effect: dropshadow(gaussian, rgba(26,115,232,0.28), 14, 0.3, 0, 2);");
+                }
+                tb.setCursor(javafx.scene.Cursor.HAND);
+            });
+            tb.setOnMouseExited(e -> {
+                if (!tb.getStyle().contains("#1a73e8")) {
+                    ScaleTransition st = new ScaleTransition(Duration.millis(120), tb);
+                    st.setToX(1.0); st.setToY(1.0); st.play();
+                    tb.setStyle(TAB_INACTIVE);
+                }
+            });
+        }
+
+        // All button hovers — wired after scene is ready
+        Platform.runLater(() -> {
+            // Navbar
+            if (searchBtn     != null) addButtonHover(searchBtn,     "rgba(26,115,232,0.35)");
+            if (locateMeBtn   != null) addButtonHover(locateMeBtn,   "rgba(26,115,232,0.30)");
+            if (predictBtn    != null) addButtonHover(predictBtn,    "rgba(124,58,237,0.35)");
+            if (aqiMapBtn     != null) addButtonHover(aqiMapBtn,     "rgba(30,132,73,0.35)");
+            if (myProfileBtn  != null) addButtonHover(myProfileBtn,  "rgba(26,115,232,0.30)");
+            if (logoutBtn     != null) addButtonHover(logoutBtn,     "rgba(220,38,38,0.28)");
+            if (setAlertBtn   != null) addButtonHover(setAlertBtn,   "rgba(245,158,11,0.35)");
+            // Tab content
+            if (exportPdfBtn        != null) addButtonHover(exportPdfBtn,        "rgba(26,115,232,0.32)");
+            if (sendFeedbackBtn     != null) addButtonHover(sendFeedbackBtn,     "rgba(26,115,232,0.35)");
+            if (refreshPollutantsBtn!= null) addButtonHover(refreshPollutantsBtn,"rgba(26,115,232,0.30)");
+            if (refreshCitiesBtn    != null) addButtonHover(refreshCitiesBtn,    "rgba(26,115,232,0.30)");
+            if (sortCitiesBtn       != null) addButtonHover(sortCitiesBtn,       "rgba(26,115,232,0.30)");
+        });
+
         startAutoRefresh();
         loadAQIData("Kochi", 0, 0);
         loadIndiaCities();
@@ -187,6 +267,7 @@ public class DashboardController {
     // NAVIGATION
     // ─────────────────────────────────────────────────────────────
     @FXML private void handleOpenPrediction() {
+        if (guardGuest()) return;
         SceneManager.switchScene("/com/example/test2/main_view.fxml", "AQI Prediction");
     }
 
@@ -197,7 +278,16 @@ public class DashboardController {
     }
 
     @FXML private void handleViewProfile() {
+        if (guardGuest()) return;
         SceneManager.switchScene("/views/ViewProfile.fxml", "Your Profile");
+    }
+
+    /** Redirects guest users to sign-up. Returns true if guest (caller should return). */
+    private boolean guardGuest() {
+        if (!UserSession.isGuest()) return false;
+        UserSession.setGuestReturnToDashboard(true);
+        SceneManager.switchScene("/fxml/SignUp.fxml", "Create Account — AiQI");
+        return true;
     }
 
     @FXML private void handleAbout() {
@@ -266,7 +356,9 @@ public class DashboardController {
                 slideIn.setFromX(22);
                 slideIn.setToX(0);
                 slideIn.setInterpolator(Interpolator.EASE_OUT);
-                new ParallelTransition(fadeIn, slideIn).play();
+                ParallelTransition enterAnim = new ParallelTransition(fadeIn, slideIn);
+                enterAnim.setOnFinished(ef -> onTabFullyVisible(newIndex));
+                enterAnim.play();
             });
             exitAnim.play();
         } else {
@@ -279,7 +371,20 @@ public class DashboardController {
             TranslateTransition slideIn = new TranslateTransition(Duration.millis(200), incoming);
             slideIn.setFromX(22); slideIn.setToX(0);
             slideIn.setInterpolator(Interpolator.EASE_OUT);
-            new ParallelTransition(fadeIn, slideIn).play();
+            ParallelTransition enterAnim2 = new ParallelTransition(fadeIn, slideIn);
+            enterAnim2.setOnFinished(ef -> onTabFullyVisible(newIndex));
+            enterAnim2.play();
+        }
+    }
+
+    /** Called once the tab slide-in animation completes. Triggers first-open animations. */
+    private void onTabFullyVisible(int tabIndex) {
+        if (tabVisited[tabIndex]) return;
+        tabVisited[tabIndex] = true;
+        if (tabIndex == 2 && lastAqiData != null) {
+            // Pollutants tab — rebuild cards so sceneProperty fires fresh
+            pollutantsGrid.getChildren().clear();
+            updatePollutantsTab();
         }
     }
 
@@ -304,6 +409,7 @@ public class DashboardController {
         weatherToggleBtn.setStyle(
                 "-fx-background-radius: 0 20 20 0; -fx-background-color: #e8eaed;" +
                         "-fx-text-fill: #555; -fx-padding: 8 28;");
+        addButtonHover(weatherToggleBtn, "rgba(26,115,232,0.28)");
     }
 
     @FXML private void handleWeatherToggle() {
@@ -315,6 +421,7 @@ public class DashboardController {
         aqiToggleBtn.setStyle(
                 "-fx-background-radius: 20 0 0 20; -fx-background-color: #e8eaed;" +
                         "-fx-text-fill: #555; -fx-padding: 8 28;");
+        addButtonHover(aqiToggleBtn, "rgba(26,115,232,0.28)");
         if (lastAqiData != null) updateWeatherView(lastAqiData);
     }
 
@@ -518,6 +625,7 @@ public class DashboardController {
     // AQI ALERT
     // ─────────────────────────────────────────────────────────────
     @FXML private void handleSetAlert() {
+        if (guardGuest()) return;
         TextInputDialog dialog = new TextInputDialog(
                 alertThreshold > 0 ? String.valueOf(alertThreshold) : "100");
         dialog.setTitle("Set AQI Alert");
@@ -551,6 +659,7 @@ public class DashboardController {
     // EXPORT PDF
     // ─────────────────────────────────────────────────────────────
     @FXML private void handleExportPdf() {
+        if (guardGuest()) return;
         if (lastAqiData == null) {
             showInfo("No data to export. Please search a city first.");
             return;
@@ -578,6 +687,7 @@ public class DashboardController {
     }
 
     @FXML private void handleDetectLocation() {
+        if (guardGuest()) return;
         Platform.runLater(() -> {
             aqiLabel.setText("...");
             statusLabel.setText("Locating...");
@@ -703,12 +813,12 @@ public class DashboardController {
 
         Platform.runLater(() -> {
             cityLabel.setText(cityName);
-            aqiLabel.setText(String.valueOf(aqi));
-            pm25Label.setText(String.format("%.1f µg/m³", pm25));
-            pm10Label.setText(String.format("%.1f µg/m³", pm10));
-            tempLabel.setText(String.format("%.1f°C", temp));
-            humidityLabel.setText(String.format("%.0f%%", humidity));
-            windLabel.setText(String.format("%.1f km/h", wind));
+            animateCounter(aqiLabel,    0, aqi,    1,    "%d");
+            animateDouble(pm25Label,    0, pm25,   "%.1f µg/m³");
+            animateDouble(pm10Label,    0, pm10,   "%.1f µg/m³");
+            animateDouble(tempLabel,    0, temp,   "%.1f°C");
+            animateDouble(humidityLabel,0, humidity,"%.0f%%");
+            animateDouble(windLabel,    0, wind,   "%.1f km/h");
             updateNeedle(aqi);
             updateRisk(aqi);
             updateLastRefreshed();
@@ -747,18 +857,18 @@ public class DashboardController {
 
         weatherDescLabel.setText(descCap);
         weatherCityLabel.setText(cityName);
-        weatherTempLabel.setText(String.format("%.0f°C", temp));
-        weatherFeelsLabel.setText(String.format("Feels like %.0f°C", feelsLike));
-        wHumidityLabel.setText(String.format("%.0f%%", humidity));
-        wWindSpeedLabel.setText(String.format("%.1f km/h", windSpeed));
+        animateDouble(weatherTempLabel,    0, temp,      "%.0f°C");
+        animateDoublePrefix(weatherFeelsLabel, 0, feelsLike, "Feels like %.0f°C");
+        animateDouble(wHumidityLabel,      0, humidity,  "%.0f%%");
+        animateDouble(wWindSpeedLabel,     0, windSpeed, "%.1f km/h");
         wWindDirLabel.setText(windDir);
-        wVisibilityLabel.setText(String.format("%.1f km", visibility));
-        wPressureLabel.setText(String.format("%.0f hPa", pressure));
-        wCloudsLabel.setText(String.format("%.0f%%", clouds));
+        animateDouble(wVisibilityLabel,    0, visibility,"%.1f km");
+        animateDouble(wPressureLabel,      0, pressure,  "%.0f hPa");
+        animateDouble(wCloudsLabel,        0, clouds,    "%.0f%%");
         wSunriseLabel.setText(sunriseStr);
         wSunsetLabel.setText(sunsetStr);
-        wMinLabel.setText(String.format("%.0f°C", tempMin));
-        wMaxLabel.setText(String.format("%.0f°C", tempMax));
+        animateDouble(wMinLabel,           0, tempMin,   "%.0f°C");
+        animateDouble(wMaxLabel,           0, tempMax,   "%.0f°C");
 
         // Load OWM weather icon from URL
         if (!iconCode.isEmpty()) {
@@ -777,8 +887,8 @@ public class DashboardController {
         if (bgStream != null) {
             try {
                 javafx.scene.image.Image bgImg = new javafx.scene.image.Image(bgStream);
+                crossfadeWeatherBg(bgImg);
                 Platform.runLater(() -> {
-                    weatherBgImage.setImage(bgImg);
                     weatherBgImage.setFitWidth(weatherCardStack.getWidth() > 0
                             ? weatherCardStack.getWidth() : 800);
                     weatherBgImage.setFitHeight(weatherCardStack.getHeight() > 0
@@ -795,6 +905,23 @@ public class DashboardController {
         } else {
             applyFallbackBg(iconCode);
         }
+    }
+
+    private void crossfadeWeatherBg(javafx.scene.image.Image newImg) {
+        Platform.runLater(() -> {
+            // Fade out old image
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(300), weatherBgImage);
+            fadeOut.setFromValue(weatherBgImage.getOpacity());
+            fadeOut.setToValue(0);
+            fadeOut.setOnFinished(e -> {
+                weatherBgImage.setImage(newImg);
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(400), weatherBgImage);
+                fadeIn.setFromValue(0); fadeIn.setToValue(1);
+                fadeIn.setInterpolator(Interpolator.EASE_IN);
+                fadeIn.play();
+            });
+            fadeOut.play();
+        });
     }
 
     private void applyFallbackBg(String iconCode) {
@@ -1035,12 +1162,27 @@ public class DashboardController {
 
                 // Daily summary cards — must be on FX thread
                 dailySummaryBox.getChildren().clear();
+                final int[] dayIdx = {0};
                 lastForecastData.path("dailySummary").fields().forEachRemaining(e -> {
                     JsonNode d = e.getValue();
-                    dailySummaryBox.getChildren().add(buildDaySummaryCard(
+                    VBox card = buildDaySummaryCard(
                             e.getKey(),
                             d.path("minAqi").asInt(), d.path("maxAqi").asInt(),
-                            d.path("minTemp").asDouble(), d.path("maxTemp").asDouble()));
+                            d.path("minTemp").asDouble(), d.path("maxTemp").asDouble());
+                    card.setOpacity(0);
+                    card.setTranslateY(16);
+                    dailySummaryBox.getChildren().add(card);
+                    int di = dayIdx[0]++;
+                    PauseTransition p = new PauseTransition(Duration.millis(di * 80.0 + 300));
+                    p.setOnFinished(ev2 -> {
+                        FadeTransition f = new FadeTransition(Duration.millis(260), card);
+                        f.setFromValue(0); f.setToValue(1);
+                        TranslateTransition t2 = new TranslateTransition(Duration.millis(260), card);
+                        t2.setFromY(16); t2.setToY(0);
+                        t2.setInterpolator(Interpolator.EASE_OUT);
+                        new ParallelTransition(f, t2).play();
+                    });
+                    p.play();
                 });
                 // Re-apply dark theme to newly drawn chart nodes
                 if (isDarkMode) applyDarkModeInlineStyles(true);
@@ -1089,6 +1231,17 @@ public class DashboardController {
         tempRange.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
 
         card.getChildren().addAll(dayLbl, aqiRange, tempRange);
+
+        String dayGlow = maxAqi <= 50  ? "rgba(46,125,50,0.35)"
+                : maxAqi <= 100 ? "rgba(154,125,10,0.35)"
+                : maxAqi <= 150 ? "rgba(202,111,30,0.35)"
+                : maxAqi <= 200 ? "rgba(160,64,0,0.35)"
+                : maxAqi <= 300 ? "rgba(125,60,152,0.35)"
+                :                "rgba(146,43,33,0.35)";
+        String dayResting = "-fx-background-color: white; -fx-background-radius: 14;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 10, 0, 0, 2);";
+        addCardHover(card, dayGlow, dayResting);
+
         return card;
     }
 
@@ -1112,16 +1265,24 @@ public class DashboardController {
             double value = lastAqiData.path(key).asDouble();
             double limit = WHO.getOrDefault(key, 100.0);
             double pct   = Math.min(value / limit, 1.0);
-            pollutantsGrid.add(buildPollutantCard(name, value, limit, pct), i % 2, i / 2);
+            pollutantsGrid.add(buildPollutantCard(name, value, limit, pct, i), i % 2, i / 2);
         }
     }
 
     private VBox buildPollutantCard(String name, double value, double limit, double pct) {
+        return buildPollutantCard(name, value, limit, pct, 0);
+    }
+
+    private VBox buildPollutantCard(String name, double value, double limit, double pct, int staggerIndex) {
         VBox card = new VBox(8);
         card.setPrefWidth(380);
         card.setPadding(new Insets(16, 20, 16, 20));
         card.setStyle("-fx-background-color: white; -fx-background-radius: 14;" +
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 10, 0, 0, 2);");
+
+        // Slide-in from below
+        card.setOpacity(0);
+        card.setTranslateY(18);
 
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
@@ -1134,7 +1295,7 @@ public class DashboardController {
                 progressColor(pct) + ";");
         header.getChildren().addAll(nameLbl, spacer, valueLbl);
 
-        ProgressBar bar = new ProgressBar(pct);
+        ProgressBar bar = new ProgressBar(0); // start at 0, animate to pct
         bar.setPrefWidth(Double.MAX_VALUE);
         bar.setStyle("-fx-accent: " + progressColor(pct) + "; -fx-background-radius: 6;");
 
@@ -1143,6 +1304,47 @@ public class DashboardController {
         whoLbl.setStyle("-fx-font-size: 11px; -fx-text-fill: #888;");
 
         card.getChildren().addAll(header, bar, whoLbl);
+
+        // Hover: color-matched glow based on pollution level
+        String glowColor = pct <= 0.5
+                ? "rgba(46,125,50,0.35)"
+                : pct <= 0.8
+                ? "rgba(245,158,11,0.38)"
+                : "rgba(220,38,38,0.38)";
+        String cardResting = "-fx-background-color: white; -fx-background-radius: 14;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 10, 0, 0, 2);";
+        addCardHoverLift(card, glowColor, cardResting);
+
+        // Staggered entrance + bar fill triggered once card enters the scene
+        final double entranceDelay = staggerIndex * 70.0;
+        final double targetPct = pct;
+        card.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene == null) return;
+            PauseTransition wait = new PauseTransition(Duration.millis(entranceDelay + 30));
+            wait.setOnFinished(ev -> {
+                // Entrance: slide up + fade in
+                FadeTransition fade = new FadeTransition(Duration.millis(260), card);
+                fade.setFromValue(0); fade.setToValue(1);
+                TranslateTransition slide = new TranslateTransition(Duration.millis(260), card);
+                slide.setFromY(18); slide.setToY(0);
+                slide.setInterpolator(Interpolator.EASE_OUT);
+                new ParallelTransition(fade, slide).play();
+
+                // Bar fill driven by SimpleDoubleProperty on FX thread
+                javafx.beans.property.SimpleDoubleProperty fillProp =
+                        new javafx.beans.property.SimpleDoubleProperty(0.0);
+                fillProp.addListener((o2, ov, nv) ->
+                        Platform.runLater(() -> bar.setProgress(nv.doubleValue())));
+                new Timeline(
+                        new KeyFrame(Duration.ZERO,
+                                new javafx.animation.KeyValue(fillProp, 0.0)),
+                        new KeyFrame(Duration.millis(750),
+                                new javafx.animation.KeyValue(fillProp, targetPct, Interpolator.EASE_OUT))
+                ).play();
+            });
+            wait.play();
+        });
+
         return card;
     }
 
@@ -1195,10 +1397,64 @@ public class DashboardController {
 
     @FXML private void handleRefreshCities() { loadIndiaCities(); }
 
+    @FXML private void handleRefreshPollutants() {
+        if (lastAqiData == null) return;
+        // Brief pulse on the button — no spin
+        if (refreshPollutantsBtn != null) {
+            ScaleTransition pulse = new ScaleTransition(Duration.millis(120), refreshPollutantsBtn);
+            pulse.setToX(0.90); pulse.setToY(0.90);
+            pulse.setAutoReverse(true); pulse.setCycleCount(2);
+            pulse.play();
+        }
+        pollutantsGrid.getChildren().clear();
+        updatePollutantsTab();
+    }
+
+    @FXML private void handleOpenAqiMap() {
+        if (guardGuest()) return;
+        // Open WAQI live map in browser — works with Desktop API
+        try {
+            String cityEnc = java.net.URLEncoder.encode(currentCity, "UTF-8");
+            java.awt.Desktop.getDesktop().browse(
+                    java.net.URI.create("https://waqi.info/#/search/" + cityEnc));
+        } catch (Exception e) {
+            showInfo("Could not open browser. Visit https://waqi.info to see the live AQI map.");
+        }
+    }
+
     @FXML private void handleSortCities() {
         sortWorstFirst = !sortWorstFirst;
         sortCitiesBtn.setText(sortWorstFirst ? "Sort: Worst First" : "Sort: Best First");
-        renderCitiesGrid();
+        flipAndRenderCities();
+    }
+
+    private void flipAndRenderCities() {
+        // Phase 1: rotate grid to 90° (cards appear to fold away)
+        javafx.beans.property.SimpleDoubleProperty rotY =
+                new javafx.beans.property.SimpleDoubleProperty(0);
+        javafx.scene.transform.Rotate flipRotate =
+                new javafx.scene.transform.Rotate(0,
+                        citiesGrid.getBoundsInLocal().getWidth() / 2, 0,
+                        0, javafx.scene.transform.Rotate.Y_AXIS);
+        citiesGrid.getTransforms().add(flipRotate);
+        rotY.addListener((obs, o, n) -> flipRotate.setAngle(n.doubleValue()));
+
+        Timeline foldOut = new Timeline(
+                new KeyFrame(Duration.ZERO,        new javafx.animation.KeyValue(rotY, 0.0)),
+                new KeyFrame(Duration.millis(200),  new javafx.animation.KeyValue(rotY, 90.0, Interpolator.EASE_IN))
+        );
+        foldOut.setOnFinished(e -> {
+            // Swap content while invisible
+            renderCitiesGrid();
+            // Phase 2: rotate back from 90° → 0 (cards unfold)
+            Timeline foldIn = new Timeline(
+                    new KeyFrame(Duration.ZERO,        new javafx.animation.KeyValue(rotY, 90.0)),
+                    new KeyFrame(Duration.millis(220),  new javafx.animation.KeyValue(rotY, 0.0, Interpolator.EASE_OUT))
+            );
+            foldIn.setOnFinished(ev -> citiesGrid.getTransforms().remove(flipRotate));
+            foldIn.play();
+        });
+        foldOut.play();
     }
 
     private void renderCitiesGrid() {
@@ -1209,7 +1465,7 @@ public class DashboardController {
                 : Integer.compare((int) a.get("aqi"), (int) b.get("aqi")));
         citiesGrid.getChildren().clear();
         for (int i = 0; i < sorted.size(); i++)
-            citiesGrid.add(buildCityCard(sorted.get(i)), i % 4, i / 4);
+            citiesGrid.add(buildCityCardAnimated(sorted.get(i), i), i % 4, i / 4);
     }
 
     private VBox buildCityCardLoading(String cityName) {
@@ -1253,6 +1509,45 @@ public class DashboardController {
         tempLbl.setStyle("-fx-font-size: 11px; -fx-text-fill: #555;");
 
         card.getChildren().addAll(nameLbl, aqiLbl, levelLbl, pm25Lbl, tempLbl);
+
+        // Hover with AQI-matched gradient glow
+        String glowRgb = switch (aqi / 50) {
+            case 0 -> "rgba(30,132,73,0.38)";
+            case 1 -> "rgba(154,125,10,0.38)";
+            case 2 -> "rgba(202,111,30,0.38)";
+            case 3 -> "rgba(160,64,0,0.38)";
+            default -> aqi <= 300 ? "rgba(125,60,152,0.38)" : "rgba(146,43,33,0.38)";
+        };
+        String cityResting = "-fx-background-color: " + bg + "; -fx-background-radius: 14;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);";
+        addCardHoverLift(card, glowRgb, cityResting);
+
+        // Click → search that city and switch to AQI tab
+        final String clickedCity = city;
+        card.setOnMouseClicked(e -> {
+            citySearchField.setText(clickedCity);
+            selectedLat = 0; selectedLon = 0;
+            loadAQIData(clickedCity, 0, 0);
+            switchToTab(0); // jump to Tab 1 (AQI view)
+        });
+
+        return card;
+    }
+
+    private VBox buildCityCardAnimated(Map<String, Object> data, int index) {
+        VBox card = buildCityCard(data);
+        card.setOpacity(0);
+        card.setTranslateY(24);
+        PauseTransition pause = new PauseTransition(Duration.millis(index * 70.0));
+        pause.setOnFinished(ev -> {
+            FadeTransition fade = new FadeTransition(Duration.millis(280), card);
+            fade.setFromValue(0); fade.setToValue(1);
+            TranslateTransition slide = new TranslateTransition(Duration.millis(280), card);
+            slide.setFromY(24); slide.setToY(0);
+            slide.setInterpolator(Interpolator.EASE_OUT);
+            new ParallelTransition(fade, slide).play();
+        });
+        pause.play();
         return card;
     }
 
@@ -1334,17 +1629,40 @@ public class DashboardController {
     // ─────────────────────────────────────────────────────────────
     // GAUGE & RISK
     // ─────────────────────────────────────────────────────────────
+    // Single reused Rotate so needle angle is always continuous
+    private final Rotate needleRotate = new Rotate(0, 190, 190);
+    private Timeline needleSwing = null;
+
+    private double aqiToAngle(int aqi) {
+        if      (aqi <= 50)  return (aqi / 50.0) * 30;
+        else if (aqi <= 100) return 30  + ((aqi - 50)  / 50.0)  * 30;
+        else if (aqi <= 150) return 60  + ((aqi - 100) / 50.0)  * 30;
+        else if (aqi <= 200) return 90  + ((aqi - 150) / 50.0)  * 30;
+        else if (aqi <= 300) return 120 + ((aqi - 200) / 100.0) * 30;
+        else                 return 150 + ((Math.min(aqi, 500) - 300) / 200.0) * 30;
+    }
+
     private void updateNeedle(int aqi) {
-        double angle;
-        if      (aqi <= 50)  angle = (aqi / 50.0) * 30;
-        else if (aqi <= 100) angle = 30  + ((aqi - 50)  / 50.0)  * 30;
-        else if (aqi <= 150) angle = 60  + ((aqi - 100) / 50.0)  * 30;
-        else if (aqi <= 200) angle = 90  + ((aqi - 150) / 50.0)  * 30;
-        else if (aqi <= 300) angle = 120 + ((aqi - 200) / 100.0) * 30;
-        else                 angle = 150 + ((Math.min(aqi, 500) - 300) / 200.0) * 30;
-        Rotate rotate = new Rotate(angle, 190, 190);
-        needle.getTransforms().clear();
-        needle.getTransforms().add(rotate);
+        // Attach rotate once
+        if (!needle.getTransforms().contains(needleRotate)) {
+            needle.getTransforms().clear();
+            needle.getTransforms().add(needleRotate);
+        }
+        double from = needleRotate.getAngle();
+        double to   = aqiToAngle(aqi);
+
+        if (needleSwing != null) needleSwing.stop();
+        needleSwing = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        new javafx.animation.KeyValue(needleRotate.angleProperty(), from)),
+                new KeyFrame(Duration.millis(650),
+                        new javafx.animation.KeyValue(needleRotate.angleProperty(),
+                                to + (to > from ? 5 : -5), Interpolator.EASE_OUT)),
+                new KeyFrame(Duration.millis(900),
+                        new javafx.animation.KeyValue(needleRotate.angleProperty(),
+                                to, Interpolator.EASE_BOTH))
+        );
+        needleSwing.play();
     }
 
     private void updateRisk(int aqi) {
@@ -1379,15 +1697,37 @@ public class DashboardController {
             imageName = "hazardous.png";
         }
 
+        final String fHex = hexColor;
+        final String fGrad = gradientStyle;
+        final String fRisk = risk;
         Platform.runLater(() -> {
-            statusLabel.setText(risk);
-            statusLabel.setStyle("-fx-text-fill: " + hexColor +
+            // Status label bounce
+            statusLabel.setText(fRisk);
+            statusLabel.setStyle("-fx-text-fill: " + fHex +
                     "; -fx-font-weight: 900; -fx-font-size: 30px;");
-            aqiLabel.setStyle("-fx-text-fill: " + hexColor +
-                    "; -fx-font-weight: 900; -fx-font-size: 52px;");
-            mainCard.setStyle("-fx-background-color: " + gradientStyle + "; " + baseStyle);
+            statusLabel.setScaleX(0.7); statusLabel.setScaleY(0.7);
+            ScaleTransition bounce = new ScaleTransition(Duration.millis(300), statusLabel);
+            bounce.setFromX(0.7); bounce.setToX(1.1);
+            bounce.setFromY(0.7); bounce.setToY(1.1);
+            bounce.setAutoReverse(true); bounce.setCycleCount(2);
+            bounce.setInterpolator(Interpolator.EASE_OUT);
+            bounce.play();
 
-            // Keep large bold sizes — only override color
+            aqiLabel.setStyle("-fx-text-fill: " + fHex +
+                    "; -fx-font-weight: 900; -fx-font-size: 52px;");
+
+            // Crossfade: fade card out, swap style, fade back in
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(180), mainCard);
+            fadeOut.setFromValue(1.0); fadeOut.setToValue(0.0);
+            fadeOut.setOnFinished(e -> {
+                mainCard.setStyle("-fx-background-color: " + fGrad + "; " + baseStyle);
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(300), mainCard);
+                fadeIn.setFromValue(0.0); fadeIn.setToValue(1.0);
+                fadeIn.setInterpolator(Interpolator.EASE_IN);
+                fadeIn.play();
+            });
+            fadeOut.play();
+
             String darkStyle = "-fx-text-fill: #1a1a2e; -fx-font-weight: 900;";
             cityLabel.setStyle(darkStyle + " -fx-font-size: 28px;");
             pm25Label.setStyle(darkStyle + " -fx-font-size: 28px;");
@@ -1489,4 +1829,102 @@ public class DashboardController {
         alert.setContentText(message);
         alert.show();
     }
+    // ─────────────────────────────────────────────────────────────
+    // ANIMATION HELPERS
+    // ─────────────────────────────────────────────────────────────
+
+    /** Animate an integer counter on a Label, e.g. AQI 0 → 142 */
+    private void animateCounter(Label label, int from, int to, int decimals, String fmt) {
+        Timeline t = new Timeline();
+        javafx.beans.property.SimpleIntegerProperty prop =
+                new javafx.beans.property.SimpleIntegerProperty(from);
+        prop.addListener((obs, o, n) -> label.setText(String.format(fmt, n.intValue())));
+        t.getKeyFrames().addAll(
+                new KeyFrame(Duration.ZERO,        new javafx.animation.KeyValue(prop, from)),
+                new KeyFrame(Duration.millis(700), new javafx.animation.KeyValue(prop, to, Interpolator.EASE_OUT))
+        );
+        t.play();
+    }
+
+    /** Animate a double value on a Label with a format string */
+    private void animateDouble(Label label, double from, double to, String fmt) {
+        javafx.beans.property.SimpleDoubleProperty prop =
+                new javafx.beans.property.SimpleDoubleProperty(from);
+        prop.addListener((obs, o, n) -> label.setText(String.format(fmt, n.doubleValue())));
+        Timeline t = new Timeline(
+                new KeyFrame(Duration.ZERO,        new javafx.animation.KeyValue(prop, from)),
+                new KeyFrame(Duration.millis(700), new javafx.animation.KeyValue(prop, to, Interpolator.EASE_OUT))
+        );
+        t.play();
+    }
+
+    /** Animate a double value where the format string wraps the number (e.g. "Feels like 24°C") */
+    private void animateDoublePrefix(Label label, double from, double to, String fmt) {
+        animateDouble(label, from, to, fmt);
+    }
+
+
+    // ─────────────────────────────────────────────────────────────
+    // HOVER ANIMATION HELPERS
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Adds a dynamic gradient glow hover to any node (card, button, etc).
+     * glowColor: e.g. "rgba(26,115,232,0.35)" for blue glow
+     * baseStyle: the node's resting style (restored on exit)
+     */
+    private void addCardHover(javafx.scene.Node node, String glowColor, String restingStyle) {
+        node.setOnMouseEntered(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(180), node);
+            st.setToX(1.035); st.setToY(1.035);
+            st.setInterpolator(Interpolator.EASE_OUT);
+            st.play();
+            node.setStyle(restingStyle +
+                    " -fx-effect: dropshadow(gaussian, " + glowColor + ", 28, 0.4, 0, 4);");
+            node.setCursor(javafx.scene.Cursor.HAND);
+        });
+        node.setOnMouseExited(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(180), node);
+            st.setToX(1.0); st.setToY(1.0);
+            st.setInterpolator(Interpolator.EASE_OUT);
+            st.play();
+            node.setStyle(restingStyle);
+        });
+    }
+
+    /** Card hover with a lift (translateY) effect instead of scale */
+    private void addCardHoverLift(javafx.scene.Node node, String glowColor, String restingStyle) {
+        node.setOnMouseEntered(e -> {
+            TranslateTransition tt = new TranslateTransition(Duration.millis(160), node);
+            tt.setToY(-5); tt.setInterpolator(Interpolator.EASE_OUT); tt.play();
+            node.setStyle(restingStyle +
+                    " -fx-effect: dropshadow(gaussian, " + glowColor + ", 32, 0.45, 0, 8);");
+            node.setCursor(javafx.scene.Cursor.HAND);
+        });
+        node.setOnMouseExited(e -> {
+            TranslateTransition tt = new TranslateTransition(Duration.millis(160), node);
+            tt.setToY(0); tt.setInterpolator(Interpolator.EASE_OUT); tt.play();
+            node.setStyle(restingStyle);
+        });
+    }
+
+    /** Button hover: scale + dynamic glow */
+    private void addButtonHover(javafx.scene.control.Button btn, String glowColor) {
+        String base = btn.getStyle() != null ? btn.getStyle() : "";
+        btn.setOnMouseEntered(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(130), btn);
+            st.setToX(1.06); st.setToY(1.06);
+            st.setInterpolator(Interpolator.EASE_OUT); st.play();
+            btn.setStyle(base + " -fx-effect: dropshadow(gaussian, " + glowColor + ", 18, 0.5, 0, 2);");
+            btn.setCursor(javafx.scene.Cursor.HAND);
+        });
+        btn.setOnMouseExited(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(130), btn);
+            st.setToX(1.0); st.setToY(1.0);
+            st.setInterpolator(Interpolator.EASE_OUT); st.play();
+            btn.setStyle(base);
+        });
+    }
+
+
 }

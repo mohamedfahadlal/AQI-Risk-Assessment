@@ -1,3 +1,4 @@
+Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=IBM437
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -7,19 +8,24 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.0)
 
-2026-03-07T21:22:16.822+05:30  INFO 36328 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : Starting AqiBackendApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 36328 (C:\Users\Fahad\Desktop\my works\Java AP project\AQI-Risk-Assessment\homepage_backend\target\aqi-backend-0.0.1-SNAPSHOT.jar started by Fahad in C:\Users\Fahad\Desktop\my works\Java AP project\AQI-Risk-Assessment\aqi-frontend)
-2026-03-07T21:22:16.826+05:30  INFO 36328 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : No active profile set, falling back to 1 default profile: "default"
-2026-03-07T21:22:19.301+05:30  INFO 36328 --- [aqi-backend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2026-03-07T21:22:19.314+05:30  INFO 36328 --- [aqi-backend] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-03-07T21:22:19.314+05:30  INFO 36328 --- [aqi-backend] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
-2026-03-07T21:22:19.366+05:30  INFO 36328 --- [aqi-backend] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-03-07T21:22:19.368+05:30  INFO 36328 --- [aqi-backend] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2417 ms
-2026-03-07T21:22:20.788+05:30  INFO 36328 --- [aqi-backend] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
-2026-03-07T21:22:20.934+05:30  WARN 36328 --- [aqi-backend] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2026-03-07T21:22:20.981+05:30  INFO 36328 --- [aqi-backend] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+2026-03-07T21:50:42.830+05:30  INFO 3068 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : Starting AqiBackendApplication v0.0.1-SNAPSHOT using Java 24 with PID 3068 (D:\Github\Java AQI\java fx gui\AQI-Risk-Assessment\homepage_backend\target\aqi-backend-0.0.1-SNAPSHOT.jar started by hp in D:\Github\Java AQI\java fx gui\AQI-Risk-Assessment\aqi-frontend)
+2026-03-07T21:50:42.833+05:30  INFO 3068 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : No active profile set, falling back to 1 default profile: "default"
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (jar:nested:/D:/Github/Java AQI/java fx gui/AQI-Risk-Assessment/homepage_backend/target/aqi-backend-0.0.1-SNAPSHOT.jar/!BOOT-INF/lib/tomcat-embed-core-10.1.16.jar!/)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2026-03-07T21:50:45.123+05:30  INFO 3068 --- [aqi-backend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-07T21:50:45.138+05:30  INFO 3068 --- [aqi-backend] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-07T21:50:45.138+05:30  INFO 3068 --- [aqi-backend] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-03-07T21:50:45.207+05:30  INFO 3068 --- [aqi-backend] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-07T21:50:45.208+05:30  INFO 3068 --- [aqi-backend] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2251 ms
+2026-03-07T21:50:46.424+05:30  INFO 3068 --- [aqi-backend] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-03-07T21:50:46.533+05:30  WARN 3068 --- [aqi-backend] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-03-07T21:50:46.561+05:30  INFO 3068 --- [aqi-backend] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
 
 Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2026-03-07T21:22:21.015+05:30 ERROR 36328 --- [aqi-backend] [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
+2026-03-07T21:50:46.589+05:30 ERROR 3068 --- [aqi-backend] [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
 
 ***************************
 APPLICATION FAILED TO START

@@ -34,3 +34,4 @@ homepage_backend/src/main/resources/application.properties
 # log file 
 aqi-frontend/backend.log
 
+*.log

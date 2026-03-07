@@ -4,9 +4,7 @@ import com.aqi.utils.DatabaseConnection;
 import com.aqi.utils.SceneManager;
 import com.aqi.utils.EmailUtil;
 import com.aqi.utils.UserSession;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -33,10 +31,6 @@ public class SignUpController {
     @FXML private PasswordField passwordField;
     @FXML private PasswordField confirmPasswordField;
     @FXML private Label statusLabel;
-    @FXML private TextField confirmPasswordVisibleField; // ADD THIS
-    @FXML private javafx.scene.control.Button toggleConfirmBtn; // ADD THIS
-
-    private boolean isConfirmVisible = false; // Tracks the state
 
     @FXML private Region passStrengthLine;
     @FXML private Region confirmPassStrengthLine;
@@ -50,6 +44,13 @@ public class SignUpController {
     @FXML private VBox otpBox;
     @FXML private TextField otpInput;
     @FXML private Button mainActionBtn;
+    @FXML private Button backToDashboardBtn;
+    @FXML private Button aboutNavBtnSu;
+    @FXML private Button loginNavBtn;
+    @FXML private VBox   signUpCard;
+    @FXML private TextField confirmPasswordVisibleField;
+    @FXML private Button toggleConfirmBtn;
+    private boolean confirmVisible = false;
 
     private String generatedOtp;
     private int buttonState = 0;
@@ -59,15 +60,68 @@ public class SignUpController {
 
     @FXML
     public void initialize() {
-        confirmPasswordVisibleField.textProperty().bindBidirectional(confirmPasswordField.textProperty());
         passStrengthLine.setBackground(new Background(new BackgroundFill(currentPassColor, new CornerRadii(3), Insets.EMPTY)));
         confirmPassStrengthLine.setBackground(new Background(new BackgroundFill(currentConfirmColor, new CornerRadii(3), Insets.EMPTY)));
+
+        // Show back button only when a guest was redirected here from a restricted action
+        if (backToDashboardBtn != null) {
+            boolean showBack = UserSession.isGuestReturnToDashboard();
+            backToDashboardBtn.setVisible(showBack);
+            backToDashboardBtn.setManaged(showBack);
+        }
 
         passwordField.textProperty().addListener((observable, oldValue, newValue) -> {
             evaluatePasswordStrength(newValue);
             checkPasswordsMatch();
         });
         confirmPasswordField.textProperty().addListener((observable, oldValue, newValue) -> checkPasswordsMatch());
+        confirmPasswordVisibleField.textProperty().addListener((obs, o, n) -> {
+            confirmPasswordField.setText(n);
+            checkPasswordsMatch();
+        });
+
+        Platform.runLater(() -> {
+            // Card pop-in — especially noticeable in guest redirect flow
+            if (signUpCard != null) {
+                signUpCard.setOpacity(0);
+                signUpCard.setScaleX(0.88);
+                signUpCard.setScaleY(0.88);
+                signUpCard.setTranslateY(20);
+                FadeTransition f = new FadeTransition(Duration.millis(400), signUpCard);
+                f.setFromValue(0); f.setToValue(1);
+                ScaleTransition s = new ScaleTransition(Duration.millis(400), signUpCard);
+                s.setFromX(0.88); s.setToX(1.0);
+                s.setFromY(0.88); s.setToY(1.0);
+                s.setInterpolator(Interpolator.EASE_OUT);
+                TranslateTransition t = new TranslateTransition(Duration.millis(400), signUpCard);
+                t.setFromY(20); t.setToY(0);
+                t.setInterpolator(Interpolator.EASE_OUT);
+                new ParallelTransition(f, s, t).play();
+            }
+            // Hovers
+            addHover(mainActionBtn,      "rgba(14,165,233,0.38)");
+            addHover(backToDashboardBtn, "rgba(26,115,232,0.30)");
+            addHover(aboutNavBtnSu,      "rgba(100,100,100,0.18)");
+            addHover(loginNavBtn,        "rgba(100,100,100,0.18)");
+        });
+    }
+
+    private void addHover(Button btn, String glowColor) {
+        if (btn == null) return;
+        String base = btn.getStyle() != null ? btn.getStyle() : "";
+        btn.setOnMouseEntered(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(130), btn);
+            st.setToX(1.06); st.setToY(1.06);
+            st.setInterpolator(Interpolator.EASE_OUT); st.play();
+            btn.setStyle(base + "-fx-effect: dropshadow(gaussian," + glowColor + ",16,0.45,0,2);");
+            btn.setCursor(javafx.scene.Cursor.HAND);
+        });
+        btn.setOnMouseExited(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(130), btn);
+            st.setToX(1.0); st.setToY(1.0);
+            st.setInterpolator(Interpolator.EASE_OUT); st.play();
+            btn.setStyle(base);
+        });
         passwordField.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> {
             if (isNowFocused && buttonState == 0) {
                 passwordConditionsBox.setVisible(true);
@@ -78,26 +132,7 @@ public class SignUpController {
             }
         });
     }
-    @FXML
-    private void toggleConfirmVisibility() {
-        isConfirmVisible = !isConfirmVisible;
 
-        if (isConfirmVisible) {
-            // Show plain text, hide dots
-            confirmPasswordVisibleField.setVisible(true);
-            confirmPasswordVisibleField.setManaged(true);
-            confirmPasswordField.setVisible(false);
-            confirmPasswordField.setManaged(false);
-            toggleConfirmBtn.setText("🙈"); // Or change to "Hide"
-        } else {
-            // Show dots, hide plain text
-            confirmPasswordVisibleField.setVisible(false);
-            confirmPasswordVisibleField.setManaged(false);
-            confirmPasswordField.setVisible(true);
-            confirmPasswordField.setManaged(true);
-            toggleConfirmBtn.setText("👁"); // Or change to "Show"
-        }
-    }
     private void animateLineColor(Region line, Color startColor, Color targetColor, boolean isPassLine) {
         if (startColor.equals(targetColor)) return;
         ObjectProperty<Color> colorProperty = new SimpleObjectProperty<>(startColor);
@@ -265,6 +300,33 @@ public class SignUpController {
         statusLabel.setText(message);
     }
 
-    @FXML private void goToLogin() { SceneManager.switchScene("/fxml/Login.fxml"); }
+    @FXML
+    private void toggleConfirmVisibility() {
+        confirmVisible = !confirmVisible;
+        if (confirmVisible) {
+            confirmPasswordVisibleField.setText(confirmPasswordField.getText());
+            confirmPasswordVisibleField.setVisible(true);
+            confirmPasswordVisibleField.setManaged(true);
+            confirmPasswordField.setVisible(false);
+            confirmPasswordField.setManaged(false);
+            toggleConfirmBtn.setText("🙈");
+        } else {
+            confirmPasswordField.setText(confirmPasswordVisibleField.getText());
+            confirmPasswordField.setVisible(true);
+            confirmPasswordField.setManaged(true);
+            confirmPasswordVisibleField.setVisible(false);
+            confirmPasswordVisibleField.setManaged(false);
+            toggleConfirmBtn.setText("👁");
+        }
+    }
+
+    @FXML
+    private void handleBackToDashboard() {
+        // Keep guest session alive, just go back
+        UserSession.setGuestReturnToDashboard(false);
+        SceneManager.switchScene("/com/example/aqidashboard/dashboard-view.fxml", "Dashboard");
+    }
+
+    @FXML private void goToLogin() { SceneManager.switchScene("/fxml/Login.fxml", "Login"); }
     @FXML private void goToAbout() { SceneManager.switchScene("/fxml/About.fxml"); }
 }
