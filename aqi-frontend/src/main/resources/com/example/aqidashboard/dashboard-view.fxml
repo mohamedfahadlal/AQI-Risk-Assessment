@@ -17,35 +17,24 @@
     <!--  NAVBAR                                                      -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <VBox style="-fx-background-color: #ffffff; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-
-        <!-- Main navbar row -->
         <HBox alignment="CENTER" spacing="15" style="-fx-padding: 12 25;">
-
-            <!-- Left: Logo -->
             <HBox alignment="CENTER_LEFT" spacing="2" minWidth="100">
                 <Label text="Ai" style="-fx-font-size: 22px; -fx-font-weight: 900; -fx-text-fill: #1a73e8;"/>
                 <Label text="QI" style="-fx-font-size: 22px; -fx-font-weight: 900; -fx-text-fill: #006699;"/>
             </HBox>
-
-            <!-- Center: Search -->
             <HBox alignment="CENTER" spacing="8" HBox.hgrow="ALWAYS">
                 <TextField fx:id="citySearchField" prefWidth="320" promptText="Search any city..."
                            style="-fx-background-radius: 20; -fx-background-color: #f1f3f4; -fx-padding: 9 18; -fx-font-size: 13px;"/>
                 <Button text="Search" onAction="#handleCitySearch"
-                        style="-fx-background-radius: 20; -fx-background-color: #1a73e8; -fx-text-fill: white;
-                               -fx-font-weight: bold; -fx-padding: 9 18; -fx-cursor: hand;"/>
+                        style="-fx-background-radius: 20; -fx-background-color: #1a73e8; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 9 18; -fx-cursor: hand;"/>
                 <Button text="Locate Me" onAction="#handleDetectLocation"
-                        style="-fx-background-radius: 20; -fx-background-color: white; -fx-border-color: #1a73e8;
-                               -fx-border-radius: 20; -fx-text-fill: #1a73e8; -fx-padding: 8 16; -fx-cursor: hand;"/>
+                        style="-fx-background-radius: 20; -fx-background-color: white; -fx-border-color: #1a73e8; -fx-border-radius: 20; -fx-text-fill: #1a73e8; -fx-padding: 8 16; -fx-cursor: hand;"/>
             </HBox>
-
-            <!-- Right: Actions -->
-            <HBox alignment="CENTER_RIGHT" spacing="8" minWidth="360">
+            <HBox alignment="CENTER_RIGHT" spacing="8" minWidth="380">
                 <Button fx:id="darkModeBtn" text="Dark Mode" onAction="#handleDarkMode"
                         style="-fx-background-radius: 20; -fx-background-color: #f1f3f4; -fx-text-fill: #444; -fx-padding: 8 14; -fx-cursor: hand;"/>
                 <Button text="Predict AQI" onAction="#handleOpenPrediction"
-                        style="-fx-background-radius: 20; -fx-background-color: #f3e8ff; -fx-text-fill: #7c3aed;
-                               -fx-font-weight: bold; -fx-padding: 8 14; -fx-cursor: hand;"/>
+                        style="-fx-background-radius: 20; -fx-background-color: #f3e8ff; -fx-text-fill: #7c3aed; -fx-font-weight: bold; -fx-padding: 8 14; -fx-cursor: hand;"/>
                 <Button text="My Profile" onAction="#handleViewProfile"
                         style="-fx-background-radius: 20; -fx-background-color: #e8f0fe; -fx-text-fill: #1a73e8; -fx-padding: 8 14; -fx-cursor: hand;"/>
                 <Button text="Logout" onAction="#handleLogout"
@@ -53,50 +42,66 @@
                 <Label fx:id="welcomeLabel" style="-fx-font-size: 12px; -fx-text-fill: #888;"/>
             </HBox>
         </HBox>
-
-        <!-- Sub-navbar: refresh info -->
         <HBox alignment="CENTER_LEFT" spacing="30"
               style="-fx-background-color: #f8f9fa; -fx-padding: 5 25; -fx-border-color: #e8eaed; -fx-border-width: 1 0 0 0;">
-            <Label fx:id="lastRefreshedLabel" text="Last refreshed: --"
-                   style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-            <Label fx:id="autoRefreshLabel" text="Auto-refresh in: 15:00"
-                   style="-fx-font-size: 11px; -fx-text-fill: #1a73e8;"/>
+            <Label fx:id="lastRefreshedLabel" text="Last refreshed: --" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
+            <Label fx:id="autoRefreshLabel" text="Auto-refresh in: 15:00" style="-fx-font-size: 11px; -fx-text-fill: #1a73e8;"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Set AQI Alert" onAction="#handleSetAlert"
-                    style="-fx-background-radius: 10; -fx-background-color: #fff3cd; -fx-text-fill: #856404;
-                           -fx-font-size: 11px; -fx-padding: 3 12; -fx-cursor: hand;"/>
+                    style="-fx-background-radius: 10; -fx-background-color: #fff3cd; -fx-text-fill: #856404; -fx-font-size: 11px; -fx-padding: 3 12; -fx-cursor: hand;"/>
             <Label fx:id="alertStatusLabel" text="" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
         </HBox>
     </VBox>
 
     <!-- ═══════════════════════════════════════════════════════════ -->
-    <!--  TAB PANE                                                    -->
+    <!--  TAB PANE — Modern floating pill style                       -->
     <!-- ═══════════════════════════════════════════════════════════ -->
-    <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS"
-             style="-fx-tab-min-width: 130;">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!--  CAPSULE TAB SWITCHER                                        -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <HBox alignment="CENTER" style="-fx-padding: 14 0 8 0; -fx-background-color: #f0f4f8;">
+        <HBox alignment="CENTER" spacing="4"
+              style="-fx-background-color: #e2e8f0; -fx-background-radius: 26; -fx-padding: 5;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);">
+            <Button fx:id="tabBtn1" text="🌫  AQI and Weather" onAction="#handleTabSwitch"
+                    style="-fx-background-radius: 22; -fx-background-color: #1a73e8; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(26,115,232,0.4), 8, 0, 0, 2);"/>
+            <Button fx:id="tabBtn2" text="📈  Forecast Trend" onAction="#handleTabSwitch"
+                    style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
+            <Button fx:id="tabBtn3" text="🧪  Pollutants" onAction="#handleTabSwitch"
+                    style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
+            <Button fx:id="tabBtn4" text="🇮🇳  India Cities" onAction="#handleTabSwitch"
+                    style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
+            <Button fx:id="tabBtn5" text="ℹ  About AQI" onAction="#handleTabSwitch"
+                    style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
+        </HBox>
+    </HBox>
 
-        <!-- ─────────────────────────────────────────────────────── -->
-        <!--  TAB 1: AQI and WEATHER                                 -->
-        <!-- ─────────────────────────────────────────────────────── -->
-        <Tab text="AQI and Weather" fx:id="tab1">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!--  TAB CONTENT PANELS (only one visible at a time)            -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <StackPane VBox.vgrow="ALWAYS">
+        <VBox fx:id="tabContent1" visible="true" managed="true" VBox.vgrow="ALWAYS">
             <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
                 <VBox spacing="16" style="-fx-padding: 20; -fx-background-color: #f0f4f8;">
 
                     <!-- Toggle bar -->
-                    <HBox alignment="CENTER" spacing="0">
+                    <HBox alignment="CENTER" spacing="0"
+                          style="-fx-background-color: #e4e9f0; -fx-background-radius: 25; -fx-padding: 4; -fx-max-width: 340;
+                                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 1);">
                         <Button fx:id="aqiToggleBtn" text="AQI View" onAction="#handleAqiToggle"
-                                style="-fx-background-radius: 20 0 0 20; -fx-background-color: #1a73e8;
-                                       -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 28; -fx-cursor: hand;"/>
+                                style="-fx-background-radius: 22; -fx-background-color: #1a73e8;
+                                       -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 36; -fx-cursor: hand;
+                                       -fx-effect: dropshadow(gaussian, rgba(26,115,232,0.35), 8, 0, 0, 2);"/>
                         <Button fx:id="weatherToggleBtn" text="Weather View" onAction="#handleWeatherToggle"
-                                style="-fx-background-radius: 0 20 20 0; -fx-background-color: #e8eaed;
-                                       -fx-text-fill: #555; -fx-padding: 8 28; -fx-cursor: hand;"/>
+                                style="-fx-background-radius: 22; -fx-background-color: transparent;
+                                       -fx-text-fill: #666; -fx-padding: 8 36; -fx-cursor: hand;"/>
                     </HBox>
 
-                    <!-- AQI VIEW -->
+                    <!-- ── AQI VIEW ── -->
                     <VBox fx:id="aqiView" spacing="0">
                         <HBox fx:id="mainCard" spacing="30" alignment="CENTER_LEFT"
                               style="-fx-background-color: white; -fx-background-radius: 20;
-                                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4); -fx-padding: 30 40;">
+                                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 24, 0, 0, 6); -fx-padding: 30 40;">
 
                             <!-- Gauge -->
                             <Pane prefHeight="260" prefWidth="380" minWidth="360">
@@ -106,56 +111,71 @@
                                 <Arc centerX="190" centerY="190" fill="transparent" length="-30" radiusX="155" radiusY="155" startAngle="90"  stroke="#d35400" strokeWidth="22"/>
                                 <Arc centerX="190" centerY="190" fill="transparent" length="-30" radiusX="155" radiusY="155" startAngle="60"  stroke="#8e44ad" strokeWidth="22"/>
                                 <Arc centerX="190" centerY="190" fill="transparent" length="-30" radiusX="155" radiusY="155" startAngle="30"  stroke="#c0392b" strokeWidth="22"/>
-                                <Line fx:id="needle" startX="190" startY="190" endX="50" endY="190" stroke="#333" strokeWidth="4" strokeLineCap="ROUND"/>
-                                <Circle centerX="190" centerY="190" radius="8" fill="#333"/>
+                                <Line fx:id="needle" startX="190" startY="190" endX="50" endY="190" stroke="#1a1a2e" strokeWidth="4" strokeLineCap="ROUND"/>
+                                <Circle centerX="190" centerY="190" radius="8" fill="#1a1a2e"/>
                                 <VBox alignment="CENTER" layoutX="115" layoutY="200" prefWidth="150">
                                     <Label fx:id="aqiLabel" text="--" style="-fx-font-size: 52px; -fx-font-weight: 900;"/>
                                     <Label text="AQI" style="-fx-font-size: 13px; -fx-text-fill: #888;"/>
                                 </VBox>
                             </Pane>
 
-                            <!-- AQI Info -->
-                            <VBox spacing="20" HBox.hgrow="ALWAYS">
-                                <HBox spacing="30" alignment="CENTER_LEFT">
-                                    <VBox spacing="3" style="-fx-background-color: #f8f9fa; -fx-padding: 12 22; -fx-background-radius: 14;">
-                                        <Label text="Air Quality" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                        <Label fx:id="statusLabel" text="--" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+                            <!-- AQI Info — always dark readable text -->
+                            <VBox spacing="28" HBox.hgrow="ALWAYS">
+                                <HBox spacing="40" alignment="CENTER_LEFT">
+                                    <VBox spacing="8"
+                                          style="-fx-background-color: rgba(0,0,0,0.07); -fx-padding: 14 24; -fx-background-radius: 16;">
+                                        <Label text="AIR QUALITY"
+                                               style="-fx-font-size: 10px; -fx-text-fill: #555; -fx-font-weight: bold;"/>
+                                        <Label fx:id="statusLabel" text="--"
+                                               style="-fx-font-size: 30px; -fx-font-weight: 900;"/>
                                     </VBox>
-                                    <VBox spacing="3">
-                                        <Label text="Location" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                        <Label fx:id="cityLabel" text="Kochi, India"
-                                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
-                                    </VBox>
-                                </HBox>
-                                <HBox spacing="40">
-                                    <VBox spacing="2">
-                                        <Label text="PM2.5" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                        <Label fx:id="pm25Label" text="-- µg/m³" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-                                    </VBox>
-                                    <VBox spacing="2">
-                                        <Label text="PM10" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                        <Label fx:id="pm10Label" text="-- µg/m³" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                                    <VBox spacing="8">
+                                        <Label text="LOCATION"
+                                               style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                        <Label fx:id="cityLabel" text="Kochi"
+                                               style="-fx-font-size: 28px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
                                     </VBox>
                                 </HBox>
-                                <Separator/>
-                                <HBox spacing="35">
-                                    <VBox spacing="2">
-                                        <Label text="Temperature" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                        <Label fx:id="tempLabel" text="--°C" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                <HBox spacing="70">
+                                    <VBox spacing="8">
+                                        <Label text="PM2.5"
+                                               style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                        <Label fx:id="pm25Label" text="-- µg/m³"
+                                               style="-fx-font-size: 28px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
                                     </VBox>
-                                    <VBox spacing="2">
-                                        <Label text="Humidity" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                        <Label fx:id="humidityLabel" text="--%"  style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                    <VBox spacing="8">
+                                        <Label text="PM10"
+                                               style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                        <Label fx:id="pm10Label" text="-- µg/m³"
+                                               style="-fx-font-size: 28px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
                                     </VBox>
-                                    <VBox spacing="2">
-                                        <Label text="Wind Speed" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                        <Label fx:id="windLabel" text="-- km/h" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                </HBox>
+                                <Separator style="-fx-background-color: rgba(0,0,0,0.15);"/>
+                                <HBox spacing="55">
+                                    <VBox spacing="8">
+                                        <Label text="TEMPERATURE"
+                                               style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                        <Label fx:id="tempLabel" text="--°C"
+                                               style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
+                                    </VBox>
+                                    <VBox spacing="8">
+                                        <Label text="HUMIDITY"
+                                               style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                        <Label fx:id="humidityLabel" text="--%"
+                                               style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
+                                    </VBox>
+                                    <VBox spacing="8">
+                                        <Label text="WIND SPEED"
+                                               style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                        <Label fx:id="windLabel" text="-- km/h"
+                                               style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
                                     </VBox>
                                 </HBox>
                                 <HBox spacing="10">
                                     <Button text="Export PDF Report" onAction="#handleExportPdf"
                                             style="-fx-background-radius: 14; -fx-background-color: #e8f5e9;
-                                                   -fx-text-fill: #2e7d32; -fx-font-weight: bold; -fx-padding: 9 20; -fx-cursor: hand;"/>
+                                                   -fx-text-fill: #2e7d32; -fx-font-weight: bold; -fx-padding: 9 20; -fx-cursor: hand;
+                                                   -fx-border-color: #a5d6a7; -fx-border-radius: 14; -fx-border-width: 1;"/>
                                 </HBox>
                             </VBox>
 
@@ -166,323 +186,485 @@
                         </HBox>
                     </VBox>
 
-                    <!-- WEATHER VIEW -->
+                    <!-- ── WEATHER VIEW ── -->
                     <VBox fx:id="weatherView" spacing="0" managed="false" visible="false">
-                        <HBox spacing="30" alignment="CENTER_LEFT"
-                              style="-fx-background-color: white; -fx-background-radius: 20;
-                                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4); -fx-padding: 30 40;">
+                        <StackPane fx:id="weatherCardStack"
+                                   style="-fx-background-radius: 20;
+                                          -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 20, 0, 0, 4);">
+                            <!-- Background image fills card -->
+                            <ImageView fx:id="weatherBgImage" preserveRatio="false"
+                                       fitWidth="800" fitHeight="300"
+                                       style="-fx-opacity: 1.0;" StackPane.alignment="CENTER"/>
+                            <!-- Overlay tint for text readability -->
+                            <Region fx:id="weatherCardOverlay"
+                                    style="-fx-background-color: rgba(255,255,255,0.42); -fx-background-radius: 20;"
+                                    StackPane.alignment="CENTER"/>
+                            <!-- Content HBox — mirrors AQI card layout -->
+                            <HBox fx:id="weatherCard" spacing="40" alignment="CENTER_LEFT"
+                                  style="-fx-background-color: transparent; -fx-background-radius: 20;
+                                         -fx-padding: 30 40;">
 
-                            <!-- Left -->
-                            <VBox spacing="12" prefWidth="260" alignment="CENTER_LEFT">
-                                <HBox spacing="14" alignment="CENTER_LEFT">
-                                    <ImageView fx:id="weatherIconView" fitWidth="64" fitHeight="64" preserveRatio="true"/>
-                                    <VBox spacing="2">
-                                        <Label fx:id="weatherDescLabel" text="--"
-                                               style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
-                                        <Label fx:id="weatherCityLabel" text="--"
-                                               style="-fx-font-size: 13px; -fx-text-fill: #888;"/>
-                                    </VBox>
-                                </HBox>
-                                <Label fx:id="weatherTempLabel" text="--°C"
-                                       style="-fx-font-size: 58px; -fx-font-weight: 900; -fx-text-fill: #1a73e8;"/>
-                                <Label fx:id="weatherFeelsLabel" text="Feels like --°C"
-                                       style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
-                            </VBox>
+                                <!-- LEFT: big temp + icon + feels like  (mirrors gauge pane width) -->
+                                <VBox spacing="14" alignment="CENTER" prefWidth="280" minWidth="280">
+                                    <HBox spacing="14" alignment="CENTER">
+                                        <ImageView fx:id="weatherIconView" fitWidth="72" fitHeight="72" preserveRatio="true"/>
+                                        <VBox spacing="3" alignment="CENTER_LEFT">
+                                            <Label fx:id="weatherDescLabel" text="--"
+                                                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
+                                            <Label fx:id="weatherCityLabel" text="--"
+                                                   style="-fx-font-size: 13px; -fx-text-fill: #555;"/>
+                                        </VBox>
+                                    </HBox>
+                                    <Label fx:id="weatherTempLabel" text="--°C"
+                                           style="-fx-font-size: 62px; -fx-font-weight: 900; -fx-text-fill: #e67e22;"/>
+                                    <Label fx:id="weatherFeelsLabel" text="Feels like --°C"
+                                           style="-fx-font-size: 14px; -fx-text-fill: #555; -fx-font-weight: bold;"/>
+                                    <HBox spacing="28" alignment="CENTER">
+                                        <VBox spacing="5" alignment="CENTER">
+                                            <Label text="MIN" style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                            <Label fx:id="wMinLabel" text="--°C"
+                                                   style="-fx-font-size: 20px; -fx-font-weight: 900; -fx-text-fill: #1a73e8;"/>
+                                        </VBox>
+                                        <Separator orientation="VERTICAL"/>
+                                        <VBox spacing="5" alignment="CENTER">
+                                            <Label text="MAX" style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                            <Label fx:id="wMaxLabel" text="--°C"
+                                                   style="-fx-font-size: 20px; -fx-font-weight: 900; -fx-text-fill: #e64a19;"/>
+                                        </VBox>
+                                    </HBox>
+                                </VBox>
 
-                            <Separator orientation="VERTICAL"/>
+                                <Separator orientation="VERTICAL"/>
 
-                            <!-- Weather cards grid -->
-                            <GridPane hgap="14" vgap="14" HBox.hgrow="ALWAYS">
-                                <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0"
-                                      style="-fx-background-color: #f0f7ff; -fx-background-radius: 12; -fx-padding: 12 18;">
-                                    <Label text="Humidity" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                    <Label fx:id="wHumidityLabel" text="--%"
-                                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
+                                <!-- RIGHT: stat grid — mirrors AQI info VBox -->
+                                <VBox spacing="22" HBox.hgrow="ALWAYS">
+                                    <HBox spacing="40" alignment="CENTER_LEFT">
+                                        <VBox spacing="8" style="-fx-background-color: rgba(0,0,0,0.06);
+                                                                  -fx-padding: 14 24; -fx-background-radius: 16;">
+                                            <Label text="HUMIDITY" style="-fx-font-size: 10px; -fx-text-fill: #555; -fx-font-weight: bold;"/>
+                                            <Label fx:id="wHumidityLabel" text="--%"
+                                                   style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
+                                        </VBox>
+                                        <VBox spacing="8" style="-fx-background-color: rgba(0,0,0,0.06);
+                                                                  -fx-padding: 14 24; -fx-background-radius: 16;">
+                                            <Label text="WIND" style="-fx-font-size: 10px; -fx-text-fill: #555; -fx-font-weight: bold;"/>
+                                            <Label fx:id="wWindSpeedLabel" text="-- km/h"
+                                                   style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
+                                        </VBox>
+                                        <VBox spacing="8">
+                                            <Label text="DIRECTION" style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                            <Label fx:id="wWindDirLabel" text="--"
+                                                   style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
+                                        </VBox>
+                                    </HBox>
+                                    <HBox spacing="55">
+                                        <VBox spacing="8">
+                                            <Label text="VISIBILITY" style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                            <Label fx:id="wVisibilityLabel" text="-- km"
+                                                   style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
+                                        </VBox>
+                                        <VBox spacing="8">
+                                            <Label text="PRESSURE" style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                            <Label fx:id="wPressureLabel" text="-- hPa"
+                                                   style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
+                                        </VBox>
+                                        <VBox spacing="8">
+                                            <Label text="CLOUD COVER" style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                            <Label fx:id="wCloudsLabel" text="--%"
+                                                   style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #1a1a2e;"/>
+                                        </VBox>
+                                    </HBox>
+                                    <Separator style="-fx-background-color: rgba(0,0,0,0.15);"/>
+                                    <HBox spacing="55">
+                                        <VBox spacing="8">
+                                            <Label text="SUNRISE" style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                            <Label fx:id="wSunriseLabel" text="--:--"
+                                                   style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #f57c00;"/>
+                                        </VBox>
+                                        <VBox spacing="8">
+                                            <Label text="SUNSET" style="-fx-font-size: 10px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+                                            <Label fx:id="wSunsetLabel" text="--:--"
+                                                   style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #e64a19;"/>
+                                        </VBox>
+                                    </HBox>
                                 </VBox>
-                                <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0"
-                                      style="-fx-background-color: #f0f7ff; -fx-background-radius: 12; -fx-padding: 12 18;">
-                                    <Label text="Wind Speed" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                    <Label fx:id="wWindSpeedLabel" text="-- km/h"
-                                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
-                                </VBox>
-                                <VBox spacing="4" GridPane.columnIndex="2" GridPane.rowIndex="0"
-                                      style="-fx-background-color: #f0f7ff; -fx-background-radius: 12; -fx-padding: 12 18;">
-                                    <Label text="Wind Direction" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                    <Label fx:id="wWindDirLabel" text="--"
-                                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
-                                </VBox>
-                                <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1"
-                                      style="-fx-background-color: #f0f7ff; -fx-background-radius: 12; -fx-padding: 12 18;">
-                                    <Label text="Visibility" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                    <Label fx:id="wVisibilityLabel" text="-- km"
-                                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
-                                </VBox>
-                                <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1"
-                                      style="-fx-background-color: #f0f7ff; -fx-background-radius: 12; -fx-padding: 12 18;">
-                                    <Label text="Pressure" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                    <Label fx:id="wPressureLabel" text="-- hPa"
-                                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
-                                </VBox>
-                                <VBox spacing="4" GridPane.columnIndex="2" GridPane.rowIndex="1"
-                                      style="-fx-background-color: #f0f7ff; -fx-background-radius: 12; -fx-padding: 12 18;">
-                                    <Label text="Cloud Cover" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                    <Label fx:id="wCloudsLabel" text="--%"
-                                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
-                                </VBox>
-                                <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="2"
-                                      style="-fx-background-color: #fff8e1; -fx-background-radius: 12; -fx-padding: 12 18;">
-                                    <Label text="Sunrise" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                    <Label fx:id="wSunriseLabel" text="--"
-                                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #f59e0b;"/>
-                                </VBox>
-                                <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="2"
-                                      style="-fx-background-color: #fff8e1; -fx-background-radius: 12; -fx-padding: 12 18;">
-                                    <Label text="Sunset" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                    <Label fx:id="wSunsetLabel" text="--"
-                                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #f59e0b;"/>
-                                </VBox>
-                                <VBox spacing="4" GridPane.columnIndex="2" GridPane.rowIndex="2"
-                                      style="-fx-background-color: #f0f7ff; -fx-background-radius: 12; -fx-padding: 12 18;">
-                                    <Label text="Min / Max Temp" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                                    <Label fx:id="wMinMaxLabel" text="--°C / --°C"
-                                           style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
-                                </VBox>
-                            </GridPane>
-                        </HBox>
+                            </HBox>
+                        </StackPane>
                     </VBox>
 
                 </VBox>
             </ScrollPane>
-        </Tab>
-
-        <!-- ─────────────────────────────────────────────────────── -->
-        <!--  TAB 2: FORECAST TREND                                  -->
-        <!-- ─────────────────────────────────────────────────────── -->
-        <Tab text="Forecast Trend" fx:id="tab2">
+        </VBox>
+        <VBox fx:id="tabContent2" visible="false" managed="false" VBox.vgrow="ALWAYS">
             <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
                 <VBox spacing="16" style="-fx-padding: 20; -fx-background-color: #f0f4f8;">
-
-                    <HBox alignment="CENTER_LEFT" spacing="16">
-                        <Label text="AQI and Temperature Forecast"
-                               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <ComboBox fx:id="forecastIntervalBox" prefWidth="130"
-                                  style="-fx-background-radius: 10;"/>
-                    </HBox>
-
-                    <VBox style="-fx-background-color: white; -fx-background-radius: 20;
-                                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4); -fx-padding: 24;">
-                        <LineChart fx:id="forecastChart" prefHeight="340" animated="false"
-                                   style="-fx-background-color: transparent;">
+                    <VBox fx:id="forecastChartContainer" spacing="15"
+                          style="-fx-background-color: white; -fx-background-radius: 20;
+                                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4); -fx-padding: 28 35;">
+                        <HBox alignment="CENTER_LEFT" spacing="20">
+                            <Label text="AQI and Temperature Forecast"
+                                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="Interval:" style="-fx-text-fill: #666; -fx-font-size: 13px;"/>
+                            <ComboBox fx:id="forecastIntervalBox"
+                                      style="-fx-background-radius: 10; -fx-font-size: 13px;"/>
+                        </HBox>
+                        <LineChart fx:id="forecastChart" prefHeight="380"
+                                   animated="false" createSymbols="false"
+                                   style="-fx-background-color: transparent; -fx-padding: 10 0 0 0;">
                             <xAxis>
-                                <CategoryAxis fx:id="forecastXAxis" label="Time"
-                                              style="-fx-tick-label-font-size: 10px;"/>
+                                <CategoryAxis fx:id="forecastXAxis"
+                                              tickLabelRotation="-40" tickLabelGap="6"
+                                              style="-fx-tick-label-fill: #111111; -fx-tick-label-font-size: 11px; -fx-font-weight: bold;"/>
                             </xAxis>
                             <yAxis>
-                                <NumberAxis fx:id="forecastYAxis" label="AQI / Temp (°C)" autoRanging="true"/>
+                                <NumberAxis fx:id="forecastYAxis" autoRanging="true"
+                                            style="-fx-tick-label-fill: #111111; -fx-tick-label-font-size: 11px; -fx-font-weight: bold;"/>
                             </yAxis>
                         </LineChart>
+                        <Label text="5-Day Summary"
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #444;"/>
+                        <HBox fx:id="dailySummaryBox" spacing="12" alignment="CENTER_LEFT"/>
                     </VBox>
-
-                    <Label text="Daily Summary"
-                           style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
-                    <HBox fx:id="dailySummaryBox" spacing="12" alignment="CENTER"/>
-
                 </VBox>
             </ScrollPane>
-        </Tab>
-
-        <!-- ─────────────────────────────────────────────────────── -->
-        <!--  TAB 3: POLLUTANTS                                      -->
-        <!-- ─────────────────────────────────────────────────────── -->
-        <Tab text="Pollutants" fx:id="tab3">
+        </VBox>
+        <VBox fx:id="tabContent3" visible="false" managed="false" VBox.vgrow="ALWAYS">
             <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
                 <VBox spacing="16" style="-fx-padding: 20; -fx-background-color: #f0f4f8;">
-                    <VBox spacing="4">
-                        <Label text="Major Pollutants in the Air"
-                               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
-                        <Label text="Compared against WHO 24-hour safe limits"
-                               style="-fx-font-size: 12px; -fx-text-fill: #888;"/>
+
+                    <!-- Outer card — matches Cities and AQI card style -->
+                    <VBox spacing="20"
+                          style="-fx-background-color: white; -fx-background-radius: 20;
+                                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 24, 0, 0, 6); -fx-padding: 28 35;">
+
+                        <!-- Header row -->
+                        <HBox alignment="CENTER_LEFT" spacing="16">
+                            <VBox spacing="3">
+                                <Label text="Major Pollutants in the Air"
+                                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
+                                <Label text="Compared against WHO 24-hour safe limits"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #999;"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Pollutant cards grid — centered like cities -->
+                        <StackPane alignment="CENTER">
+                            <GridPane fx:id="pollutantsGrid" hgap="16" vgap="16" alignment="CENTER"/>
+                        </StackPane>
+
                     </VBox>
-                    <GridPane fx:id="pollutantsGrid" hgap="16" vgap="16"/>
                 </VBox>
             </ScrollPane>
-        </Tab>
-
-        <!-- ─────────────────────────────────────────────────────── -->
-        <!--  TAB 4: INDIA CITIES                                    -->
-        <!-- ─────────────────────────────────────────────────────── -->
-        <Tab text="India Cities" fx:id="tab4">
+        </VBox>
+        <VBox fx:id="tabContent4" visible="false" managed="false" VBox.vgrow="ALWAYS">
             <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
                 <VBox spacing="16" style="-fx-padding: 20; -fx-background-color: #f0f4f8;">
-                    <HBox alignment="CENTER_LEFT" spacing="16">
-                        <Label text="Air Quality Across India"
-                               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button fx:id="sortCitiesBtn" text="Sort: Worst First" onAction="#handleSortCities"
-                                style="-fx-background-radius: 14; -fx-background-color: #e8f0fe;
-                                       -fx-text-fill: #1a73e8; -fx-padding: 7 16; -fx-cursor: hand;"/>
-                        <Button text="Refresh Cities" onAction="#handleRefreshCities"
-                                style="-fx-background-radius: 14; -fx-background-color: #e8f5e9;
-                                       -fx-text-fill: #2e7d32; -fx-padding: 7 16; -fx-cursor: hand;"/>
-                    </HBox>
-                    <GridPane fx:id="citiesGrid" hgap="16" vgap="16"/>
+
+                    <!-- Outer card — same look as AQI card -->
+                    <VBox spacing="20"
+                          style="-fx-background-color: white; -fx-background-radius: 20;
+                                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 24, 0, 0, 6); -fx-padding: 28 35;">
+
+                        <HBox alignment="CENTER_LEFT" spacing="16">
+                            <VBox spacing="3">
+                                <Label text="Air Quality Across India"
+                                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
+                                <Label text="Live AQI data for major Indian cities"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #999;"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="sortCitiesBtn" text="Sort: Worst First" onAction="#handleSortCities"
+                                    style="-fx-background-radius: 20; -fx-background-color: #e8f0fe;
+                                           -fx-text-fill: #1a73e8; -fx-font-weight: bold;
+                                           -fx-padding: 8 18; -fx-cursor: hand;
+                                           -fx-border-color: #c5d8fb; -fx-border-radius: 20; -fx-border-width: 1;"/>
+                            <Button text="Refresh" onAction="#handleRefreshCities"
+                                    style="-fx-background-radius: 20; -fx-background-color: #e8f5e9;
+                                           -fx-text-fill: #2e7d32; -fx-font-weight: bold;
+                                           -fx-padding: 8 18; -fx-cursor: hand;
+                                           -fx-border-color: #a5d6a7; -fx-border-radius: 20; -fx-border-width: 1;"/>
+                        </HBox>
+
+                        <!-- Cities grid — centered via StackPane wrapper -->
+                        <StackPane alignment="CENTER">
+                            <GridPane fx:id="citiesGrid" hgap="16" vgap="16" alignment="CENTER"/>
+                        </StackPane>
+
+                    </VBox>
                 </VBox>
             </ScrollPane>
-        </Tab>
-
-        <!-- ─────────────────────────────────────────────────────── -->
-        <!--  TAB 5: ABOUT AQI                                       -->
-        <!-- ─────────────────────────────────────────────────────── -->
-        <Tab text="About AQI" fx:id="tab5">
+        </VBox>
+        <VBox fx:id="tabContent5" visible="false" managed="false" VBox.vgrow="ALWAYS">
             <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
                 <VBox spacing="24" style="-fx-padding: 30 60; -fx-background-color: #f0f4f8;">
 
                     <!-- What is AQI -->
-                    <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 16;
-                                              -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);">
+                    <VBox spacing="10"
+                          style="-fx-background-color: white; -fx-background-radius: 16;
+                                 -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);">
                         <Label text="What is Air Quality Index (AQI)?"
                                style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
-                        <Label wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #444; -fx-line-spacing: 4;"
+                        <Label wrapText="true"
+                               style="-fx-font-size: 13px; -fx-text-fill: #444; -fx-line-spacing: 4;"
                                text="The Air Quality Index (AQI) is a standardized measure used to communicate how polluted the air currently is. It translates complex pollutant concentrations into a single number, making it easy to understand health risks at a glance. India follows the CPCB AQI standard which considers 8 major pollutants including PM2.5, PM10, NO2, O3, SO2, CO, NH3, and NO."/>
                     </VBox>
 
-                    <!-- AQI Table -->
-                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 16;
-                                              -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);">
+                    <!-- AQI Classification Table — full-width bold rows -->
+                    <VBox spacing="0"
+                          style="-fx-background-color: white; -fx-background-radius: 16;
+                                 -fx-padding: 24 24 0 24;
+                                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);">
                         <Label text="AQI Classification and Health Implications"
-                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
-                        <GridPane hgap="0" vgap="0">
-                            <Label text="AQI Range" style="-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-color: #f1f3f4; -fx-font-size: 12px;" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                            <Label text="Level"     style="-fx-font-weight: bold; -fx-padding: 10 20; -fx-background-color: #f1f3f4; -fx-font-size: 12px;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                            <Label text="Health Implication" style="-fx-font-weight: bold; -fx-padding: 10 200; -fx-background-color: #f1f3f4; -fx-font-size: 12px;" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333; -fx-padding: 0 0 16 0;"/>
 
-                            <Label text="0 - 50"   style="-fx-padding: 9 20; -fx-background-color: #eafaf1; -fx-text-fill: #1e8449;" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                            <Label text="Good"     style="-fx-padding: 9 20; -fx-background-color: #eafaf1; -fx-text-fill: #1e8449; -fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                            <Label text="Safe for everyone. Enjoy outdoor activities." style="-fx-padding: 9 20; -fx-background-color: #eafaf1; -fx-text-fill: #1e8449;" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                        <!-- Header row -->
+                        <HBox style="-fx-background-color: #1a1a2e; -fx-background-radius: 10 10 0 0; -fx-padding: 12 0;">
+                            <Label text="AQI Range" minWidth="160"
+                                   style="-fx-font-weight: bold; -fx-padding: 0 20; -fx-text-fill: white; -fx-font-size: 13px;"/>
+                            <Label text="Level" minWidth="160"
+                                   style="-fx-font-weight: bold; -fx-padding: 0 20; -fx-text-fill: white; -fx-font-size: 13px;"/>
+                            <Label text="Health Implication" HBox.hgrow="ALWAYS"
+                                   style="-fx-font-weight: bold; -fx-padding: 0 20; -fx-text-fill: white; -fx-font-size: 13px;"/>
+                        </HBox>
+                        <!-- Data rows -->
+                        <HBox style="-fx-background-color: #d5f5e3; -fx-padding: 13 0;">
+                            <Label text="0 – 50" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: bold; -fx-text-fill: #1e8449; -fx-font-size: 13px;"/>
+                            <Label text="Good" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: 900; -fx-text-fill: #1e8449; -fx-font-size: 14px;"/>
+                            <Label text="Air quality is satisfactory. Safe for all. Enjoy outdoor activities."
+                                   style="-fx-padding: 0 20; -fx-text-fill: #1a4731; -fx-font-size: 13px;"/>
+                        </HBox>
+                        <HBox style="-fx-background-color: #fef9c3; -fx-padding: 13 0;">
+                            <Label text="51 – 100" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: bold; -fx-text-fill: #92400e; -fx-font-size: 13px;"/>
+                            <Label text="Moderate" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: 900; -fx-text-fill: #92400e; -fx-font-size: 14px;"/>
+                            <Label text="Acceptable. Unusually sensitive individuals take caution outdoors."
+                                   style="-fx-padding: 0 20; -fx-text-fill: #78350f; -fx-font-size: 13px;"/>
+                        </HBox>
+                        <HBox style="-fx-background-color: #fed7aa; -fx-padding: 13 0;">
+                            <Label text="101 – 150" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: bold; -fx-text-fill: #9a3412; -fx-font-size: 13px;"/>
+                            <Label text="Poor" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: 900; -fx-text-fill: #9a3412; -fx-font-size: 14px;"/>
+                            <Label text="Sensitive groups may experience effects. Limit prolonged outdoor activity."
+                                   style="-fx-padding: 0 20; -fx-text-fill: #7c2d12; -fx-font-size: 13px;"/>
+                        </HBox>
+                        <HBox style="-fx-background-color: #fecaca; -fx-padding: 13 0;">
+                            <Label text="151 – 200" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: bold; -fx-text-fill: #991b1b; -fx-font-size: 13px;"/>
+                            <Label text="Unhealthy" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: 900; -fx-text-fill: #991b1b; -fx-font-size: 14px;"/>
+                            <Label text="Everyone may experience health effects. Avoid outdoor exertion."
+                                   style="-fx-padding: 0 20; -fx-text-fill: #7f1d1d; -fx-font-size: 13px;"/>
+                        </HBox>
+                        <HBox style="-fx-background-color: #e9d5ff; -fx-padding: 13 0;">
+                            <Label text="201 – 300" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: bold; -fx-text-fill: #6b21a8; -fx-font-size: 13px;"/>
+                            <Label text="Severe" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: 900; -fx-text-fill: #6b21a8; -fx-font-size: 14px;"/>
+                            <Label text="Health warnings for all. Serious effects possible. Stay indoors."
+                                   style="-fx-padding: 0 20; -fx-text-fill: #581c87; -fx-font-size: 13px;"/>
+                        </HBox>
+                        <HBox style="-fx-background-color: #fca5a5; -fx-background-radius: 0 0 10 10; -fx-padding: 13 0;">
+                            <Label text="301 – 500" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: bold; -fx-text-fill: #7f1d1d; -fx-font-size: 13px;"/>
+                            <Label text="Hazardous" minWidth="160"
+                                   style="-fx-padding: 0 20; -fx-font-weight: 900; -fx-text-fill: #7f1d1d; -fx-font-size: 14px;"/>
+                            <Label text="Emergency conditions. Entire population affected. Do not go outside."
+                                   style="-fx-padding: 0 20; -fx-text-fill: #450a0a; -fx-font-size: 13px;"/>
+                        </HBox>
 
-                            <Label text="51 - 100"  style="-fx-padding: 9 20; -fx-background-color: #fef9e7; -fx-text-fill: #9a7d0a;" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                            <Label text="Moderate"  style="-fx-padding: 9 20; -fx-background-color: #fef9e7; -fx-text-fill: #9a7d0a; -fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                            <Label text="Sensitive groups take caution when outdoors." style="-fx-padding: 9 20; -fx-background-color: #fef9e7; -fx-text-fill: #9a7d0a;" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-
-                            <Label text="101 - 150" style="-fx-padding: 9 20; -fx-background-color: #fdf2e9; -fx-text-fill: #ca6f1e;" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                            <Label text="Poor"      style="-fx-padding: 9 20; -fx-background-color: #fdf2e9; -fx-text-fill: #ca6f1e; -fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                            <Label text="Limit prolonged outdoor exertion." style="-fx-padding: 9 20; -fx-background-color: #fdf2e9; -fx-text-fill: #ca6f1e;" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
-
-                            <Label text="151 - 200" style="-fx-padding: 9 20; -fx-background-color: #fbeee6; -fx-text-fill: #a04000;" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                            <Label text="Unhealthy" style="-fx-padding: 9 20; -fx-background-color: #fbeee6; -fx-text-fill: #a04000; -fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                            <Label text="Health effects likely. Avoid outdoor activity." style="-fx-padding: 9 20; -fx-background-color: #fbeee6; -fx-text-fill: #a04000;" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
-
-                            <Label text="201 - 300" style="-fx-padding: 9 20; -fx-background-color: #f4ecf7; -fx-text-fill: #7d3c98;" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                            <Label text="Severe"    style="-fx-padding: 9 20; -fx-background-color: #f4ecf7; -fx-text-fill: #7d3c98; -fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
-                            <Label text="Serious health effects for everyone." style="-fx-padding: 9 20; -fx-background-color: #f4ecf7; -fx-text-fill: #7d3c98;" GridPane.columnIndex="2" GridPane.rowIndex="5"/>
-
-                            <Label text="301 - 500" style="-fx-padding: 9 20; -fx-background-color: #fadbd8; -fx-text-fill: #922b21;" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
-                            <Label text="Hazardous" style="-fx-padding: 9 20; -fx-background-color: #fadbd8; -fx-text-fill: #922b21; -fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
-                            <Label text="Emergency conditions. Everyone affected." style="-fx-padding: 9 20; -fx-background-color: #fadbd8; -fx-text-fill: #922b21;" GridPane.columnIndex="2" GridPane.rowIndex="6"/>
-                        </GridPane>
+                        <Region prefHeight="24"/>
                     </VBox>
 
-                    <!-- Pollutants explained -->
-                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 16;
-                                              -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);">
+                    <!-- Major Pollutants Explained -->
+                    <VBox spacing="12"
+                          style="-fx-background-color: white; -fx-background-radius: 16;
+                                 -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);">
                         <Label text="Major Pollutants Explained"
                                style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
                         <GridPane hgap="16" vgap="10">
                             <VBox spacing="3" GridPane.columnIndex="0" GridPane.rowIndex="0" prefWidth="380"
-                                  style="-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 12 16;">
+                                  style="-fx-background-color: #f0f4ff; -fx-background-radius: 10; -fx-padding: 12 16;">
                                 <Label text="PM2.5" style="-fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
                                 <Label text="Fine particles that penetrate deep into the lungs and bloodstream." wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #555;"/>
                             </VBox>
                             <VBox spacing="3" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="380"
-                                  style="-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 12 16;">
+                                  style="-fx-background-color: #f0f4ff; -fx-background-radius: 10; -fx-padding: 12 16;">
                                 <Label text="PM10" style="-fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
                                 <Label text="Coarse particles from dust and construction that cause respiratory issues." wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #555;"/>
                             </VBox>
                             <VBox spacing="3" GridPane.columnIndex="0" GridPane.rowIndex="1" prefWidth="380"
-                                  style="-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 12 16;">
+                                  style="-fx-background-color: #f0f4ff; -fx-background-radius: 10; -fx-padding: 12 16;">
                                 <Label text="NO2" style="-fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
                                 <Label text="Nitrogen Dioxide from vehicles and industry. Irritates the airways." wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #555;"/>
                             </VBox>
                             <VBox spacing="3" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="380"
-                                  style="-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 12 16;">
+                                  style="-fx-background-color: #f0f4ff; -fx-background-radius: 10; -fx-padding: 12 16;">
                                 <Label text="O3 (Ozone)" style="-fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
                                 <Label text="Ground-level Ozone formed by sunlight. Causes breathing problems." wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #555;"/>
                             </VBox>
                             <VBox spacing="3" GridPane.columnIndex="0" GridPane.rowIndex="2" prefWidth="380"
-                                  style="-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 12 16;">
+                                  style="-fx-background-color: #f0f4ff; -fx-background-radius: 10; -fx-padding: 12 16;">
                                 <Label text="SO2" style="-fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
                                 <Label text="Sulphur Dioxide from burning fossil fuels. Causes acid rain." wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #555;"/>
                             </VBox>
                             <VBox spacing="3" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="380"
-                                  style="-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 12 16;">
+                                  style="-fx-background-color: #f0f4ff; -fx-background-radius: 10; -fx-padding: 12 16;">
                                 <Label text="CO" style="-fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
                                 <Label text="Carbon Monoxide from incomplete combustion. Reduces oxygen in blood." wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #555;"/>
                             </VBox>
                             <VBox spacing="3" GridPane.columnIndex="0" GridPane.rowIndex="3" prefWidth="380"
-                                  style="-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 12 16;">
+                                  style="-fx-background-color: #f0f4ff; -fx-background-radius: 10; -fx-padding: 12 16;">
                                 <Label text="NH3" style="-fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
                                 <Label text="Ammonia from agriculture and waste. Contributes to particulate formation." wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #555;"/>
                             </VBox>
                             <VBox spacing="3" GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="380"
-                                  style="-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 12 16;">
+                                  style="-fx-background-color: #f0f4ff; -fx-background-radius: 10; -fx-padding: 12 16;">
                                 <Label text="NO" style="-fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
                                 <Label text="Nitric Oxide, precursor to NO2. Emitted by engines and power plants." wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #555;"/>
                             </VBox>
                         </GridPane>
                     </VBox>
 
-                    <!-- FAQ -->
-                    <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 16;
-                                              -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);">
-                        <Label text="Frequently Asked Questions"
-                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
-                        <Accordion fx:id="faqAccordion">
+                    <!-- FAQ — Modern styled accordion -->
+                    <VBox spacing="16"
+                          style="-fx-background-color: white; -fx-background-radius: 20;
+                                 -fx-padding: 28 35; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);">
+                        <VBox spacing="4">
+                            <Label text="Frequently Asked Questions"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
+                            <Label text="Everything you need to know about air quality"
+                                   style="-fx-font-size: 12px; -fx-text-fill: #999;"/>
+                        </VBox>
+
+                        <Accordion fx:id="faqAccordion"
+                                   style="-fx-background-color: transparent;">
                             <panes>
-                                <TitledPane text="What is a safe AQI level?" style="-fx-font-size: 13px;">
-                                    <Label wrapText="true" maxWidth="700" style="-fx-font-size: 12px; -fx-text-fill: #555; -fx-padding: 8;"
-                                           text="AQI 0-50 is considered Good and safe for all groups. AQI below 100 is generally acceptable for healthy individuals, though sensitive groups should limit prolonged outdoor exposure."/>
+                                <TitledPane animated="true"
+                                            style="-fx-background-color: #f4f7ff;
+                                                   -fx-background-radius: 12;
+                                                   -fx-border-color: #c7d9ff;
+                                                   -fx-border-radius: 12;
+                                                   -fx-border-width: 1.5;
+                                                   -fx-text-fill: #1a1a2e;
+                                                   -fx-font-size: 14px;
+                                                   -fx-font-weight: bold;">
+                                    <text>❓  What is a safe AQI level?</text>
+                                    <content>
+                                        <Label wrapText="true" maxWidth="780"
+                                               style="-fx-font-size: 13px; -fx-text-fill: #444; -fx-padding: 10 6; -fx-line-spacing: 4;"
+                                               text="AQI 0–50 is considered Good and safe for all groups. AQI below 100 is generally acceptable for healthy individuals, though sensitive groups should limit prolonged outdoor exposure."/>
+                                    </content>
                                 </TitledPane>
-                                <TitledPane text="How often is the AQI data updated?" style="-fx-font-size: 13px;">
-                                    <Label wrapText="true" maxWidth="700" style="-fx-font-size: 12px; -fx-text-fill: #555; -fx-padding: 8;"
-                                           text="Data is fetched live from OpenWeatherMap each time you search a city or click Locate Me. The dashboard also auto-refreshes every 15 minutes to keep readings current."/>
+                                <TitledPane animated="true"
+                                            style="-fx-background-color: #f4f7ff;
+                                                   -fx-background-radius: 12;
+                                                   -fx-border-color: #c7d9ff;
+                                                   -fx-border-radius: 12;
+                                                   -fx-border-width: 1.5;
+                                                   -fx-text-fill: #1a1a2e;
+                                                   -fx-font-size: 14px;
+                                                   -fx-font-weight: bold;">
+                                    <text>🔄  How often is the AQI data updated?</text>
+                                    <content>
+                                        <Label wrapText="true" maxWidth="780"
+                                               style="-fx-font-size: 13px; -fx-text-fill: #444; -fx-padding: 10 6; -fx-line-spacing: 4;"
+                                               text="Data is fetched live from OpenWeatherMap each time you search a city or click Locate Me. The dashboard also auto-refreshes every 15 minutes. You can see the last refreshed time in the top bar."/>
+                                    </content>
                                 </TitledPane>
-                                <TitledPane text="What causes high AQI?" style="-fx-font-size: 13px;">
-                                    <Label wrapText="true" maxWidth="700" style="-fx-font-size: 12px; -fx-text-fill: #555; -fx-padding: 8;"
-                                           text="Major contributors include vehicle emissions, industrial pollution, construction dust, crop burning, and weather conditions such as low wind speed and temperature inversions that trap pollutants near the ground."/>
+                                <TitledPane animated="true"
+                                            style="-fx-background-color: #f4f7ff;
+                                                   -fx-background-radius: 12;
+                                                   -fx-border-color: #c7d9ff;
+                                                   -fx-border-radius: 12;
+                                                   -fx-border-width: 1.5;
+                                                   -fx-text-fill: #1a1a2e;
+                                                   -fx-font-size: 14px;
+                                                   -fx-font-weight: bold;">
+                                    <text>🏭  What causes high AQI?</text>
+                                    <content>
+                                        <Label wrapText="true" maxWidth="780"
+                                               style="-fx-font-size: 13px; -fx-text-fill: #444; -fx-padding: 10 6; -fx-line-spacing: 4;"
+                                               text="Major contributors include vehicle emissions, industrial pollution, construction dust, crop burning, and weather conditions such as low wind speed and temperature inversions that trap pollutants near the ground."/>
+                                    </content>
                                 </TitledPane>
-                                <TitledPane text="How does AQI affect my health?" style="-fx-font-size: 13px;">
-                                    <Label wrapText="true" maxWidth="700" style="-fx-font-size: 12px; -fx-text-fill: #555; -fx-padding: 8;"
-                                           text="High AQI can cause respiratory issues, eye irritation, and aggravate conditions like asthma, COPD, and heart disease. Long-term exposure to poor air quality is linked to reduced lung function and increased cardiovascular risk."/>
+                                <TitledPane animated="true"
+                                            style="-fx-background-color: #f4f7ff;
+                                                   -fx-background-radius: 12;
+                                                   -fx-border-color: #c7d9ff;
+                                                   -fx-border-radius: 12;
+                                                   -fx-border-width: 1.5;
+                                                   -fx-text-fill: #1a1a2e;
+                                                   -fx-font-size: 14px;
+                                                   -fx-font-weight: bold;">
+                                    <text>🫁  How does AQI affect my health?</text>
+                                    <content>
+                                        <Label wrapText="true" maxWidth="780"
+                                               style="-fx-font-size: 13px; -fx-text-fill: #444; -fx-padding: 10 6; -fx-line-spacing: 4;"
+                                               text="High AQI can cause respiratory issues, eye irritation, and aggravate conditions like asthma, COPD, and heart disease. Long-term exposure to poor air quality is linked to reduced lung function and increased cardiovascular risk."/>
+                                    </content>
                                 </TitledPane>
-                                <TitledPane text="What should I do when AQI is Severe or Hazardous?" style="-fx-font-size: 13px;">
-                                    <Label wrapText="true" maxWidth="700" style="-fx-font-size: 12px; -fx-text-fill: #555; -fx-padding: 8;"
-                                           text="Stay indoors, use air purifiers if available, wear N95 masks if going outside, avoid outdoor exercise, keep windows and doors closed, and monitor health symptoms closely especially for children and elderly."/>
+                                <TitledPane animated="true"
+                                            style="-fx-background-color: #fff4f4;
+                                                   -fx-background-radius: 12;
+                                                   -fx-border-color: #ffb3b3;
+                                                   -fx-border-radius: 12;
+                                                   -fx-border-width: 1.5;
+                                                   -fx-text-fill: #7f1d1d;
+                                                   -fx-font-size: 14px;
+                                                   -fx-font-weight: bold;">
+                                    <text>🚨  What to do when AQI is Severe or Hazardous?</text>
+                                    <content>
+                                        <Label wrapText="true" maxWidth="780"
+                                               style="-fx-font-size: 13px; -fx-text-fill: #444; -fx-padding: 10 6; -fx-line-spacing: 4;"
+                                               text="Stay indoors, use air purifiers if available, wear N95 masks if going outside, avoid outdoor exercise, keep windows and doors closed, and monitor health symptoms closely especially for children and the elderly."/>
+                                    </content>
                                 </TitledPane>
-                                <TitledPane text="Who is most affected by poor air quality?" style="-fx-font-size: 13px;">
-                                    <Label wrapText="true" maxWidth="700" style="-fx-font-size: 12px; -fx-text-fill: #555; -fx-padding: 8;"
-                                           text="Children, elderly individuals, pregnant women, and people with pre-existing conditions such as asthma, heart disease, or lung conditions are most vulnerable to the effects of high AQI levels."/>
+                                <TitledPane animated="true"
+                                            style="-fx-background-color: #f4f7ff;
+                                                   -fx-background-radius: 12;
+                                                   -fx-border-color: #c7d9ff;
+                                                   -fx-border-radius: 12;
+                                                   -fx-border-width: 1.5;
+                                                   -fx-text-fill: #1a1a2e;
+                                                   -fx-font-size: 14px;
+                                                   -fx-font-weight: bold;">
+                                    <text>👥  Who is most affected by poor air quality?</text>
+                                    <content>
+                                        <Label wrapText="true" maxWidth="780"
+                                               style="-fx-font-size: 13px; -fx-text-fill: #444; -fx-padding: 10 6; -fx-line-spacing: 4;"
+                                               text="Children, elderly individuals, pregnant women, and people with pre-existing conditions such as asthma, heart disease, or lung conditions are most vulnerable to the effects of high AQI levels."/>
+                                    </content>
                                 </TitledPane>
                             </panes>
                         </Accordion>
                     </VBox>
 
                     <!-- Contact Us -->
-                    <VBox spacing="14" style="-fx-background-color: white; -fx-background-radius: 16;
-                                              -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);">
+                    <VBox spacing="14"
+                          style="-fx-background-color: white; -fx-background-radius: 16;
+                                 -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);">
                         <Label text="Get in Touch"
                                style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
                         <Label text="Have questions or feedback? We would love to hear from you!"
                                style="-fx-font-size: 13px; -fx-text-fill: #666;"/>
                         <TextField fx:id="feedbackName" promptText="Your Name"
-                                   style="-fx-background-radius: 10; -fx-padding: 10 14; -fx-background-color: #f8f9fa;"/>
+                                   style="-fx-background-radius: 10; -fx-padding: 10 14; -fx-background-color: #f8f9fa;
+                                          -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-border-width: 1;"/>
                         <TextField fx:id="feedbackEmail" promptText="Your Email"
-                                   style="-fx-background-radius: 10; -fx-padding: 10 14; -fx-background-color: #f8f9fa;"/>
+                                   style="-fx-background-radius: 10; -fx-padding: 10 14; -fx-background-color: #f8f9fa;
+                                          -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-border-width: 1;"/>
                         <TextArea fx:id="feedbackMessage" promptText="Your message..." prefRowCount="4"
-                                  style="-fx-background-radius: 10; -fx-padding: 10 14; -fx-background-color: #f8f9fa;"/>
+                                  style="-fx-background-radius: 10; -fx-padding: 10 14; -fx-background-color: #f8f9fa;
+                                         -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-border-width: 1;"/>
                         <Button text="Send Feedback" onAction="#handleSendFeedback"
-                                style="-fx-background-radius: 12; -fx-background-color: #1a73e8; -fx-text-fill: white;
-                                       -fx-font-weight: bold; -fx-padding: 10 28; -fx-cursor: hand;"/>
+                                style="-fx-background-radius: 12; -fx-background-color: #1a73e8;
+                                       -fx-text-fill: white; -fx-font-weight: bold;
+                                       -fx-padding: 10 28; -fx-cursor: hand;"/>
                         <Label fx:id="feedbackStatusLabel" text=""
                                style="-fx-font-size: 12px; -fx-text-fill: #2e7d32;"/>
                         <Label text="Or reach us directly at: team@aiqi.com"
@@ -491,8 +673,7 @@
 
                 </VBox>
             </ScrollPane>
-        </Tab>
-
-    </TabPane>
+        </VBox>
+    </StackPane>
 
 </VBox>

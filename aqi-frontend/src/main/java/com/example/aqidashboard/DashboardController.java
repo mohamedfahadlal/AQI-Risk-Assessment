@@ -11,12 +11,18 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.chart.*;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.animation.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
 import javafx.scene.transform.Rotate;
+import javafx.util.Duration;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -39,6 +45,20 @@ public class DashboardController {
     @FXML private Label alertStatusLabel;
     @FXML private Button darkModeBtn;
 
+    // ── Capsule tab switcher ──────────────────────────────────────
+    @FXML private Button tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5;
+    @FXML private VBox tabContent1, tabContent2, tabContent3, tabContent4, tabContent5;
+    private Button[] tabBtns;
+    private VBox[]   tabContents;
+
+    private static final String TAB_ACTIVE   =
+            "-fx-background-radius: 22; -fx-background-color: #1a73e8; -fx-text-fill: white;" +
+                    "-fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;" +
+                    "-fx-effect: dropshadow(gaussian, rgba(26,115,232,0.4), 8, 0, 0, 2);";
+    private static final String TAB_INACTIVE =
+            "-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555;" +
+                    "-fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;";
+
     // ── Tab 1: AQI View ───────────────────────────────────────────
     @FXML private VBox aqiView;
     @FXML private VBox weatherView;
@@ -57,6 +77,10 @@ public class DashboardController {
     @FXML private ImageView aqiImageView;
 
     // ── Tab 1: Weather View ───────────────────────────────────────
+    @FXML private HBox weatherCard;
+    @FXML private StackPane weatherCardStack;
+    @FXML private ImageView weatherBgImage;
+    @FXML private Region weatherCardOverlay;
     @FXML private ImageView weatherIconView;
     @FXML private Label weatherDescLabel;
     @FXML private Label weatherCityLabel;
@@ -70,9 +94,10 @@ public class DashboardController {
     @FXML private Label wCloudsLabel;
     @FXML private Label wSunriseLabel;
     @FXML private Label wSunsetLabel;
-    @FXML private Label wMinMaxLabel;
+    @FXML private Label wMinLabel, wMaxLabel;
 
     // ── Tab 2: Forecast ───────────────────────────────────────────
+    @FXML private VBox forecastChartContainer;
     @FXML private LineChart<String, Number> forecastChart;
     @FXML private CategoryAxis forecastXAxis;
     @FXML private NumberAxis forecastYAxis;
@@ -149,6 +174,10 @@ public class DashboardController {
             fetchSuggestions(newVal);
         });
 
+        // Wire capsule tab switcher
+        tabBtns     = new Button[]{tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5};
+        tabContents = new VBox[]{tabContent1, tabContent2, tabContent3, tabContent4, tabContent5};
+
         startAutoRefresh();
         loadAQIData("Kochi", 0, 0);
         loadIndiaCities();
@@ -173,6 +202,94 @@ public class DashboardController {
 
     @FXML private void handleAbout() {
         SceneManager.switchScene("/fxml/About.fxml", "About Us");
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // CAPSULE TAB SWITCHER
+    // ─────────────────────────────────────────────────────────────
+    @FXML private void handleTabSwitch(javafx.event.ActionEvent event) {
+        if (tabBtns == null) return;
+        Button clicked = (Button) event.getSource();
+        for (int i = 0; i < tabBtns.length; i++) {
+            if (tabBtns[i] == clicked) {
+                animateTabButton(clicked);
+                switchToTabAnimated(i);
+                return;
+            }
+        }
+    }
+
+    private void switchToTab(int index) {
+        if (tabBtns == null || index >= tabBtns.length) return;
+        Platform.runLater(() -> switchToTabAnimated(index));
+    }
+
+    private void switchToTabAnimated(int newIndex) {
+        if (tabBtns == null) return;
+        // Find currently visible tab
+        VBox outgoing = null;
+        for (int i = 0; i < tabContents.length; i++) {
+            if (tabContents[i].isVisible()) { outgoing = tabContents[i]; break; }
+        }
+        final VBox incoming = tabContents[newIndex];
+        if (incoming == outgoing) return;
+
+        // Update button styles with a small scale-pop on the active button
+        for (int i = 0; i < tabBtns.length; i++) {
+            tabBtns[i].setStyle(i == newIndex ? TAB_ACTIVE : TAB_INACTIVE);
+        }
+
+        // Fade + translate out
+        if (outgoing != null) {
+            final VBox out = outgoing;
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(120), out);
+            fadeOut.setFromValue(1.0);
+            fadeOut.setToValue(0.0);
+            TranslateTransition slideOut = new TranslateTransition(Duration.millis(120), out);
+            slideOut.setFromX(0);
+            slideOut.setToX(-18);
+            ParallelTransition exitAnim = new ParallelTransition(fadeOut, slideOut);
+            exitAnim.setOnFinished(e -> {
+                out.setVisible(false);
+                out.setManaged(false);
+                out.setTranslateX(0);
+                out.setOpacity(1.0);
+                // Fade + translate in
+                incoming.setOpacity(0);
+                incoming.setTranslateX(22);
+                incoming.setVisible(true);
+                incoming.setManaged(true);
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(180), incoming);
+                fadeIn.setFromValue(0.0);
+                fadeIn.setToValue(1.0);
+                TranslateTransition slideIn = new TranslateTransition(Duration.millis(180), incoming);
+                slideIn.setFromX(22);
+                slideIn.setToX(0);
+                slideIn.setInterpolator(Interpolator.EASE_OUT);
+                new ParallelTransition(fadeIn, slideIn).play();
+            });
+            exitAnim.play();
+        } else {
+            incoming.setOpacity(0);
+            incoming.setTranslateX(22);
+            incoming.setVisible(true);
+            incoming.setManaged(true);
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(200), incoming);
+            fadeIn.setFromValue(0.0); fadeIn.setToValue(1.0);
+            TranslateTransition slideIn = new TranslateTransition(Duration.millis(200), incoming);
+            slideIn.setFromX(22); slideIn.setToX(0);
+            slideIn.setInterpolator(Interpolator.EASE_OUT);
+            new ParallelTransition(fadeIn, slideIn).play();
+        }
+    }
+
+    private void animateTabButton(Button btn) {
+        ScaleTransition pop = new ScaleTransition(Duration.millis(80), btn);
+        pop.setFromX(1.0); pop.setToX(0.92);
+        pop.setFromY(1.0); pop.setToY(0.92);
+        pop.setAutoReverse(true);
+        pop.setCycleCount(2);
+        pop.play();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -206,7 +323,15 @@ public class DashboardController {
     // ─────────────────────────────────────────────────────────────
     @FXML private void handleDarkMode() {
         isDarkMode = !isDarkMode;
-        darkModeBtn.setText(isDarkMode ? "☀ Light Mode" : "🌙 Dark Mode");
+        darkModeBtn.setText(isDarkMode ? "☀  Light" : "🌙  Dark");
+
+        // Button style feedback
+        darkModeBtn.setStyle(isDarkMode
+                ? "-fx-background-color: #252838; -fx-text-fill: #e2e8f0; -fx-background-radius: 12;" +
+                "-fx-border-color: #3a3f55; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 7 16; -fx-cursor: hand;"
+                : "-fx-background-color: #f0f4f8; -fx-text-fill: #1a1a2e; -fx-background-radius: 12;" +
+                "-fx-border-color: #cbd5e1; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 7 16; -fx-cursor: hand;");
+
         Platform.runLater(() -> {
             if (darkModeBtn.getScene() == null) return;
             var stylesheets = darkModeBtn.getScene().getStylesheets();
@@ -216,7 +341,177 @@ public class DashboardController {
                 if (isDarkMode) { if (!stylesheets.contains(darkCss)) stylesheets.add(darkCss); }
                 else            { stylesheets.remove(darkCss); }
             }
+            applyDarkModeInlineStyles(isDarkMode);
         });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // DARK MODE — override inline styles CSS can't reach
+    // ─────────────────────────────────────────────────────────────
+    private void applyDarkModeInlineStyles(boolean dark) {
+        // Colours
+        String pageBg      = dark ? "#13151f" : "#f0f4f8";
+        String cardBg      = dark ? "#1e2130" : "white";
+        String cardBgAlt   = dark ? "#252838" : "#f4f7ff";
+        String pillBg      = dark ? "#252838" : "#e2e8f0";
+        String tileBg      = dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)";
+        String tileText    = dark ? "#e2e8f0"  : "#1a1a2e";
+        String labelMuted  = dark ? "#94a3b8"  : "#666";
+        String cardShadow  = dark
+                ? "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 20, 0, 0, 4);"
+                : "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);";
+        String navBg       = dark ? "#1a1d2e"  : "white";
+        String navBorder   = dark ? "-fx-border-color: #2a2d3e; -fx-border-width: 0 0 1 0;" : "";
+        String forecastBg  = dark ? "#1e2130"  : "white";
+        String tabBarBg    = dark ? "#1a1d2e"  : "#f0f4f8";
+        String pillInner   = dark ? "#1e2130"  : "#e2e8f0";
+        String separatorC  = dark ? "#2e3347"  : "rgba(0,0,0,0.15)";
+
+        // ── Navbar
+        if (darkModeBtn.getParent() != null && darkModeBtn.getParent().getParent() instanceof javafx.scene.Node nav) {
+            if (nav instanceof javafx.scene.layout.HBox navbar) {
+                navbar.setStyle("-fx-background-color: " + navBg + "; -fx-padding: 14 30; " +
+                        "-fx-alignment: CENTER_LEFT; -fx-spacing: 16; " +
+                        (dark ? "-fx-border-color: #2a2d3e; -fx-border-width: 0 0 1 0;" : ""));
+            }
+        }
+
+        // ── Tab switcher bar + pill container
+        if (tabBtns != null && tabBtns[0] != null) {
+            var pillHBox = tabBtns[0].getParent(); // inner HBox (pill)
+            if (pillHBox != null) {
+                pillHBox.setStyle("-fx-background-color: " + pillInner + "; -fx-background-radius: 26; " +
+                        "-fx-padding: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 8, 0, 0, 2);");
+                var tabBar = pillHBox.getParent(); // outer HBox centering it
+                if (tabBar instanceof javafx.scene.layout.HBox hb)
+                    hb.setStyle("-fx-padding: 14 0 8 0; -fx-background-color: " + tabBarBg + ";");
+            }
+            // Re-style inactive tab buttons
+            for (int i = 0; i < tabBtns.length; i++) {
+                if (!tabBtns[i].getStyle().contains("#1a73e8")) {
+                    tabBtns[i].setStyle(
+                            "-fx-background-radius: 22; -fx-background-color: transparent; " +
+                                    "-fx-text-fill: " + (dark ? "#94a3b8" : "#555") + "; " +
+                                    "-fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;");
+                }
+            }
+        }
+
+        // ── All tab content scroll backgrounds
+        for (VBox tc : tabContents) {
+            if (tc == null) continue;
+            // ScrollPane > VBox (the page bg)
+            if (tc.getChildren().size() > 0 && tc.getChildren().get(0) instanceof javafx.scene.control.ScrollPane sp) {
+                sp.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+                if (sp.getContent() instanceof javafx.scene.layout.VBox vb) {
+                    vb.setStyle("-fx-padding: 20; -fx-background-color: " + pageBg + ";");
+                    // Inner white cards
+                    styleChildCards(vb, dark, cardBg, cardBgAlt, tileBg, tileText, labelMuted, cardShadow, separatorC);
+                }
+            }
+        }
+
+        // ── AQI/Weather toggle pill bar
+        if (aqiToggleBtn != null && aqiToggleBtn.getParent() instanceof javafx.scene.layout.HBox togglePill) {
+            togglePill.setStyle("-fx-background-color: " + pillInner + "; -fx-background-radius: 25; " +
+                    "-fx-padding: 4; -fx-max-width: 340; " +
+                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 6, 0, 0, 1);");
+            // Inactive toggle button
+            weatherToggleBtn.setStyle("-fx-background-radius: 22; -fx-background-color: transparent; " +
+                    "-fx-text-fill: " + (dark ? "#94a3b8" : "#666") + "; -fx-padding: 8 36; -fx-cursor: hand;");
+        }
+
+        // ── Forecast chart chart-plot background via CSS class — handled by CSS
+        // But re-style the container card
+        if (forecastChartContainer != null)
+            forecastChartContainer.setStyle("-fx-background-color: " + forecastBg + "; -fx-background-radius: 20; " +
+                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0," + (dark?"0.35":"0.08") + "), 20, 0, 0, 4); -fx-padding: 28 35;");
+
+        // ── Chart text colours (for current live chart)
+        if (forecastChart != null) {
+            forecastChart.lookupAll(".chart-legend-item").forEach(n ->
+                    n.setStyle("-fx-text-fill: " + (dark?"#cbd5e1":"#111") + "; -fx-font-size: 13px; -fx-font-weight: bold;"));
+            forecastChart.lookupAll("Text").forEach(n ->
+                    n.setStyle("-fx-fill: " + (dark?"#94a3b8":"#111") + "; -fx-font-size: 11px;"));
+        }
+
+        // ── Weather card overlay
+        if (weatherCardOverlay != null)
+            weatherCardOverlay.setStyle("-fx-background-color: " +
+                    (dark ? "rgba(10,12,20,0.50)" : "rgba(255,255,255,0.42)") +
+                    "; -fx-background-radius: 20;");
+    }
+
+    /** Recursively style white card VBoxes and their stat tiles */
+    private void styleChildCards(javafx.scene.layout.VBox parent, boolean dark,
+                                 String cardBg, String cardBgAlt, String tileBg,
+                                 String tileText, String labelMuted, String cardShadow, String separatorC) {
+
+        String cardStyle = "-fx-background-color: " + cardBg + "; -fx-background-radius: 20; " + cardShadow + " -fx-padding: 28 35;";
+        String tileStyle = tileBg + "; -fx-padding: 14 24; -fx-background-radius: 16;";
+        // "rgba..." bg style for the AQI badge tiles
+        String inlineTile = "-fx-background-color: " + tileBg + "; -fx-padding: 14 24; -fx-background-radius: 16;";
+
+        for (javafx.scene.Node child : parent.getChildren()) {
+            if (child instanceof javafx.scene.layout.VBox vb) {
+                String s = vb.getStyle();
+                // Top-level white cards
+                if (s != null && (s.contains("white") || s.contains("#ffffff") || s.contains("background-color: white"))) {
+                    vb.setStyle("-fx-background-color: " + cardBg + "; -fx-background-radius: 20; " +
+                            cardShadow + " -fx-padding: 28 35;");
+                }
+                // Stat tiles with semi-transparent bg
+                if (s != null && s.contains("rgba(0,0,0,0.07)")) {
+                    vb.setStyle(inlineTile);
+                }
+                // f0f4ff mini-tiles in weather grid
+                if (s != null && (s.contains("#f0f4ff") || s.contains("#fff8e1") || s.contains("#fff3e0"))) {
+                    vb.setStyle("-fx-background-color: " + cardBgAlt + "; -fx-padding: 12 18; -fx-background-radius: 12;");
+                }
+                styleChildCards(vb, dark, cardBg, cardBgAlt, tileBg, tileText, labelMuted, cardShadow, separatorC);
+            }
+            if (child instanceof javafx.scene.layout.HBox hb) {
+                String s = hb.getStyle();
+                // #e4e9f0 sort/filter bar
+                if (s != null && (s.contains("#e4e9f0") || s.contains("#e2e8f0"))) {
+                    hb.setStyle("-fx-background-color: " + (dark?"#252838":"#e4e9f0") +
+                            "; -fx-background-radius: 25; -fx-padding: 4; -fx-max-width: 340; " +
+                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 1);");
+                }
+                styleChildCards2(hb, dark, cardBgAlt, tileBg);
+            }
+            if (child instanceof javafx.scene.control.Separator sep) {
+                sep.setStyle("-fx-background-color: " + separatorC + ";");
+            }
+            if (child instanceof javafx.scene.control.Label lbl) {
+                String s = lbl.getStyle();
+                if (s != null && (s.contains("#666") || s.contains("#555") || s.contains("#888"))) {
+                    lbl.setStyle(s.replaceAll("#666|#555|#888", dark ? "#94a3b8" : "#666"));
+                }
+                if (s != null && s.contains("#1a1a2e")) {
+                    lbl.setStyle(s.replace("#1a1a2e", dark ? "#e2e8f0" : "#1a1a2e"));
+                }
+            }
+        }
+    }
+
+    private void styleChildCards2(javafx.scene.layout.HBox parent, boolean dark, String cardBgAlt, String tileBg) {
+        for (javafx.scene.Node child : parent.getChildren()) {
+            if (child instanceof javafx.scene.layout.VBox vb) {
+                String s = vb.getStyle();
+                if (s != null && (s.contains("#f0f4ff") || s.contains("#fff8e1") || s.contains("#fff3e0"))) {
+                    vb.setStyle("-fx-background-color: " + cardBgAlt + "; -fx-padding: 12 18; -fx-background-radius: 12;");
+                }
+                if (s != null && s.contains("rgba(0,0,0,0.06)")) {
+                    vb.setStyle("-fx-background-color: " + tileBg + "; -fx-padding: 14 24; -fx-background-radius: 16;");
+                }
+                if (s != null && s.contains("rgba(0,0,0,0.07)")) {
+                    vb.setStyle("-fx-background-color: " + tileBg + "; -fx-padding: 14 24; -fx-background-radius: 16;");
+                }
+            }
+            if (child instanceof javafx.scene.layout.HBox hb)
+                styleChildCards2(hb, dark, cardBgAlt, tileBg);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -418,6 +713,7 @@ public class DashboardController {
             updateRisk(aqi);
             updateLastRefreshed();
             updatePollutantsTab();
+            applyRiskGradient(aqi);
             checkAlert(aqi);
             if (weatherView.isVisible()) updateWeatherView(data);
         });
@@ -461,7 +757,8 @@ public class DashboardController {
         wCloudsLabel.setText(String.format("%.0f%%", clouds));
         wSunriseLabel.setText(sunriseStr);
         wSunsetLabel.setText(sunsetStr);
-        wMinMaxLabel.setText(String.format("%.0f°C / %.0f°C", tempMin, tempMax));
+        wMinLabel.setText(String.format("%.0f°C", tempMin));
+        wMaxLabel.setText(String.format("%.0f°C", tempMax));
 
         // Load OWM weather icon from URL
         if (!iconCode.isEmpty()) {
@@ -473,6 +770,82 @@ public class DashboardController {
                 System.out.println("Could not load weather icon: " + iconCode);
             }
         }
+
+        // Set weather background image via ImageView (JavaFX doesn't support SVG/CSS bg)
+        String bgFile = getWeatherImageFile(iconCode, desc);
+        var bgStream = getClass().getResourceAsStream("/images/" + bgFile);
+        if (bgStream != null) {
+            try {
+                javafx.scene.image.Image bgImg = new javafx.scene.image.Image(bgStream);
+                Platform.runLater(() -> {
+                    weatherBgImage.setImage(bgImg);
+                    weatherBgImage.setFitWidth(weatherCardStack.getWidth() > 0
+                            ? weatherCardStack.getWidth() : 800);
+                    weatherBgImage.setFitHeight(weatherCardStack.getHeight() > 0
+                            ? weatherCardStack.getHeight() : 300);
+                    weatherCardStack.widthProperty().addListener((obs, o, n) ->
+                            weatherBgImage.setFitWidth(n.doubleValue()));
+                    weatherCardStack.heightProperty().addListener((obs, o, n) ->
+                            weatherBgImage.setFitHeight(n.doubleValue()));
+                });
+            } catch (Exception e) {
+                System.out.println("Could not load weather bg: " + bgFile);
+                applyFallbackBg(iconCode);
+            }
+        } else {
+            applyFallbackBg(iconCode);
+        }
+    }
+
+    private void applyFallbackBg(String iconCode) {
+        String grad = getWeatherFallbackGradient(iconCode);
+        Platform.runLater(() -> {
+            weatherBgImage.setImage(null);
+            weatherCardStack.setStyle("-fx-background-color: " + grad +
+                    "; -fx-background-radius: 20; " +
+                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 20, 0, 0, 4);");
+        });
+    }
+
+    private String getWeatherImageFile(String iconCode, String desc) {
+        if (iconCode == null || iconCode.isEmpty()) return "broken_clouds.png";
+        String id = iconCode.substring(0, Math.min(2, iconCode.length()));
+        return switch (id) {
+            case "01" -> "clear.png";
+            case "02", "03" -> "few_clouds.png";
+            case "04" -> "broken_clouds.png";
+            case "09" -> "drizzle.png";
+            case "10" -> "rain.png";
+            case "11" -> "thunderstorm.png";
+            case "13" -> "snow.png";
+            case "50" -> "mist.png";
+            default   -> {
+                String d = desc.toLowerCase();
+                if (d.contains("clear"))       yield "clear.png";
+                if (d.contains("cloud"))       yield "broken_clouds.png";
+                if (d.contains("rain"))        yield "rain.png";
+                if (d.contains("drizzle"))     yield "drizzle.png";
+                if (d.contains("thunder"))     yield "thunderstorm.png";
+                if (d.contains("snow"))        yield "snow.png";
+                if (d.contains("mist") || d.contains("fog") || d.contains("haze")) yield "mist.png";
+                yield "broken_clouds.png";
+            }
+        };
+    }
+
+    private String getWeatherFallbackGradient(String iconCode) {
+        if (iconCode == null) return "linear-gradient(to bottom right, #e0eafc, #cfdef3)";
+        String id = iconCode.substring(0, Math.min(2, iconCode.length()));
+        return switch (id) {
+            case "01" -> "linear-gradient(to bottom right, #ffecd2, #fcb69f)"; // sunny warm
+            case "02", "03" -> "linear-gradient(to bottom right, #d4e9ff, #b8d4f5)"; // partly cloudy
+            case "04" -> "linear-gradient(to bottom right, #c9d6df, #eef2f3)"; // overcast
+            case "09", "10" -> "linear-gradient(to bottom right, #4b6cb7, #182848)"; // rain dark blue
+            case "11" -> "linear-gradient(to bottom right, #373b44, #4286f4)"; // thunderstorm
+            case "13" -> "linear-gradient(to bottom right, #e8f4f8, #d7e8f0)"; // snow pale blue
+            case "50" -> "linear-gradient(to bottom right, #bdc3c7, #e8ecef)"; // mist grey
+            default   -> "linear-gradient(to bottom right, #e0eafc, #cfdef3)";
+        };
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -502,7 +875,6 @@ public class DashboardController {
 
     private void redrawForecastChart() {
         if (lastForecastData == null) return;
-        JsonNode entries = lastForecastData.path("entries");
 
         int step = 1;
         String interval = forecastIntervalBox.getValue();
@@ -511,40 +883,168 @@ public class DashboardController {
             if (interval.contains("12")) step = 4;
             if (interval.contains("24")) step = 8;
         }
+        System.out.println("[Chart] interval=" + interval + " step=" + step);
 
-        XYChart.Series<String, Number> aqiSeries  = new XYChart.Series<>();
-        XYChart.Series<String, Number> tempSeries = new XYChart.Series<>();
-        aqiSeries.setName("AQI");
-        tempSeries.setName("Temp (°C)");
-
+        // Build filtered data lists
+        List<String>  labels  = new ArrayList<>();
+        List<Integer> aqiVals = new ArrayList<>();
+        List<Double>  tmpVals = new ArrayList<>();
         int count = 0;
-        for (JsonNode entry : entries) {
-            if (count % step != 0) { count++; continue; }
-            String label = formatForecastLabel(entry.path("dtTxt").asText());
-            aqiSeries.getData().add(new XYChart.Data<>(label, entry.path("aqi").asInt()));
-            tempSeries.getData().add(new XYChart.Data<>(label, entry.path("temp").asDouble()));
+        for (JsonNode entry : lastForecastData.path("entries")) {
+            if (count % step == 0) {
+                labels.add(formatForecastLabel(entry.path("dtTxt").asText()));
+                aqiVals.add(entry.path("aqi").asInt());
+                tmpVals.add(entry.path("temp").asDouble());
+            }
             count++;
         }
 
-        forecastChart.getData().clear();
-        forecastChart.getData().addAll(aqiSeries, tempSeries);
+        // No thinning — show exactly what the interval selects.
+        // 3hr=40pts, 6hr=20pts, 12hr=10pts, 24hr=5pts. Labels are rotated so they fit.
 
-        // Style lines after rendering
+        final List<String>  fLabels  = labels;
+        final List<Integer> fAqi     = aqiVals;
+        final List<Double>  fTmp     = tmpVals;
+
+        // ALL chart work must happen on FX thread
         Platform.runLater(() -> {
-            if (aqiSeries.getNode() != null)
-                aqiSeries.getNode().setStyle("-fx-stroke: #1a73e8; -fx-stroke-width: 2.5px;");
-            if (tempSeries.getNode() != null)
-                tempSeries.getNode().setStyle("-fx-stroke: #f59e0b; -fx-stroke-width: 2.5px;");
-        });
+            // Build new series
+            XYChart.Series<String, Number> aqiSeries  = new XYChart.Series<>();
+            XYChart.Series<String, Number> tempSeries = new XYChart.Series<>();
+            aqiSeries.setName("AQI");
+            tempSeries.setName("Temp (°C)");
+            for (int i = 0; i < fLabels.size(); i++) {
+                aqiSeries.getData().add(new XYChart.Data<>(fLabels.get(i), fAqi.get(i)));
+                tempSeries.getData().add(new XYChart.Data<>(fLabels.get(i), fTmp.get(i)));
+            }
 
-        // Daily summary cards
-        dailySummaryBox.getChildren().clear();
-        lastForecastData.path("dailySummary").fields().forEachRemaining(e -> {
-            JsonNode d = e.getValue();
-            dailySummaryBox.getChildren().add(buildDaySummaryCard(
-                    e.getKey(),
-                    d.path("minAqi").asInt(), d.path("maxAqi").asInt(),
-                    d.path("minTemp").asDouble(), d.path("maxTemp").asDouble()));
+            // Build brand-new chart + axes — eliminates all stale CategoryAxis state
+            CategoryAxis newX = new CategoryAxis();
+            NumberAxis   newY = new NumberAxis();
+            // Rotate more steeply for 3hr (40 labels) so they never overlap
+            int labelCount = fLabels.size();
+            // Same bottom-to-top angle for all intervals, smaller font for dense 3hr view
+            double fontSize = labelCount > 20 ? 9 : labelCount > 10 ? 10 : 11;
+            newX.setTickLabelRotation(-40);
+            newX.setTickLabelGap(2);
+            newX.setStyle("-fx-tick-label-fill: #111; -fx-font-size: " + fontSize + "px;");
+            newY.setAutoRanging(true);
+            newY.setStyle("-fx-tick-label-fill: #111; -fx-font-size: 11px;");
+
+            LineChart<String, Number> newChart = new LineChart<>(newX, newY);
+            newChart.setPrefHeight(labelCount > 20 ? 440 : 380);
+            newChart.setAnimated(false);
+            newChart.setCreateSymbols(true);
+            newChart.setStyle("-fx-background-color: transparent; -fx-padding: 10 0 0 0;");
+
+            // Empty series — points added live by animation below
+            XYChart.Series<String, Number> liveAqi  = new XYChart.Series<>();
+            XYChart.Series<String, Number> liveTmp  = new XYChart.Series<>();
+            liveAqi.setName("AQI");
+            liveTmp.setName("Temp (°C)");
+            newChart.getData().addAll(liveAqi, liveTmp);
+
+            // Swap with fade
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(100), forecastChartContainer);
+            fadeOut.setFromValue(1.0);
+            fadeOut.setToValue(0.0);
+            fadeOut.setOnFinished(ev -> {
+                javafx.collections.ObservableList<javafx.scene.Node> kids = forecastChartContainer.getChildren();
+                boolean swapped = false;
+                for (int i = 0; i < kids.size(); i++) {
+                    if (kids.get(i) instanceof LineChart) { kids.set(i, newChart); swapped = true; break; }
+                }
+                if (!swapped) kids.add(1, newChart);
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(180), forecastChartContainer);
+                fadeIn.setFromValue(0.0); fadeIn.setToValue(1.0);
+                fadeIn.setInterpolator(Interpolator.EASE_IN);
+                fadeIn.play();
+            });
+            fadeOut.play();
+
+            // Update references
+            forecastChart = newChart;
+            forecastXAxis = newX;
+            forecastYAxis = newY;
+
+            // Style line colours + legend once chart is in scene
+            Platform.runLater(() -> {
+                if (liveAqi.getNode() != null)
+                    liveAqi.getNode().setStyle("-fx-stroke: #1a73e8; -fx-stroke-width: 2.5px;");
+                if (liveTmp.getNode() != null)
+                    liveTmp.getNode().setStyle("-fx-stroke: #f59e0b; -fx-stroke-width: 2.5px;");
+                newChart.lookupAll(".chart-legend-item").forEach(n ->
+                        n.setStyle("-fx-text-fill: #111; -fx-font-size: 13px; -fx-font-weight: bold;"));
+                newChart.lookupAll("Text").forEach(n ->
+                        n.setStyle("-fx-fill: #111; -fx-font-size: 11px;"));
+
+                // ── LIVE DRAW ANIMATION ──────────────────────────────────
+                // Each tick adds one point to both series so the line
+                // literally extends right in front of the user.
+                String dotStyleAqi = "-fx-background-color: #1a73e8, white; " +
+                        "-fx-background-insets: 0, 2; -fx-background-radius: 5px; " +
+                        "-fx-padding: " + (labelCount > 20 ? "5px" : "7px") + ";";
+                String dotStyleTmp = "-fx-background-color: #f59e0b, white; " +
+                        "-fx-background-insets: 0, 2; -fx-background-radius: 5px; " +
+                        "-fx-padding: " + (labelCount > 20 ? "5px" : "7px") + ";";
+
+                // Total draw duration: 900ms spread across all points
+                double msPerPoint = Math.max(18, 900.0 / Math.max(fLabels.size(), 1));
+                List<KeyFrame> frames = new ArrayList<>();
+
+                for (int pi = 0; pi < fLabels.size(); pi++) {
+                    final int idx = pi;
+                    frames.add(new KeyFrame(Duration.millis(idx * msPerPoint), kfEv -> {
+                        // Add the next point to both series
+                        XYChart.Data<String, Number> dAqi = new XYChart.Data<>(fLabels.get(idx), fAqi.get(idx));
+                        XYChart.Data<String, Number> dTmp = new XYChart.Data<>(fLabels.get(idx), fTmp.get(idx));
+                        liveAqi.getData().add(dAqi);
+                        liveTmp.getData().add(dTmp);
+
+                        // Re-apply line stroke (JavaFX resets it on data change)
+                        if (liveAqi.getNode() != null)
+                            liveAqi.getNode().setStyle("-fx-stroke: #1a73e8; -fx-stroke-width: 2.5px;");
+                        if (liveTmp.getNode() != null)
+                            liveTmp.getNode().setStyle("-fx-stroke: #f59e0b; -fx-stroke-width: 2.5px;");
+
+                        // Style + pop-in the dot that just appeared
+                        Platform.runLater(() -> {
+                            if (dAqi.getNode() != null) {
+                                dAqi.getNode().setStyle(dotStyleAqi);
+                                dAqi.getNode().setScaleX(0); dAqi.getNode().setScaleY(0);
+                                ScaleTransition st = new ScaleTransition(Duration.millis(160), dAqi.getNode());
+                                st.setFromX(0); st.setToX(1);
+                                st.setFromY(0); st.setToY(1);
+                                st.setInterpolator(Interpolator.EASE_OUT);
+                                st.play();
+                            }
+                            if (dTmp.getNode() != null) {
+                                dTmp.getNode().setStyle(dotStyleTmp);
+                                dTmp.getNode().setScaleX(0); dTmp.getNode().setScaleY(0);
+                                ScaleTransition st = new ScaleTransition(Duration.millis(160), dTmp.getNode());
+                                st.setFromX(0); st.setToX(1);
+                                st.setFromY(0); st.setToY(1);
+                                st.setInterpolator(Interpolator.EASE_OUT);
+                                st.play();
+                            }
+                        });
+                    }));
+                }
+                Timeline drawTimeline = new Timeline(frames.toArray(new KeyFrame[0]));
+                drawTimeline.play();
+
+                // Daily summary cards — must be on FX thread
+                dailySummaryBox.getChildren().clear();
+                lastForecastData.path("dailySummary").fields().forEachRemaining(e -> {
+                    JsonNode d = e.getValue();
+                    dailySummaryBox.getChildren().add(buildDaySummaryCard(
+                            e.getKey(),
+                            d.path("minAqi").asInt(), d.path("maxAqi").asInt(),
+                            d.path("minTemp").asDouble(), d.path("maxTemp").asDouble()));
+                });
+                // Re-apply dark theme to newly drawn chart nodes
+                if (isDarkMode) applyDarkModeInlineStyles(true);
+            });
         });
     }
 
@@ -882,19 +1382,19 @@ public class DashboardController {
         Platform.runLater(() -> {
             statusLabel.setText(risk);
             statusLabel.setStyle("-fx-text-fill: " + hexColor +
-                    "; -fx-font-weight: bold; -fx-font-size: 22px;");
+                    "; -fx-font-weight: 900; -fx-font-size: 30px;");
             aqiLabel.setStyle("-fx-text-fill: " + hexColor +
                     "; -fx-font-weight: 900; -fx-font-size: 52px;");
             mainCard.setStyle("-fx-background-color: " + gradientStyle + "; " + baseStyle);
 
-            // Force dark text for readability on light gradient cards
-            String darkText = "-fx-text-fill: #2d3436;";
-            cityLabel.setStyle(darkText + " -fx-font-weight: bold; -fx-font-size: 18px;");
-            pm25Label.setStyle(darkText);
-            pm10Label.setStyle(darkText);
-            tempLabel.setStyle(darkText);
-            humidityLabel.setStyle(darkText);
-            windLabel.setStyle(darkText);
+            // Keep large bold sizes — only override color
+            String darkStyle = "-fx-text-fill: #1a1a2e; -fx-font-weight: 900;";
+            cityLabel.setStyle(darkStyle + " -fx-font-size: 28px;");
+            pm25Label.setStyle(darkStyle + " -fx-font-size: 28px;");
+            pm10Label.setStyle(darkStyle + " -fx-font-size: 28px;");
+            tempLabel.setStyle(darkStyle  + " -fx-font-size: 26px;");
+            humidityLabel.setStyle(darkStyle + " -fx-font-size: 26px;");
+            windLabel.setStyle(darkStyle + " -fx-font-size: 26px;");
         });
 
         try {
@@ -904,6 +1404,46 @@ public class DashboardController {
         } catch (Exception e) {
             System.out.println("Image not found: " + imageName);
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // RISK GRADIENT — Forecast chart + Pollutants background
+    // ─────────────────────────────────────────────────────────────
+    private void applyRiskGradient(int aqi) {
+        String bg1, bg2, chartBg;
+        if (aqi <= 50) {
+            bg1 = "#e8f8f0"; bg2 = "#d0f0e0";
+            chartBg = "linear-gradient(to bottom, #f0fdf4, #dcfce7)";
+        } else if (aqi <= 100) {
+            bg1 = "#fefce8"; bg2 = "#fef08a";
+            chartBg = "linear-gradient(to bottom, #fefce8, #fef9c3)";
+        } else if (aqi <= 150) {
+            bg1 = "#fff7ed"; bg2 = "#fed7aa";
+            chartBg = "linear-gradient(to bottom, #fff7ed, #ffedd5)";
+        } else if (aqi <= 200) {
+            bg1 = "#fff1f0"; bg2 = "#fecaca";
+            chartBg = "linear-gradient(to bottom, #fff1f0, #fee2e2)";
+        } else if (aqi <= 300) {
+            bg1 = "#faf5ff"; bg2 = "#e9d5ff";
+            chartBg = "linear-gradient(to bottom, #faf5ff, #f3e8ff)";
+        } else {
+            bg1 = "#fff0f0"; bg2 = "#fca5a5";
+            chartBg = "linear-gradient(to bottom, #fff0f0, #fee2e2)";
+        }
+        String panelStyle = "-fx-background-color: linear-gradient(to bottom right, " + bg1 + ", " + bg2 + "); " +
+                "-fx-background-radius: 20; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4); -fx-padding: 28 35;";
+        Platform.runLater(() -> {
+            // Apply to forecast chart container (parent VBox inside tab2)
+            if (forecastChart != null && forecastChart.getParent() instanceof VBox chartPanel) {
+                chartPanel.setStyle(panelStyle);
+            }
+            // Apply to pollutants grid container
+            if (pollutantsGrid != null && pollutantsGrid.getParent() instanceof StackPane sp
+                    && sp.getParent() instanceof VBox pollPanel) {
+                pollPanel.setStyle(panelStyle);
+            }
+        });
     }
 
     // ─────────────────────────────────────────────────────────────
