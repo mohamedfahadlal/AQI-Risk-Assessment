@@ -35,8 +35,8 @@ public class ForgotPasswordController {
     @FXML private Label upperLabel;
     @FXML private Label numberLabel;
     @FXML private Label specialLabel;
-    @FXML private TextField confirmPasswordVisibleField; // ADD THIS
-    @FXML private javafx.scene.control.Button toggleConfirmBtn; // ADD THIS
+    @FXML private TextField confirmPasswordVisibleField;
+    @FXML private javafx.scene.control.Button toggleConfirmBtn;
 
     private boolean isConfirmVisible = false; // Tracks the state
 
@@ -51,12 +51,15 @@ public class ForgotPasswordController {
 
     @FXML
     public void initialize() {
-        // Add real-time listener to check password criteria as the user types
+        // 1. Bind the confirm fields exactly ONCE when the screen loads to prevent UI freezing
+        confirmPasswordVisibleField.textProperty().bindBidirectional(confirmPasswordField.textProperty());
+
+        // 2. Add real-time listener to check password criteria as the user types
         newPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
             validatePassword(newValue);
-            confirmPasswordVisibleField.textProperty().bindBidirectional(confirmPasswordField.textProperty());
         });
     }
+
     @FXML
     private void toggleConfirmVisibility() {
         isConfirmVisible = !isConfirmVisible;
@@ -77,6 +80,7 @@ public class ForgotPasswordController {
             toggleConfirmBtn.setText("👁"); // Or change to "Show"
         }
     }
+
     private boolean validatePassword(String password) {
         boolean hasLength = password.length() >= 8;
         boolean hasUpper = password.matches(".*[A-Z].*");
@@ -103,6 +107,7 @@ public class ForgotPasswordController {
     private void handleSendOtp() {
         String email = emailField.getText().trim();
         if (email.isEmpty()) {
+            statusLabel.setStyle("-fx-text-fill: #ef4444;");
             statusLabel.setText("Please enter your email.");
             return;
         }
@@ -141,7 +146,11 @@ public class ForgotPasswordController {
     private void handleResetPassword() {
         String enteredOtp = otpField.getText().trim();
         String newPassword = newPasswordField.getText();
-        String confirmPassword = confirmPasswordField.getText();
+
+        // Use your visible text field if the Eye is active, otherwise use the hidden one
+        String confirmPassword = isConfirmVisible ?
+                confirmPasswordVisibleField.getText() :
+                confirmPasswordField.getText();
 
         if (enteredOtp.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
             statusLabel.setStyle("-fx-text-fill: #ef4444;");
@@ -169,12 +178,16 @@ public class ForgotPasswordController {
             return;
         }
 
-        // 3. Hash and save
-        String hashedPassword = hashPassword(newPassword);
-        updatePasswordInDatabase(verifiedEmail, hashedPassword);
-    }
+        // Show a loading status so the user knows something is happening
+        statusLabel.setStyle("-fx-text-fill: #007bff;");
+        statusLabel.setText("Updating password... please wait.");
 
-    // --- THE MISSING METHODS ARE BACK BELOW ---
+        // 3. Move the heavy database task to a background thread!
+        new Thread(() -> {
+            String hashedPassword = hashPassword(newPassword);
+            updatePasswordInDatabase(verifiedEmail, hashedPassword);
+        }).start();
+    }
 
     private boolean checkIfEmailExists(String email) {
         String query = "SELECT 1 FROM users WHERE email = ?";
