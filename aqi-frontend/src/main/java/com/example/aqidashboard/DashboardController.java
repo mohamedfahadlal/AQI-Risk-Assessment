@@ -1412,13 +1412,11 @@ public class DashboardController {
 
     @FXML private void handleOpenAqiMap() {
         if (guardGuest()) return;
-        // Open WAQI live map in browser — works with Desktop API
         try {
-            String cityEnc = java.net.URLEncoder.encode(currentCity, "UTF-8");
             java.awt.Desktop.getDesktop().browse(
-                    java.net.URI.create("https://waqi.info/#/search/" + cityEnc));
+                    java.net.URI.create("http://localhost:8080/map"));
         } catch (Exception e) {
-            showInfo("Could not open browser. Visit https://waqi.info to see the live AQI map.");
+            showInfo("Could not open map. Make sure the backend is running on port 8080.");
         }
     }
 
