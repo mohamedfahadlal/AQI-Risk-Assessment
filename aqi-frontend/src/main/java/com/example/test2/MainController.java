@@ -13,6 +13,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -74,6 +75,34 @@ public class MainController {
         modelSelector.getItems().addAll("XGBoost", "Random Forest", "LightGBM");
         modelSelector.getSelectionModel().selectFirst();
         setupAutoComplete();
+
+        // Wrap rootBox in ScrollPane after scene is ready
+        Platform.runLater(this::wrapInScrollPane);
+    }
+
+    /**
+     * Replaces the scene root with a ScrollPane wrapping rootBox.
+     * This is the cleanest approach — no FXML changes needed.
+     */
+    private void wrapInScrollPane() {
+        Scene scene = rootBox.getScene();
+        if (scene == null) return;
+
+        ScrollPane scrollPane = new ScrollPane(rootBox);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setStyle("-fx-background-color: #F0F4F8; -fx-background: #F0F4F8;");
+
+        // Style the inner viewport after skin is applied
+        scrollPane.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+            if (newSkin != null) {
+                scrollPane.lookup(".viewport")
+                          .setStyle("-fx-background-color: #F0F4F8;");
+            }
+        });
+
+        scene.setRoot(scrollPane);
     }
 
     @FXML
@@ -164,14 +193,12 @@ public class MainController {
         predictButton.setText("PREDICT NOW");
     }
 
-    /* ── ML Server Call — uses real lat/lon/windDirection ──────── */
     private int[] callMLServer(String modelName, int currentAqi,
                                double pm25, double pm10, double no2, double o3,
                                double co, double so2, double temp, double humidity,
                                double wind, double windDirection, double lat, double lon) {
         try {
             LocalDateTime now = LocalDateTime.now();
-
             Map<String, Object> payload = new HashMap<>();
             payload.put("model",            modelName);
             payload.put("current_aqi",      currentAqi);
@@ -186,7 +213,7 @@ public class MainController {
             payload.put("temperature",      temp);
             payload.put("relativehumidity", humidity);
             payload.put("wind_speed",       wind);
-            payload.put("wind_direction",   windDirection);   // real value from OWM
+            payload.put("wind_direction",   windDirection);
             payload.put("aqi_lag_1",        currentAqi);
             payload.put("aqi_lag_2",        currentAqi);
             payload.put("hour",             now.getHour());
@@ -194,30 +221,21 @@ public class MainController {
             payload.put("month",            now.getMonthValue());
 
             String json = objectMapper.writeValueAsString(payload);
-
             HttpRequest req = HttpRequest.newBuilder()
                     .uri(URI.create(ML_SERVER + "/predict"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .timeout(java.time.Duration.ofSeconds(10))
                     .build();
-
-            HttpResponse<String> res = httpClient.send(
-                    req, HttpResponse.BodyHandlers.ofString());
-
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
             if (res.statusCode() == 200) {
                 JsonNode result = objectMapper.readTree(res.body());
                 int predicted = result.path("predicted_aqi").asInt(currentAqi);
                 return new int[]{predicted, 1};
-            } else {
-                System.out.println("ML server returned " + res.statusCode() + ": " + res.body());
             }
-
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("ML server unavailable, using fallback: " + e.getMessage());
         }
-
         return new int[]{fallbackPredict(currentAqi, pm25, pm10), 0};
     }
 
@@ -230,7 +248,6 @@ public class MainController {
         return Math.min(predicted, 500);
     }
 
-    /* ── Health Profile ────────────────────────────────────────── */
     private JsonNode fetchHealthProfile() {
         try {
             String userId = UserSession.getUserId();
@@ -246,10 +263,8 @@ public class MainController {
         return null;
     }
 
-    /* ── Risk Advisory ─────────────────────────────────────────── */
     private String buildRiskAdvice(int predictedAqi, JsonNode profile) {
         int riskScore = 0;
-
         if      (predictedAqi <= 50)  riskScore += 5;
         else if (predictedAqi <= 100) riskScore += 15;
         else if (predictedAqi <= 150) riskScore += 25;
@@ -275,7 +290,6 @@ public class MainController {
         if (symptomChest.isSelected())      riskScore += 8;
         if (symptomIrritation.isSelected()) riskScore += 3;
         if (symptomFatigue.isSelected())    riskScore += 4;
-
         riskScore = Math.min(riskScore, 100);
 
         String riskLevel;
@@ -342,11 +356,9 @@ public class MainController {
             if (predictedAqi > 200)
                 advice.append("• EMERGENCY: Minimize all outdoor activity.\n");
         }
-
         return advice.toString();
     }
 
-    /* ── UI Update ─────────────────────────────────────────────── */
     private void updateUI(String city, int predictedAqi, double pm25, double pm10,
                           String advice, String modelLabel) {
         cityLabel.setText(city.toUpperCase());
@@ -388,7 +400,6 @@ public class MainController {
         aqiStatus.setTextFill(Color.web("#E74C3C"));
     }
 
-    /* ── Autocomplete ──────────────────────────────────────────── */
     private void setupAutoComplete() {
         ContextMenu suggestionsPopup = new ContextMenu();
         cityField.textProperty().addListener((obs, oldVal, newVal) -> {
@@ -426,7 +437,6 @@ public class MainController {
         cityField.focusedProperty().addListener((obs, o, n) -> { if (!n) suggestionsPopup.hide(); });
     }
 
-    /* ── Programmatic UI Styling ───────────────────────────────── */
     private void buildProgrammaticUI() {
         rootBox.setBackground(new Background(new BackgroundFill(
                 Color.web("#F0F4F8"), CornerRadii.EMPTY, Insets.EMPTY)));
