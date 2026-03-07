@@ -1,10 +1,5 @@
 package com.example.aqidashboard;
 
-
-import javafx.scene.web.WebView;
-import javafx.scene.web.WebEngine;
-import netscape.javascript.JSObject;
-import javafx.concurrent.Worker;
 import com.aqi.utils.EmailUtil;
 import com.aqi.utils.SceneManager;
 import com.aqi.utils.UserSession;
@@ -173,23 +168,22 @@ public class DashboardController {
         aqiLabel.setText("--");
 
         String username = UserSession.getUsername();
-        // Show/hide logout based on guest status
+        // Show/hide logout based on guest status — use fx:id fields directly
         if (UserSession.isGuest()) {
-            // Find and hide logout button, show sign-up prompt
-            darkModeBtn.getParent().getChildrenUnmodifiable().forEach(node -> {
-                if (node instanceof Button btn) {
-                    if ("Logout".equals(btn.getText())) {
-                        btn.setVisible(false);
-                        btn.setManaged(false);
-                    }
-                    if ("My Profile".equals(btn.getText())) {
-                        btn.setText("Sign Up Free");
-                        btn.setStyle("-fx-background-radius: 20; -fx-background-color: #1a73e8;" +
-                                "-fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 14; -fx-cursor: hand;");
-                        btn.setOnAction(e -> guardGuest());
-                    }
-                }
-            });
+            if (logoutBtn    != null) { logoutBtn.setVisible(false);   logoutBtn.setManaged(false); }
+            if (myProfileBtn != null) {
+                myProfileBtn.setText("Sign Up Free");
+                myProfileBtn.setStyle("-fx-background-radius: 20; -fx-background-color: #1a73e8;" +
+                        "-fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 14; -fx-cursor: hand;");
+                myProfileBtn.setOnAction(e -> guardGuest());
+            }
+        } else {
+            // Logged-in user — restore proper state in case session changed
+            if (logoutBtn    != null) { logoutBtn.setVisible(true);    logoutBtn.setManaged(true); }
+            if (myProfileBtn != null) {
+                myProfileBtn.setText("My Profile");
+                myProfileBtn.setOnAction(e -> handleViewProfile());
+            }
         }
         if (username != null && !username.isEmpty())
             welcomeLabel.setText("Hi, " + username);
@@ -696,446 +690,36 @@ public class DashboardController {
         Platform.runLater(() -> {
             aqiLabel.setText("...");
             statusLabel.setText("Locating...");
-            cityLabel.setText("Detecting location...");
         });
-
         Thread thread = new Thread(() -> {
-            double lat = 0, lon = 0;
-            String source = "unknown";
-
-            // ── 1. Try OS native location ─────────────────────────────
-            double[] osCoords = tryOsLocation();
-            if (osCoords != null) {
-                lat = osCoords[0];
-                lon = osCoords[1];
-                source = "OS";
-                System.out.printf("[Locate] OS location: %.6f, %.6f%n", lat, lon);
-            }
-
-            // ── 2. Fallback: dual IP APIs averaged ────────────────────
-            if (lat == 0 && lon == 0) {
-                System.out.println("[Locate] OS location unavailable, trying IP APIs...");
-                double[] ipCoords = tryDualIpLocation();
-                if (ipCoords != null) {
-                    lat = ipCoords[0];
-                    lon = ipCoords[1];
-                    source = "IP";
-                    System.out.printf("[Locate] IP location: %.6f, %.6f%n", lat, lon);
-                }
-            }
-
-            if (lat == 0 && lon == 0) {
-                Platform.runLater(() -> {
-                    aqiLabel.setText("--");
-                    statusLabel.setText("Error");
-                    cityLabel.setText("Could not detect location");
-                    showInfo("Could not detect your location.\nPlease type your city in the search box.");
-                });
-                return;
-            }
-
-            final double finalLat = lat;
-            final double finalLon = lon;
-            final String finalSource = source;
-
-            // ── 3. Reverse geocode → exact city name via Nominatim ────
-            String cityName = reverseGeocode(finalLat, finalLon);
-            final String finalCity = cityName;
-
-            Platform.runLater(() -> {
-                citySearchField.setText(finalCity);
-                selectedLat = finalLat;
-                selectedLon = finalLon;
-                currentCity = finalCity;
-                System.out.println("[Locate] Resolved → " + finalCity + " (via " + finalSource + ")");
-            });
-
-            // ── 4. Fetch AQI using raw coords ─────────────────────────
             try {
-                HttpRequest aqiReq = HttpRequest.newBuilder()
-                        .uri(URI.create(BACKEND + "/aqi/locate?lat=" + finalLat + "&lon=" + finalLon))
-                        .GET().build();
-                HttpResponse<String> aqiRes = httpClient.send(
-                        aqiReq, HttpResponse.BodyHandlers.ofString());
-                if (aqiRes.statusCode() == 200) {
-                    updateUIFromResponse(aqiRes.body());
-                    loadForecastData(finalCity, finalLat, finalLon);
-                } else {
-                    Platform.runLater(() -> showError("Server error fetching AQI"));
-                }
-            } catch (Exception e) {
-                Platform.runLater(() -> showError("Cannot connect to server"));
-                e.printStackTrace();
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    /**
-     * Tries to get GPS/WiFi coords from the OS.
-     * Windows: PowerShell + Windows.Devices.Geolocation
-     * macOS:   CoreLocation via osascript
-     * Returns double[]{lat, lon} or null if unavailable.
-     */
-    private double[] tryOsLocation() {
-        String os = System.getProperty("os.name", "").toLowerCase();
-
-        if (os.contains("win")) {
-            return tryWindowsLocation();
-        } else if (os.contains("mac")) {
-            return tryMacLocation();
-        }
-        return null; // Linux — no standard CLI location API
-    }
-
-    /**
-     * Windows Location API via PowerShell.
-     * Uses Windows.Devices.Geolocation — same source as browser geolocation.
-     * WiFi triangulation on laptops gives ~100m accuracy.
-     */
-    private double[] tryWindowsLocation() {
-        try {
-            // PowerShell script: request location asynchronously, wait up to 8s
-            String psScript =
-                    "Add-Type -AssemblyName System.Runtime.WindowsRuntime; " +
-                            "$loc = [Windows.Devices.Geolocation.Geolocator]::new(); " +
-                            "$loc.DesiredAccuracy = [Windows.Devices.Geolocation.PositionAccuracy]::High; " +
-                            "$taskMethod = [System.WindowsRuntimeSystemExtensions].GetMethod('AsTask', " +
-                            "  [Type[]]@([Windows.Foundation.IAsyncOperation[Windows.Devices.Geolocation.Geoposition]])); " +
-                            "$task = $taskMethod.Invoke($null, @($loc.GetGeopositionAsync())); " +
-                            "if ($task.Wait(8000)) { " +
-                            "  $pos = $task.Result.Coordinate.Point.Position; " +
-                            "  Write-Output ($pos.Latitude.ToString('F6') + ',' + $pos.Longitude.ToString('F6')); " +
-                            "} else { Write-Output 'TIMEOUT'; }";
-
-            ProcessBuilder pb = new ProcessBuilder(
-                    "powershell", "-NoProfile", "-NonInteractive",
-                    "-ExecutionPolicy", "Bypass", "-Command", psScript);
-            pb.redirectErrorStream(true);
-            Process proc = pb.start();
-
-            String output = new String(proc.getInputStream().readAllBytes()).trim();
-            boolean finished = proc.waitFor(10, java.util.concurrent.TimeUnit.SECONDS);
-            if (!finished) { proc.destroyForcibly(); return null; }
-
-            System.out.println("[Locate/Win] PowerShell output: " + output);
-
-            if (output.contains(",") && !output.contains("TIMEOUT")) {
-                // Take only the last line (PowerShell may print warnings first)
-                String lastLine = output.lines()
-                        .filter(l -> l.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+"))
-                        .reduce((a, b) -> b)
-                        .orElse(null);
-                if (lastLine != null) {
-                    String[] parts = lastLine.split(",");
-                    return new double[]{
-                            Double.parseDouble(parts[0].trim()),
-                            Double.parseDouble(parts[1].trim())
-                    };
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("[Locate/Win] PowerShell location failed: " + e.getMessage());
-        }
-        return null;
-    }
-
-    /**
-     * macOS CoreLocation via osascript.
-     * Prompts the user for location permission on first run.
-     */
-    private double[] tryMacLocation() {
-        try {
-            String script =
-                    "do shell script \"" +
-                            "python3 -c \\\"" +
-                            "import CoreLocation, time; " +
-                            "m=CoreLocation.CLLocationManager.alloc().init(); " +
-                            "m.startUpdatingLocation(); " +
-                            "time.sleep(3); " +
-                            "loc=m.location(); " +
-                            "print(str(loc.coordinate().latitude)+','+str(loc.coordinate().longitude))" +
-                            "\\\"\"";
-
-            ProcessBuilder pb = new ProcessBuilder("osascript", "-e", script);
-            pb.redirectErrorStream(true);
-            Process proc = pb.start();
-            String output = new String(proc.getInputStream().readAllBytes()).trim();
-            proc.waitFor(8, java.util.concurrent.TimeUnit.SECONDS);
-
-            System.out.println("[Locate/Mac] osascript output: " + output);
-
-            if (output.contains(",")) {
-                String[] parts = output.split(",");
-                return new double[]{
-                        Double.parseDouble(parts[0].trim()),
-                        Double.parseDouble(parts[1].trim())
-                };
-            }
-        } catch (Exception e) {
-            System.out.println("[Locate/Mac] CoreLocation failed: " + e.getMessage());
-        }
-        return null;
-    }
-
-    /**
-     * Queries TWO IP geolocation APIs and averages the coordinates.
-     * Much more accurate than a single API — when both agree on the
-     * same district, the average is within ~5km of truth.
-     */
-    private double[] tryDualIpLocation() {
-        double lat1 = 0, lon1 = 0;
-        double lat2 = 0, lon2 = 0;
-        int count = 0;
-
-        // API 1: ip-api.com
-        try {
-            HttpRequest r = HttpRequest.newBuilder()
-                    .uri(URI.create("http://ip-api.com/json/?fields=status,lat,lon"))
-                    .timeout(java.time.Duration.ofSeconds(4)).GET().build();
-            HttpResponse<String> res = httpClient.send(r, HttpResponse.BodyHandlers.ofString());
-            JsonNode geo = objectMapper.readTree(res.body());
-            if ("success".equals(geo.path("status").asText())) {
-                lat1 = geo.path("lat").asDouble();
-                lon1 = geo.path("lon").asDouble();
-                count++;
-                System.out.printf("[Locate/IP1] ip-api: %.4f, %.4f%n", lat1, lon1);
-            }
-        } catch (Exception e) {
-            System.out.println("[Locate/IP1] Failed: " + e.getMessage());
-        }
-
-        // API 2: ipinfo.io
-        try {
-            HttpRequest r = HttpRequest.newBuilder()
-                    .uri(URI.create("https://ipinfo.io/json"))
-                    .timeout(java.time.Duration.ofSeconds(4)).GET().build();
-            HttpResponse<String> res = httpClient.send(r, HttpResponse.BodyHandlers.ofString());
-            JsonNode geo = objectMapper.readTree(res.body());
-            String loc = geo.path("loc").asText();
-            if (!loc.isEmpty() && loc.contains(",")) {
-                String[] parts = loc.split(",");
-                lat2 = Double.parseDouble(parts[0].trim());
-                lon2 = Double.parseDouble(parts[1].trim());
-                count++;
-                System.out.printf("[Locate/IP2] ipinfo: %.4f, %.4f%n", lat2, lon2);
-            }
-        } catch (Exception e) {
-            System.out.println("[Locate/IP2] Failed: " + e.getMessage());
-        }
-
-        if (count == 0) return null;
-        if (count == 1) return lat1 != 0 ? new double[]{lat1, lon1} : new double[]{lat2, lon2};
-
-        // Both succeeded — average them
-        return new double[]{(lat1 + lat2) / 2.0, (lon1 + lon2) / 2.0};
-    }
-
-    /**
-     * Nominatim reverse geocode: coords → exact city/town name.
-     * Uses OpenStreetMap data — free, no API key, very accurate for Kerala.
-     * Falls back to "Your Location" if it fails.
-     */
-    private String reverseGeocode(double lat, double lon) {
-        try {
-            String url = String.format(
-                    "https://nominatim.openstreetmap.org/reverse" +
-                            "?lat=%.6f&lon=%.6f&format=json&zoom=10&addressdetails=1",
-                    lat, lon);
-
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("User-Agent", "AiQI-JavaFX/1.0")
-                    .timeout(java.time.Duration.ofSeconds(6))
-                    .GET().build();
-
-            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-            JsonNode addr = objectMapper.readTree(res.body()).path("address");
-
-            // Most specific → least specific
-            String[] keys = {"city", "town", "village", "suburb",
-                    "county", "state_district", "state"};
-            for (String key : keys) {
-                String val = addr.path(key).asText("");
-                if (!val.isEmpty()) {
-                    System.out.println("[Locate] Nominatim → " + key + ": " + val);
-                    return val;
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("[Locate] Nominatim failed: " + e.getMessage());
-        }
-        return "Your Location";
-    }
-
-    /**
-     * Spins up an invisible JavaFX WebView (WebKit engine).
-     * navigator.geolocation.getCurrentPosition() inside it uses the
-     * OS location stack — WiFi triangulation, GPS, cell towers —
-     * giving accuracy similar to a browser or Android app.
-     *
-     * The JS result is bridged back to Java via JSObject.setMember().
-     */
-    private void locateViaGps() {
-        WebView webView = new WebView();
-        WebEngine engine = webView.getEngine();
-
-        // ── Java bridge exposed to JavaScript as window.javaBridge ──
-        // Must be a non-anonymous class so WebKit can reflect its methods.
-        class GpsBridge {
-            /** Called by JS on success with real GPS/WiFi coordinates */
-            public void onSuccess(double lat, double lon) {
-                System.out.printf("[GPS] Got coords: %.6f, %.6f%n", lat, lon);
-                Platform.runLater(() -> resolveLocationFromCoords(lat, lon));
-            }
-
-            /** Called by JS if user denies permission or GPS times out */
-            public void onError(String message) {
-                System.out.println("[GPS] Error: " + message);
-                Platform.runLater(() -> {
-                    aqiLabel.setText("--");
-                    statusLabel.setText("Location denied");
-                    cityLabel.setText("Please allow location access or type a city.");
-                    showGpsErrorDialog(message);
-                });
-            }
-        }
-
-        GpsBridge bridge = new GpsBridge();
-
-        engine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
-            if (newState != Worker.State.SUCCEEDED) return;
-
-            // Inject bridge into JS window scope
-            JSObject win = (JSObject) engine.executeScript("window");
-            win.setMember("javaBridge", bridge);
-
-            // Request location — high accuracy, 10s timeout, no cached results
-            engine.executeScript(
-                    "navigator.geolocation.getCurrentPosition(" +
-                            "  function(pos) {" +
-                            "    window.javaBridge.onSuccess(" +
-                            "      pos.coords.latitude," +
-                            "      pos.coords.longitude" +
-                            "    );" +
-                            "  }," +
-                            "  function(err) {" +
-                            "    window.javaBridge.onError(err.message || 'Unknown error');" +
-                            "  }," +
-                            "  {" +
-                            "    enableHighAccuracy: true," +   // use GPS/WiFi, not just IP
-                            "    timeout: 10000," +             // 10 second timeout
-                            "    maximumAge: 0" +              // never use a cached position
-                            "  }" +
-                            ");"
-            );
-        });
-
-        // A real browsing context is required for geolocation to work
-        engine.loadContent("<html><body><p>Locating...</p></body></html>");
-    }
-
-    /**
-     * Called once we have accurate GPS coords.
-     * Uses Nominatim (OpenStreetMap) to reverse-geocode the exact city name
-     * — far more reliable than whatever the IP API guessed.
-     * Then fetches AQI using the raw coords (not city name) for max accuracy.
-     */
-    private void resolveLocationFromCoords(double lat, double lon) {
-        Platform.runLater(() -> cityLabel.setText("Resolving city..."));
-
-        Thread thread = new Thread(() -> {
-            // ── Step 1: Reverse geocode coords → real city name ──────
-            String cityName = "Your Location";
-            try {
-                String url = String.format(
-                        "https://nominatim.openstreetmap.org/reverse" +
-                                "?lat=%.6f&lon=%.6f&format=json&zoom=10&addressdetails=1",
-                        lat, lon);
-
-                HttpRequest req = HttpRequest.newBuilder()
-                        .uri(URI.create(url))
-                        .header("User-Agent", "AiQI-JavaFX/1.0 (contact@aiqi.app)")
-                        .timeout(java.time.Duration.ofSeconds(6))
-                        .GET().build();
-
-                HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-                JsonNode addr = objectMapper.readTree(res.body()).path("address");
-
-                // Walk from most-specific to least-specific until we find a value
-                String[] keys = {"city", "town", "village", "suburb",
-                        "county", "state_district", "state"};
-                for (String key : keys) {
-                    String val = addr.path(key).asText("");
-                    if (!val.isEmpty()) {
-                        cityName = val;
-                        System.out.println("[GPS] Nominatim → " + key + " = " + cityName);
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("[GPS] Nominatim reverse geocode failed: " + e.getMessage());
-                // Continue — we still have valid coords for the AQI call
-            }
-
-            final String finalCity = cityName;
-            Platform.runLater(() -> {
-                citySearchField.setText(finalCity);
+                HttpRequest geoReq = HttpRequest.newBuilder()
+                        .uri(URI.create("http://ip-api.com/json/")).GET().build();
+                HttpResponse<String> geoRes = httpClient.send(geoReq, HttpResponse.BodyHandlers.ofString());
+                JsonNode geo = objectMapper.readTree(geoRes.body());
+                double lat   = geo.path("lat").asDouble();
+                double lon   = geo.path("lon").asDouble();
+                String city  = geo.path("city").asText("Your Location");
+                Platform.runLater(() -> citySearchField.setText(city));
                 selectedLat = lat;
                 selectedLon = lon;
-                currentCity = finalCity;
-            });
+                currentCity = city;
 
-            // ── Step 2: Fetch AQI using raw coords (most precise) ────
-            try {
                 HttpRequest aqiReq = HttpRequest.newBuilder()
                         .uri(URI.create(BACKEND + "/aqi/locate?lat=" + lat + "&lon=" + lon))
                         .GET().build();
-
-                HttpResponse<String> aqiRes = httpClient.send(
-                        aqiReq, HttpResponse.BodyHandlers.ofString());
-
+                HttpResponse<String> aqiRes = httpClient.send(aqiReq, HttpResponse.BodyHandlers.ofString());
                 if (aqiRes.statusCode() == 200) {
                     updateUIFromResponse(aqiRes.body());
-                    loadForecastData(finalCity, lat, lon);
-                } else {
-                    Platform.runLater(() -> showError("Server error fetching AQI"));
+                    loadForecastData(city, lat, lon);
                 }
             } catch (Exception e) {
-                Platform.runLater(() -> showError("Cannot connect to server"));
+                Platform.runLater(() -> showError("Could not detect location"));
                 e.printStackTrace();
             }
         });
         thread.setDaemon(true);
         thread.start();
-    }
-
-    /** Shows a friendly dialog explaining why GPS failed and what to do */
-    private void showGpsErrorDialog(String technicalReason) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Location Access — AiQI");
-        alert.setHeaderText("Could not get your location");
-
-        String msg;
-        if (technicalReason.toLowerCase().contains("denied") ||
-                technicalReason.toLowerCase().contains("permission")) {
-            msg = "Location access was denied.\n\n" +
-                    "To fix this:\n" +
-                    "• Windows: Settings → Privacy → Location → Allow apps\n" +
-                    "• macOS: System Settings → Privacy → Location Services\n\n" +
-                    "Or just type your city in the search box.";
-        } else if (technicalReason.toLowerCase().contains("timeout")) {
-            msg = "Location request timed out.\n\n" +
-                    "This can happen if you're offline or location services are slow.\n" +
-                    "Please try again or type your city manually.";
-        } else {
-            msg = "Location unavailable: " + technicalReason + "\n\n" +
-                    "Please type your city in the search box instead.";
-        }
-
-        alert.setContentText(msg);
-        alert.show();
     }
 
     private void fetchSuggestions(String query) {
@@ -1827,11 +1411,13 @@ public class DashboardController {
 
     @FXML private void handleOpenAqiMap() {
         if (guardGuest()) return;
+        // Open WAQI live map in browser — works with Desktop API
         try {
+            String cityEnc = java.net.URLEncoder.encode(currentCity, "UTF-8");
             java.awt.Desktop.getDesktop().browse(
-                    java.net.URI.create("http://localhost:8080/map"));
+                    java.net.URI.create("https://waqi.info/#/search/" + cityEnc));
         } catch (Exception e) {
-            showInfo("Could not open map. Make sure the backend is running on port 8080.");
+            showInfo("Could not open browser. Visit https://waqi.info to see the live AQI map.");
         }
     }
 
