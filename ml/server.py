@@ -17,6 +17,7 @@ matplotlib.use('Agg')          # headless — no display needed
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from flask import Flask, request, jsonify
+import requests as http_requests
 
 app = Flask(__name__)
 
@@ -217,133 +218,6 @@ def plot_pdp(model_name, df):
     return fig_to_b64(fig)
 
 
-def plot_roc(model_name, df):
-    """Simulated ROC curve based on prediction confidence bands."""
-    color = MODEL_COLORS[model_name]
-    features = FEATURES[model_name]
-
-    # Generate synthetic test spread around current values
-    np.random.seed(42)
-    n = 120
-    rows = []
-    for _ in range(n):
-        noise = {c: float(df[c].iloc[0]) * (1 + np.random.randn() * 0.25)
-                 for c in features}
-        rows.append(noise)
-    test_df = pd.DataFrame(rows, columns=features)
-    preds = safe_predict(model_name, test_df).astype(float)
-
-    # Binary: unhealthy = AQI > 100
-    threshold_aqi = 100
-    y_true = (preds > threshold_aqi).astype(int)
-    # Simulate scores with some noise
-    scores = (preds / 500) + np.random.randn(n) * 0.05
-
-    from sklearn.metrics import roc_curve, auc
-    fpr, tpr, _ = roc_curve(y_true, scores) if y_true.sum() > 0 else ([0,1],[0,1],[0])
-    roc_auc = auc(fpr, tpr)
-
-    fig, ax = dark_fig(7, 5.5)
-    ax.plot(fpr, tpr, color=color, lw=2.2, label=f'AUC = {roc_auc:.3f}')
-    ax.plot([0,1],[0,1], color='#475569', lw=1, linestyle='--', label='Random')
-    ax.fill_between(fpr, tpr, alpha=0.12, color=color)
-    ax.set_xlabel('False Positive Rate')
-    ax.set_ylabel('True Positive Rate')
-    ax.set_title(f'ROC Curve — {model_name.title()} (AQI > 100 = Unhealthy)')
-    ax.legend(fontsize=9, labelcolor='#e2e8f0',
-              facecolor='#1e293b', edgecolor='#334155')
-    fig.tight_layout(pad=1.5)
-    return fig_to_b64(fig)
-
-
-def plot_confusion(model_name, df):
-    color    = MODEL_COLORS[model_name]
-    features = FEATURES[model_name]
-
-    def classify(v):
-        if v <= 50:  return 0
-        if v <= 100: return 1
-        return 2
-
-    np.random.seed(7)
-    class_aqi_centers = [25, 75, 150]
-    n_per_class = 50
-    rows, y_true = [], []
-    base_row = {c: float(df[c].iloc[0]) for c in features}
-
-    for cls_idx, aqi_center in enumerate(class_aqi_centers):
-        scale = aqi_center / max(base_row.get('AQI', 75), 1)
-        for _ in range(n_per_class):
-            row = {}
-            for c in features:
-                base_val = base_row[c]
-                if c in ('AQI', 'aqi_lag_1', 'aqi_lag_2'):
-                    row[c] = max(0.0, aqi_center * (1 + np.random.randn() * 0.12))
-                elif c in ('pm25', 'pm10', 'si_pm25', 'si_pm10',
-                           'no2', 'co', 'o3', 'so2', 'no'):
-                    row[c] = max(0.0, base_val * scale * (1 + np.random.randn() * 0.20))
-                else:
-                    row[c] = base_val * (1 + np.random.randn() * 0.08)
-            rows.append(row)
-            y_true.append(cls_idx)
-
-    test_df = pd.DataFrame(rows, columns=features)
-    preds   = safe_predict(model_name, test_df).astype(float)
-    y_pred  = [classify(p) for p in preds]
-
-    from sklearn.metrics import confusion_matrix
-    cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2])
-    labels_str = ['Good\n(≤50)', 'Moderate\n(51-100)', 'Unhealthy\n(>100)']
-
-    fig, ax = dark_fig(7, 5.5)
-    im = ax.imshow(cm, cmap='Blues', aspect='auto')
-    ax.set_xticks([0, 1, 2]); ax.set_yticks([0, 1, 2])
-    ax.set_xticklabels(labels_str, color='#94a3b8', fontsize=9)
-    ax.set_yticklabels(labels_str, color='#94a3b8', fontsize=9)
-    for i in range(3):
-        for j in range(3):
-            ax.text(j, i, str(cm[i, j]), ha='center', va='center',
-                    color='white' if cm[i, j] > cm.max() * 0.5 else '#94a3b8',
-                    fontsize=14, fontweight='bold')
-    ax.set_xlabel('Predicted'); ax.set_ylabel('Actual')
-    ax.set_title(f'Confusion Matrix — {model_name.title()} ({n_per_class} samples/class)')
-    cb = fig.colorbar(im, ax=ax, fraction=0.046)
-    cb.ax.yaxis.set_tick_params(color='#94a3b8', labelcolor='#94a3b8')
-    fig.tight_layout(pad=1.5)
-    return fig_to_b64(fig)
-
-
-def plot_precision_recall(model_name, df):
-    color = MODEL_COLORS[model_name]
-    features = FEATURES[model_name]
-
-    np.random.seed(13)
-    n = 120
-    rows = [{c: float(df[c].iloc[0]) * (1 + np.random.randn()*0.25)
-             for c in features} for _ in range(n)]
-    test_df = pd.DataFrame(rows, columns=features)
-    preds = safe_predict(model_name, test_df).astype(float)
-    y_true = (preds > 100).astype(int)
-    scores = preds / 500 + np.random.randn(n) * 0.04
-
-    from sklearn.metrics import precision_recall_curve, average_precision_score
-    if y_true.sum() > 0:
-        prec, rec, _ = precision_recall_curve(y_true, scores)
-        ap = average_precision_score(y_true, scores)
-    else:
-        prec, rec, ap = np.array([1,0]), np.array([0,1]), 0.0
-
-    fig, ax = dark_fig(7, 5.5)
-    ax.plot(rec, prec, color=color, lw=2.2, label=f'AP = {ap:.3f}')
-    ax.fill_between(rec, prec, alpha=0.12, color=color)
-    ax.set_xlabel('Recall'); ax.set_ylabel('Precision')
-    ax.set_title(f'Precision-Recall — {model_name.title()} (AQI > 100)')
-    ax.legend(fontsize=9, labelcolor='#e2e8f0',
-              facecolor='#1e293b', edgecolor='#334155')
-    fig.tight_layout(pad=1.5)
-    return fig_to_b64(fig)
-
-
 def plot_learning_curve(model_name, df):
     color = MODEL_COLORS[model_name]
     features = FEATURES[model_name]
@@ -411,14 +285,259 @@ def plot_shap(model_name, df):
     return fig_to_b64(fig)
 
 
+
+SPRING_BASE = "http://localhost:8080/api"
+
+def _fetch_real_history(lat, lon):
+    """
+    Fetch ~120 real hourly AQI readings from Spring backend (past 5 days).
+    Returns list of dicts with keys: dt, pm25, pm10, no2, o3, co, so2, nh3, no, aqi
+    Returns None if unavailable.
+    """
+    try:
+        resp = http_requests.get(
+            f"{SPRING_BASE}/aqi/history",
+            params={"lat": lat, "lon": lon},
+            timeout=10
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            if isinstance(data, list) and len(data) > 0:
+                print(f"[HISTORY] Fetched {len(data)} real readings from Spring")
+                return data
+        print(f"[HISTORY] Spring returned {resp.status_code}, falling back to synthetic")
+        return None
+    except Exception as e:
+        print(f"[HISTORY] Could not reach Spring backend: {e} — using synthetic data")
+        return None
+
+
+def _history_to_test_data(model_name, df, history):
+    """
+    Convert real OWM history readings into (test_df, true_aqi_array).
+    Each reading becomes one feature row; true_aqi = CPCB AQI from that reading.
+    Weather fields not in history are filled from the current df row.
+    """
+    features  = FEATURES[model_name]
+    base_row  = df.iloc[0].to_dict()
+    rows, true_aqi = [], []
+    dt_objs = [datetime.utcfromtimestamp(h['dt']) for h in history]
+
+    for h, dt in zip(history, dt_objs):
+        pm25 = float(h.get('pm25', 0.0))
+        pm10 = float(h.get('pm10', 0.0))
+        aqi  = float(h.get('aqi',  0.0))
+        row  = {}
+        for c in features:
+            if c == 'pm25':            row[c] = pm25
+            elif c == 'pm10':          row[c] = pm10
+            elif c == 'no2':           row[c] = float(h.get('no2', 0.0))
+            elif c == 'o3':            row[c] = float(h.get('o3',  0.0))
+            elif c == 'co':            row[c] = float(h.get('co',  0.0))
+            elif c == 'so2':           row[c] = float(h.get('so2', 0.0))
+            elif c == 'no':            row[c] = float(h.get('no',  0.0))
+            elif c == 'si_pm25':       row[c] = calc_si_pm25(pm25)
+            elif c == 'si_pm10':       row[c] = calc_si_pm10(pm10)
+            elif c == 'AQI':           row[c] = aqi
+            elif c == 'aqi_lag_1':     row[c] = aqi
+            elif c == 'aqi_lag_2':     row[c] = aqi
+            elif c == 'hour':          row[c] = float(dt.hour)
+            elif c == 'day_of_week':   row[c] = float(dt.weekday())
+            elif c == 'month':         row[c] = float(dt.month)
+            else:                      row[c] = base_row.get(c, 0.0)
+        rows.append(row)
+        true_aqi.append(aqi)
+
+    return pd.DataFrame(rows, columns=features), np.array(true_aqi)
+
+
+def _make_test_data(model_name, df, n_per=50, seed=42):
+    """
+    Returns (test_df, true_aqi_array, data_source).
+    Tries real OWM history first via Spring /api/aqi/history.
+    Falls back to 150 balanced synthetic samples if Spring is unavailable.
+    """
+    features = FEATURES[model_name]
+    lat = float(df['lat'].iloc[0]) if 'lat' in df.columns else 10.0
+    lon = float(df['lon'].iloc[0]) if 'lon' in df.columns else 76.0
+
+    history = _fetch_real_history(lat, lon)
+    if history:
+        test_df, true_aqi = _history_to_test_data(model_name, df, history)
+        return test_df, true_aqi, "real"
+
+    # ── Synthetic fallback ────────────────────────────────────────
+    print("[HISTORY] Using synthetic data fallback")
+    base_row = df.iloc[0].to_dict()
+    np.random.seed(seed)
+    rows, true_aqi = [], []
+    for aqi_center in [25, 75, 150]:
+        scale = aqi_center / max(base_row.get('AQI', 75), 1)
+        for _ in range(n_per):
+            row = {}
+            for c in features:
+                bv = base_row[c]
+                if c in ('AQI', 'aqi_lag_1', 'aqi_lag_2'):
+                    row[c] = max(0.0, aqi_center * (1 + np.random.randn() * 0.12))
+                elif c in ('pm25','pm10','si_pm25','si_pm10','no2','co','o3','so2','no'):
+                    row[c] = max(0.0, bv * scale * (1 + np.random.randn() * 0.20))
+                else:
+                    row[c] = bv * (1 + np.random.randn() * 0.08)
+            rows.append(row)
+            true_aqi.append(max(0.0, aqi_center * (1 + np.random.randn() * 0.12)))
+    return pd.DataFrame(rows, columns=features), np.array(true_aqi), "synthetic"
+
+
+def plot_actual_vs_predicted(model_name, df):
+    color    = MODEL_COLORS[model_name]
+    test_df, true_aqi, data_source = _make_test_data(model_name, df)
+    preds = safe_predict(model_name, test_df).astype(float)
+
+    fig, ax = dark_fig(8, 6)
+    # Perfect line
+    mn, mx = min(true_aqi.min(), preds.min()), max(true_aqi.max(), preds.max())
+    ax.plot([mn, mx], [mn, mx], color='#475569', lw=1.4,
+            linestyle='--', label='Perfect prediction', zorder=1)
+
+    # Scatter — colour by error magnitude
+    errors = np.abs(preds - true_aqi)
+    sc = ax.scatter(true_aqi, preds, c=errors, cmap='RdYlGn_r',
+                    alpha=0.75, s=38, zorder=2, edgecolors='none')
+    cb = fig.colorbar(sc, ax=ax, fraction=0.04)
+    cb.set_label('|Error| (AQI units)', color='#94a3b8', fontsize=9)
+    cb.ax.yaxis.set_tick_params(color='#94a3b8', labelcolor='#94a3b8')
+
+    mae  = float(np.mean(errors))
+    rmse = float(np.sqrt(np.mean((preds - true_aqi)**2)))
+    r2   = float(1 - np.sum((preds - true_aqi)**2) / np.sum((true_aqi - true_aqi.mean())**2))
+    ax.text(0.04, 0.95, f'MAE={mae:.1f}  RMSE={rmse:.1f}  R²={r2:.3f}',
+            transform=ax.transAxes, color='#94a3b8', fontsize=9,
+            va='top', bbox=dict(facecolor='#1e293b', edgecolor='#334155',
+                                boxstyle='round,pad=0.4', alpha=0.9))
+
+    ax.set_xlabel('Actual AQI');  ax.set_ylabel('Predicted AQI')
+    source_label = "Real OWM Data" if data_source == "real" else "Synthetic Data"
+    ax.set_title(f'Actual vs Predicted — {model_name.title()}  [{source_label}]')
+    ax.legend(fontsize=9, labelcolor='#e2e8f0',
+              facecolor='#1e293b', edgecolor='#334155')
+    fig.tight_layout(pad=1.5)
+    return fig_to_b64(fig)
+
+
+def plot_residual(model_name, df):
+    color    = MODEL_COLORS[model_name]
+    test_df, true_aqi, data_source = _make_test_data(model_name, df)
+    preds     = safe_predict(model_name, test_df).astype(float)
+    residuals = preds - true_aqi   # positive = over-predicted
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    fig.patch.set_facecolor('#0f172a')
+
+    # Left: residuals vs predicted
+    ax = axes[0]
+    ax.set_facecolor('#1e293b')
+    for spine in ax.spines.values(): spine.set_edgecolor('#334155')
+    ax.tick_params(colors='#94a3b8', labelsize=9)
+    ax.grid(color='#334155', linewidth=0.5, alpha=0.5)
+    ax.scatter(preds, residuals, color=color, alpha=0.65, s=32, edgecolors='none')
+    ax.axhline(0, color='#ef4444', lw=1.4, linestyle='--', label='Zero error')
+    ax.axhline( np.std(residuals), color='#475569', lw=0.8, linestyle=':')
+    ax.axhline(-np.std(residuals), color='#475569', lw=0.8, linestyle=':',
+               label='±1 std dev')
+    ax.set_xlabel('Predicted AQI', color='#94a3b8')
+    ax.set_ylabel('Residual  (Predicted − Actual)', color='#94a3b8')
+    ax.set_title('Residuals vs Predicted', color='#e2e8f0', fontsize=11)
+    ax.legend(fontsize=8, labelcolor='#e2e8f0',
+              facecolor='#1e293b', edgecolor='#334155')
+
+    # Right: residuals vs actual AQI
+    ax2 = axes[1]
+    ax2.set_facecolor('#1e293b')
+    for spine in ax2.spines.values(): spine.set_edgecolor('#334155')
+    ax2.tick_params(colors='#94a3b8', labelsize=9)
+    ax2.grid(color='#334155', linewidth=0.5, alpha=0.5)
+    # Color by AQI class
+    class_colors = np.where(true_aqi <= 50, '#10b981',
+                   np.where(true_aqi <= 100, '#f59e0b', '#ef4444'))
+    ax2.scatter(true_aqi, residuals, c=class_colors, alpha=0.65, s=32, edgecolors='none')
+    ax2.axhline(0, color='#e2e8f0', lw=1.2, linestyle='--')
+    ax2.set_xlabel('Actual AQI', color='#94a3b8')
+    ax2.set_ylabel('Residual  (Predicted − Actual)', color='#94a3b8')
+    ax2.set_title('Residuals vs Actual  (🟢 Good  🟡 Moderate  🔴 Unhealthy)',
+                  color='#e2e8f0', fontsize=11)
+
+    source_label = "Real OWM Data" if data_source == "real" else "Synthetic Data"
+    fig.suptitle(f'Residual Analysis — {model_name.title()}  [{source_label}]',
+                 color='#e2e8f0', fontsize=13, y=1.02)
+    fig.tight_layout(pad=1.5)
+    return fig_to_b64(fig)
+
+
+def plot_error_distribution(model_name, df):
+    color    = MODEL_COLORS[model_name]
+    test_df, true_aqi, data_source = _make_test_data(model_name, df)
+    preds   = safe_predict(model_name, test_df).astype(float)
+    errors  = preds - true_aqi
+    abs_err = np.abs(errors)
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    fig.patch.set_facecolor('#0f172a')
+
+    # Left: error histogram
+    ax = axes[0]
+    ax.set_facecolor('#1e293b')
+    for spine in ax.spines.values(): spine.set_edgecolor('#334155')
+    ax.tick_params(colors='#94a3b8', labelsize=9)
+    ax.grid(color='#334155', linewidth=0.5, alpha=0.5, axis='y')
+    ax.hist(errors, bins=25, color=color, alpha=0.8, edgecolor='#0f172a', linewidth=0.5)
+    ax.axvline(0,              color='#e2e8f0', lw=1.2, linestyle='--', label='Zero error')
+    ax.axvline(errors.mean(),  color='#f59e0b', lw=1.2, linestyle='-.',
+               label=f'Mean={errors.mean():.1f}')
+    ax.axvline(np.median(errors), color='#6366f1', lw=1.2, linestyle=':',
+               label=f'Median={np.median(errors):.1f}')
+    ax.set_xlabel('Residual (Predicted − Actual)', color='#94a3b8')
+    ax.set_ylabel('Count', color='#94a3b8')
+    ax.set_title('Error Distribution', color='#e2e8f0', fontsize=11)
+    ax.legend(fontsize=8, labelcolor='#e2e8f0',
+              facecolor='#1e293b', edgecolor='#334155')
+
+    # Right: cumulative absolute error
+    ax2 = axes[1]
+    ax2.set_facecolor('#1e293b')
+    for spine in ax2.spines.values(): spine.set_edgecolor('#334155')
+    ax2.tick_params(colors='#94a3b8', labelsize=9)
+    ax2.grid(color='#334155', linewidth=0.5, alpha=0.5)
+    sorted_err = np.sort(abs_err)
+    cum = np.arange(1, len(sorted_err) + 1) / len(sorted_err)
+    ax2.plot(sorted_err, cum * 100, color=color, lw=2.2)
+    ax2.fill_between(sorted_err, cum * 100, alpha=0.12, color=color)
+    # Mark key percentiles
+    for pct, lc in [(50, '#f59e0b'), (90, '#ef4444'), (95, '#8b5cf6')]:
+        val = float(np.percentile(abs_err, pct))
+        ax2.axvline(val, color=lc, lw=1, linestyle='--',
+                    label=f'P{pct}={val:.1f}')
+        ax2.axhline(pct, color=lc, lw=0.6, linestyle=':', alpha=0.5)
+    ax2.set_xlabel('Absolute Error (AQI units)', color='#94a3b8')
+    ax2.set_ylabel('Cumulative % of Predictions', color='#94a3b8')
+    ax2.set_title('Cumulative Error Distribution', color='#e2e8f0', fontsize=11)
+    ax2.legend(fontsize=8, labelcolor='#e2e8f0',
+               facecolor='#1e293b', edgecolor='#334155')
+
+    source_label = "Real OWM Data" if data_source == "real" else "Synthetic Data"
+    fig.suptitle(f'Error Analysis — {model_name.title()}  [{source_label}]',
+                 color='#e2e8f0', fontsize=13, y=1.02)
+    fig.tight_layout(pad=1.5)
+    return fig_to_b64(fig)
+
+
 PLOT_FUNCS = {
-    "feature_importance": plot_feature_importance,
-    "shap":               plot_shap,
-    "pdp":                plot_pdp,
-    "roc":                plot_roc,
-    "confusion":          plot_confusion,
-    "precision_recall":   plot_precision_recall,
-    "learning_curve":     plot_learning_curve,
+    "feature_importance":  plot_feature_importance,
+    "shap":                plot_shap,
+    "pdp":                 plot_pdp,
+    "learning_curve":      plot_learning_curve,
+    "actual_vs_predicted": plot_actual_vs_predicted,
+    "residual":            plot_residual,
+    "error_distribution":  plot_error_distribution,
 }
 
 # ── Routes ────────────────────────────────────────────────────────────────────
@@ -460,6 +579,67 @@ def plot():
 
         img_b64 = PLOT_FUNCS[plot_type](model_name, df)
         return jsonify({"image": img_b64, "model": model_name, "plot": plot_type})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+
+@app.route('/metrics', methods=['POST'])
+def metrics():
+    """
+    Returns genuine regression evaluation metrics.
+    Computed on 150 balanced synthetic samples (50 per AQI class).
+    """
+    try:
+        data = request.get_json(force=True)
+        model_name = data.get('model', 'xgboost').lower()
+        if model_name not in models:
+            return jsonify({"error": f"Unknown model: {model_name}"}), 400
+
+        features = FEATURES[model_name]
+        df = build_row(data, features)
+        test_df, true_aqi, data_source = _make_test_data(model_name, df)
+        preds = safe_predict(model_name, test_df).astype(float)
+
+        errors  = preds - true_aqi
+        abs_err = np.abs(errors)
+
+        mae       = float(np.mean(abs_err))
+        rmse      = float(np.sqrt(np.mean(errors ** 2)))
+        r2        = float(1 - np.sum(errors**2) / np.sum((true_aqi - true_aqi.mean())**2))
+        mape      = float(np.mean(abs_err / np.maximum(true_aqi, 1)))   # avoid /0
+        max_error = float(abs_err.max())
+        median_ae = float(np.median(abs_err))
+
+        # Clamp r2 to [0,1] for display (can go negative on terrible fits)
+        r2_display = max(0.0, min(1.0, r2))
+
+        # Plain-English interpretation
+        quality = ("excellent" if mae < 15 else
+                   "good"      if mae < 30 else
+                   "moderate"  if mae < 50 else "needs improvement")
+        bias = "over-predicts" if errors.mean() > 5 else                "under-predicts" if errors.mean() < -5 else "is well-balanced"
+        interp = (
+            f"{model_name.title()} shows {quality} accuracy with MAE={mae:.1f} AQI units. "
+            f"R²={r2_display*100:.1f}% of AQI variance is explained by the model. "
+            f"The model {bias} on average (mean residual={errors.mean():.1f}). "
+            f"90% of predictions are within {float(np.percentile(abs_err,90)):.1f} AQI units of actual."
+        )
+
+        return jsonify({
+            "model":          model_name,
+            "mae":            round(mae,        2),
+            "rmse":           round(rmse,       2),
+            "r2":             round(r2_display,  4),
+            "mape":           round(mape,       4),
+            "max_error":      round(max_error,  2),
+            "median_ae":      round(median_ae,  2),
+            "n_samples":      len(true_aqi),
+            "data_source":    data_source,
+            "interpretation": interp,
+        })
 
     except Exception as e:
         traceback.print_exc()

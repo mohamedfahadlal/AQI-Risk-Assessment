@@ -2110,6 +2110,12 @@ public class DashboardController {
                 double lon     = selectedLon != 0 ? selectedLon : 76.0;
                 double so2     = lastAqiData.path("so2").asDouble(0);
 
+                // One dedicated client for all ML calls — avoids ClosedChannelException
+                // from sharing the dashboard's HttpClient across rapid sequential requests
+                HttpClient mlClient = HttpClient.newBuilder()
+                        .connectTimeout(java.time.Duration.ofSeconds(8))
+                        .build();
+
                 List<Integer> xgbPreds = new ArrayList<>();
                 List<Integer> rfPreds  = new ArrayList<>();
                 List<Integer> lgbPreds = new ArrayList<>();
@@ -2145,9 +2151,9 @@ public class DashboardController {
                     payload.put("wind_direction",   180.0);
                     payload.put("current_aqi",      actualAqi.get(i));
 
-                    xgbPreds.add(flaskPredict(payload, "xgboost"));
-                    rfPreds.add( flaskPredict(payload, "randomforest"));
-                    lgbPreds.add(flaskPredict(payload, "lightgbm"));
+                    xgbPreds.add(flaskPredict(payload, "xgboost",      mlClient));
+                    rfPreds.add( flaskPredict(payload, "randomforest", mlClient));
+                    lgbPreds.add(flaskPredict(payload, "lightgbm",     mlClient));
                 }
 
                 // ── Step 3: compute MAE per model ───────────────────────────
@@ -2178,20 +2184,35 @@ public class DashboardController {
     }
 
     /** POST one prediction request to Flask. Returns predicted AQI or -1 on failure. */
-    private int flaskPredict(com.fasterxml.jackson.databind.node.ObjectNode payload, String modelName) {
+    private int flaskPredict(com.fasterxml.jackson.databind.node.ObjectNode payload,
+                             String modelName, HttpClient mlClient) {
         try {
-            payload.put("model", modelName);
+            // Deep-copy so adding "model" key doesn't corrupt the shared payload
+            com.fasterxml.jackson.databind.node.ObjectNode copy = payload.deepCopy();
+            copy.put("model", modelName);
+
             HttpRequest req = HttpRequest.newBuilder()
                     .uri(java.net.URI.create(ML_SERVER + "/predict"))
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
+                    .POST(HttpRequest.BodyPublishers.ofString(copy.toString()))
+                    .timeout(java.time.Duration.ofSeconds(10))
                     .build();
-            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> resp = mlClient.send(req, HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() == 200) {
                 return objectMapper.readTree(resp.body()).path("predicted_aqi").asInt(-1);
+            } else {
+                System.err.println("[ML] " + modelName + " HTTP " + resp.statusCode() + ": " + resp.body());
             }
+        } catch (java.net.ConnectException e) {
+            System.err.println("[ML] " + modelName
+                    + " — Flask unreachable at " + ML_SERVER
+                    + ". Is server.py running on port 5000?");
         } catch (Exception e) {
-            System.err.println("[ML] " + modelName + " predict failed: " + e.getMessage());
+            System.err.println("[ML] " + modelName + " failed: "
+                    + e.getClass().getSimpleName() + ": "
+                    + (e.getMessage() != null ? e.getMessage()
+                    : (e.getCause() != null ? e.getCause().toString() : "no detail")));
+            e.printStackTrace();
         }
         return -1;
     }

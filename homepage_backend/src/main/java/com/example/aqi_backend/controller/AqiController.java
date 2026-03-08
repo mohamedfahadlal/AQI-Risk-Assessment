@@ -38,6 +38,19 @@ public class AqiController {
         }
     }
 
+    // GET /api/aqi/history?lat=9.93&lon=76.26
+    // Returns past 5 days of hourly AQI readings (~120 points)
+    // Used by Flask /metrics to get real y_true ground truth values
+    @GetMapping("/aqi/history")
+    public ResponseEntity<?> getAqiHistory(@RequestParam double lat,
+                                           @RequestParam double lon) {
+        try {
+            return ResponseEntity.ok(aqiService.getAqiHistory(lat, lon));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     // GET /api/search?q=Koc
     @GetMapping("/search")
     public ResponseEntity<?> searchCities(@RequestParam String q) {
