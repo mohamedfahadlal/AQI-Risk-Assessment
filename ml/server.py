@@ -257,41 +257,56 @@ def plot_roc(model_name, df):
 
 
 def plot_confusion(model_name, df):
-    color = MODEL_COLORS[model_name]
+    color    = MODEL_COLORS[model_name]
     features = FEATURES[model_name]
 
-    np.random.seed(7)
-    n = 150
-    rows = [{c: float(df[c].iloc[0]) * (1 + np.random.randn() * 0.3)
-             for c in features} for _ in range(n)]
-    test_df = pd.DataFrame(rows, columns=features)
-    preds = safe_predict(model_name, test_df).astype(float)
-
-    # 3-class: Good ≤50, Moderate 51-100, Unhealthy >100
     def classify(v):
-        if v <= 50: return 0
+        if v <= 50:  return 0
         if v <= 100: return 1
         return 2
-    y_pred = [classify(p) for p in preds]
-    y_true = [classify(float(df['AQI'].iloc[0]) * (1 + np.random.randn()*0.2))
-              for _ in range(n)]
+
+    np.random.seed(7)
+    class_aqi_centers = [25, 75, 150]
+    n_per_class = 50
+    rows, y_true = [], []
+    base_row = {c: float(df[c].iloc[0]) for c in features}
+
+    for cls_idx, aqi_center in enumerate(class_aqi_centers):
+        scale = aqi_center / max(base_row.get('AQI', 75), 1)
+        for _ in range(n_per_class):
+            row = {}
+            for c in features:
+                base_val = base_row[c]
+                if c in ('AQI', 'aqi_lag_1', 'aqi_lag_2'):
+                    row[c] = max(0.0, aqi_center * (1 + np.random.randn() * 0.12))
+                elif c in ('pm25', 'pm10', 'si_pm25', 'si_pm10',
+                           'no2', 'co', 'o3', 'so2', 'no'):
+                    row[c] = max(0.0, base_val * scale * (1 + np.random.randn() * 0.20))
+                else:
+                    row[c] = base_val * (1 + np.random.randn() * 0.08)
+            rows.append(row)
+            y_true.append(cls_idx)
+
+    test_df = pd.DataFrame(rows, columns=features)
+    preds   = safe_predict(model_name, test_df).astype(float)
+    y_pred  = [classify(p) for p in preds]
 
     from sklearn.metrics import confusion_matrix
-    cm = confusion_matrix(y_true, y_pred, labels=[0,1,2])
+    cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2])
     labels_str = ['Good\n(≤50)', 'Moderate\n(51-100)', 'Unhealthy\n(>100)']
 
     fig, ax = dark_fig(7, 5.5)
     im = ax.imshow(cm, cmap='Blues', aspect='auto')
-    ax.set_xticks([0,1,2]); ax.set_yticks([0,1,2])
+    ax.set_xticks([0, 1, 2]); ax.set_yticks([0, 1, 2])
     ax.set_xticklabels(labels_str, color='#94a3b8', fontsize=9)
     ax.set_yticklabels(labels_str, color='#94a3b8', fontsize=9)
     for i in range(3):
         for j in range(3):
-            ax.text(j, i, str(cm[i,j]), ha='center', va='center',
-                    color='white' if cm[i,j] > cm.max()*0.5 else '#94a3b8',
+            ax.text(j, i, str(cm[i, j]), ha='center', va='center',
+                    color='white' if cm[i, j] > cm.max() * 0.5 else '#94a3b8',
                     fontsize=14, fontweight='bold')
     ax.set_xlabel('Predicted'); ax.set_ylabel('Actual')
-    ax.set_title(f'Confusion Matrix — {model_name.title()}')
+    ax.set_title(f'Confusion Matrix — {model_name.title()} ({n_per_class} samples/class)')
     cb = fig.colorbar(im, ax=ax, fraction=0.046)
     cb.ax.yaxis.set_tick_params(color='#94a3b8', labelcolor='#94a3b8')
     fig.tight_layout(pad=1.5)
