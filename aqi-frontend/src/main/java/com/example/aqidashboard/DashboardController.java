@@ -41,8 +41,8 @@ import java.util.concurrent.*;
 
 public class DashboardController {
 
-    private static final String BACKEND    = "http://localhost:8080/api";
-    private static final String ML_SERVER  = "http://localhost:5000";
+    private static final String BACKEND    = "https://aqi-risk-assessment-deployable-repo-spring-boot-production.up.railway.app/api";
+    private static final String ML_SERVER  = "https://aqi-risk-assessment-deployable-repo-production.up.railway.app";
 
     // ── Navbar ────────────────────────────────────────────────────
     @FXML private TextField citySearchField;
@@ -1492,7 +1492,7 @@ public class DashboardController {
         if (guardGuest()) return;
         try {
             java.awt.Desktop.getDesktop().browse(
-                    java.net.URI.create("http://localhost:8080/map"));
+                    java.net.URI.create("https://aqi-risk-assessment-deployable-repo-spring-boot-production.up.railway.app/map"));
         } catch (Exception e) {
             showInfo("Could not open map. Make sure the backend is running on port 8080.");
         }
