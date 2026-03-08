@@ -1,10 +1,5 @@
 package com.example.aqidashboard;
 
-
-import javafx.scene.web.WebView;
-import javafx.scene.web.WebEngine;
-import netscape.javascript.JSObject;
-import javafx.concurrent.Worker;
 import com.aqi.utils.EmailUtil;
 import com.aqi.utils.SceneManager;
 import com.aqi.utils.UserSession;
@@ -40,7 +35,8 @@ import java.util.concurrent.*;
 
 public class DashboardController {
 
-    private static final String BACKEND = "http://localhost:8080/api";
+    private static final String BACKEND    = "http://localhost:8080/api";
+    private static final String ML_SERVER  = "http://localhost:5000";
 
     // ── Navbar ────────────────────────────────────────────────────
     @FXML private TextField citySearchField;
@@ -51,8 +47,8 @@ public class DashboardController {
     @FXML private Button darkModeBtn;
 
     // ── Capsule tab switcher ──────────────────────────────────────
-    @FXML private Button tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5;
-    @FXML private VBox tabContent1, tabContent2, tabContent3, tabContent4, tabContent5;
+    @FXML private Button tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5, tabBtn6;
+    @FXML private VBox tabContent1, tabContent2, tabContent3, tabContent4, tabContent5, tabContent6;
     private Button[] tabBtns;
     private VBox[]   tabContents;
 
@@ -115,6 +111,17 @@ public class DashboardController {
     // ── Tab 4: India Cities ───────────────────────────────────────
     @FXML private GridPane citiesGrid;
     @FXML private Button sortCitiesBtn;
+
+    // ── Tab 5: ML Model Comparison ────────────────────────────────
+    @FXML private VBox    mlChartContainer;
+    @FXML private Label   mlStatusLabel;
+    @FXML private Label   mlMaeXgb;
+    @FXML private Label   mlMaeRf;
+    @FXML private Label   mlMaeLgb;
+    @FXML private Button  mlRefreshBtn;
+    @FXML private VBox    mlCardXgb;
+    @FXML private VBox    mlCardRf;
+    @FXML private VBox    mlCardLgb;
     @FXML private Button locateMeBtn;
     @FXML private Button refreshCitiesBtn;
     @FXML private Button refreshPollutantsBtn;
@@ -140,7 +147,7 @@ public class DashboardController {
     private final List<Map<String, Object>> citiesData = Collections.synchronizedList(new ArrayList<>());
 
     private double selectedLat = 0, selectedLon = 0;
-    private final boolean[] tabVisited = new boolean[5]; // tracks first-open per tab
+    private final boolean[] tabVisited = new boolean[6]; // tracks first-open per tab
     private String currentCity = "Kochi";
     private JsonNode lastAqiData = null;
     private JsonNode lastForecastData = null;
@@ -173,23 +180,22 @@ public class DashboardController {
         aqiLabel.setText("--");
 
         String username = UserSession.getUsername();
-        // Show/hide logout based on guest status
+        // Show/hide logout based on guest status — use fx:id fields directly
         if (UserSession.isGuest()) {
-            // Find and hide logout button, show sign-up prompt
-            darkModeBtn.getParent().getChildrenUnmodifiable().forEach(node -> {
-                if (node instanceof Button btn) {
-                    if ("Logout".equals(btn.getText())) {
-                        btn.setVisible(false);
-                        btn.setManaged(false);
-                    }
-                    if ("My Profile".equals(btn.getText())) {
-                        btn.setText("Sign Up Free");
-                        btn.setStyle("-fx-background-radius: 20; -fx-background-color: #1a73e8;" +
-                                "-fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 14; -fx-cursor: hand;");
-                        btn.setOnAction(e -> guardGuest());
-                    }
-                }
-            });
+            if (logoutBtn    != null) { logoutBtn.setVisible(false);   logoutBtn.setManaged(false); }
+            if (myProfileBtn != null) {
+                myProfileBtn.setText("Sign Up Free");
+                myProfileBtn.setStyle("-fx-background-radius: 20; -fx-background-color: #1a73e8;" +
+                        "-fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 14; -fx-cursor: hand;");
+                myProfileBtn.setOnAction(e -> guardGuest());
+            }
+        } else {
+            // Logged-in user — restore proper state in case session changed
+            if (logoutBtn    != null) { logoutBtn.setVisible(true);    logoutBtn.setManaged(true); }
+            if (myProfileBtn != null) {
+                myProfileBtn.setText("My Profile");
+                myProfileBtn.setOnAction(e -> handleViewProfile());
+            }
         }
         if (username != null && !username.isEmpty())
             welcomeLabel.setText("Hi, " + username);
@@ -221,8 +227,8 @@ public class DashboardController {
         });
 
         // Wire capsule tab switcher
-        tabBtns     = new Button[]{tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5};
-        tabContents = new VBox[]{tabContent1, tabContent2, tabContent3, tabContent4, tabContent5};
+        tabBtns     = new Button[]{tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5, tabBtn6};
+        tabContents = new VBox[]{tabContent1, tabContent2, tabContent3, tabContent4, tabContent5, tabContent6};
 
         // Tab button hovers
         for (Button tb : tabBtns) {
@@ -261,6 +267,12 @@ public class DashboardController {
             if (refreshPollutantsBtn!= null) addButtonHover(refreshPollutantsBtn,"rgba(26,115,232,0.30)");
             if (refreshCitiesBtn    != null) addButtonHover(refreshCitiesBtn,    "rgba(26,115,232,0.30)");
             if (sortCitiesBtn       != null) addButtonHover(sortCitiesBtn,       "rgba(26,115,232,0.30)");
+            if (mlRefreshBtn        != null) addButtonHover(mlRefreshBtn,        "rgba(26,115,232,0.40)");
+
+            // ML stat card hovers — each with its own brand colour
+            addMlCardHover(mlCardXgb, "#10b981", "rgba(16,185,129,0.18)", "rgba(16,185,129,0.55)");
+            addMlCardHover(mlCardRf,  "#f59e0b", "rgba(245,158,11,0.18)", "rgba(245,158,11,0.55)");
+            addMlCardHover(mlCardLgb, "#8b5cf6", "rgba(139,92,246,0.18)", "rgba(139,92,246,0.55)");
         });
 
         startAutoRefresh();
@@ -391,6 +403,17 @@ public class DashboardController {
             pollutantsGrid.getChildren().clear();
             updatePollutantsTab();
         }
+        if (tabIndex == 4) {
+            // ML Comparison tab — load on first open
+            loadMlComparisonData();
+        }
+    }
+
+    @FXML private void handleMlRefresh() {
+        if (mlChartContainer != null) mlChartContainer.getChildren().clear();
+        if (mlStatusLabel   != null) mlStatusLabel.setText("Refreshing…");
+        tabVisited[4] = false;   // allow reload
+        loadMlComparisonData();
     }
 
     private void animateTabButton(Button btn) {
@@ -696,463 +719,36 @@ public class DashboardController {
         Platform.runLater(() -> {
             aqiLabel.setText("...");
             statusLabel.setText("Locating...");
-            cityLabel.setText("Detecting location...");
         });
-
         Thread thread = new Thread(() -> {
-            double lat = 0, lon = 0;
-            String source = "unknown";
-
-            // ── 1. Try OS native location ─────────────────────────────
-            double[] osCoords = tryOsLocation();
-            if (osCoords != null) {
-                lat = osCoords[0];
-                lon = osCoords[1];
-                source = "OS";
-                System.out.printf("[Locate] OS location: %.6f, %.6f%n", lat, lon);
-            }
-
-            // ── 2. Fallback: dual IP APIs averaged ────────────────────
-            if (lat == 0 && lon == 0) {
-                System.out.println("[Locate] OS location unavailable, trying IP APIs...");
-                double[] ipCoords = tryDualIpLocation();
-                if (ipCoords != null) {
-                    lat = ipCoords[0];
-                    lon = ipCoords[1];
-                    source = "IP";
-                    System.out.printf("[Locate] IP location: %.6f, %.6f%n", lat, lon);
-                }
-            }
-
-            if (lat == 0 && lon == 0) {
-                Platform.runLater(() -> {
-                    aqiLabel.setText("--");
-                    statusLabel.setText("Error");
-                    cityLabel.setText("Could not detect location");
-                    showInfo("Could not detect your location.\nPlease type your city in the search box.");
-                });
-                return;
-            }
-
-            final double finalLat = lat;
-            final double finalLon = lon;
-            final String finalSource = source;
-
-            // ── 3. Reverse geocode → exact city name via Nominatim ────
-            String cityName = reverseGeocode(finalLat, finalLon);
-            final String finalCity = cityName;
-
-            Platform.runLater(() -> {
-                citySearchField.setText(finalCity);
-                selectedLat = finalLat;
-                selectedLon = finalLon;
-                currentCity = finalCity;
-                System.out.println("[Locate] Resolved → " + finalCity + " (via " + finalSource + ")");
-            });
-
-            // ── 4. Fetch AQI using raw coords ─────────────────────────
             try {
-                HttpRequest aqiReq = HttpRequest.newBuilder()
-                        .uri(URI.create(BACKEND + "/aqi/locate?lat=" + finalLat + "&lon=" + finalLon))
-                        .GET().build();
-                HttpResponse<String> aqiRes = httpClient.send(
-                        aqiReq, HttpResponse.BodyHandlers.ofString());
-                if (aqiRes.statusCode() == 200) {
-                    updateUIFromResponse(aqiRes.body());
-                    loadForecastData(finalCity, finalLat, finalLon);
-                } else {
-                    Platform.runLater(() -> showError("Server error fetching AQI"));
-                }
-            } catch (Exception e) {
-                Platform.runLater(() -> showError("Cannot connect to server"));
-                e.printStackTrace();
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    /**
-     * Tries to get GPS/WiFi coords from the OS.
-     * Windows: PowerShell + Windows.Devices.Geolocation
-     * macOS:   CoreLocation via osascript
-     * Returns double[]{lat, lon} or null if unavailable.
-     */
-    private double[] tryOsLocation() {
-        String os = System.getProperty("os.name", "").toLowerCase();
-
-        if (os.contains("win")) {
-            return tryWindowsLocation();
-        } else if (os.contains("mac")) {
-            return tryMacLocation();
-        }
-        return null; // Linux — no standard CLI location API
-    }
-
-    /**
-     * Windows Location API via PowerShell.
-     * Uses Windows.Devices.Geolocation — same source as browser geolocation.
-     * WiFi triangulation on laptops gives ~100m accuracy.
-     */
-    private double[] tryWindowsLocation() {
-        try {
-            // WinRT types need [Windows.Devices.Geolocation.Geolocator,
-            // Windows.Devices.Geolocation, ContentType=WindowsRuntime] syntax
-            // AND the assembly must be loaded differently in PS5 vs PS7
-            String psScript =
-                    "$poa = [System.Runtime.InteropServices.WindowsRuntime.AsyncInfo]; " +
-                            "if (-not $poa) { exit 1 } " +
-
-                            // Load the WinRT projection assembly
-                            "[void][Windows.Devices.Geolocation.Geolocator," +
-                            "Windows.Devices.Geolocation,ContentType=WindowsRuntime]; " +
-
-                            "$loc = New-Object Windows.Devices.Geolocation.Geolocator; " +
-                            "$loc.DesiredAccuracyInMeters = 100; " +
-
-                            // GetGeopositionAsync() returns IAsyncOperation — wrap with AsTask
-                            "$iop = $loc.GetGeopositionAsync(); " +
-                            "$task = [System.Runtime.InteropServices.WindowsRuntime.WindowsRuntimeSystemExtensions]" +
-                            "::AsTask($iop); " +
-                            "if ($task.Wait(8000)) { " +
-                            "  $c = $task.Result.Coordinate.Point.Position; " +
-                            "  Write-Host ($c.Latitude.ToString('F6') + ',' + $c.Longitude.ToString('F6')); " +
-                            "} else { Write-Host 'TIMEOUT'; }";
-
-            ProcessBuilder pb = new ProcessBuilder(
-                    "powershell", "-NoProfile", "-NonInteractive",
-                    "-ExecutionPolicy", "Bypass", "-Command", psScript);
-            pb.redirectErrorStream(true);
-            Process proc = pb.start();
-
-            String output = new String(proc.getInputStream().readAllBytes()).trim();
-            boolean finished = proc.waitFor(12, java.util.concurrent.TimeUnit.SECONDS);
-            if (!finished) { proc.destroyForcibly(); return null; }
-
-            System.out.println("[Locate/Win] Output: " + output);
-
-            // Extract the lat,lon line (ignore any warnings above it)
-            String coordLine = output.lines()
-                    .map(String::trim)
-                    .filter(l -> l.matches("-?\\d+\\.\\d+,-?\\d+\\.\\d+"))
-                    .reduce((a, b) -> b)
-                    .orElse(null);
-
-            if (coordLine != null) {
-                String[] parts = coordLine.split(",");
-                double lat = Double.parseDouble(parts[0]);
-                double lon = Double.parseDouble(parts[1]);
-                // Sanity check — reject 0,0 or obviously wrong coords
-                if (Math.abs(lat) > 0.01 && Math.abs(lon) > 0.01) {
-                    return new double[]{lat, lon};
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("[Locate/Win] Exception: " + e.getMessage());
-        }
-        return null;
-    }
-    /**
-     * macOS CoreLocation via osascript.
-     * Prompts the user for location permission on first run.
-     */
-    private double[] tryMacLocation() {
-        try {
-            String script =
-                    "do shell script \"" +
-                            "python3 -c \\\"" +
-                            "import CoreLocation, time; " +
-                            "m=CoreLocation.CLLocationManager.alloc().init(); " +
-                            "m.startUpdatingLocation(); " +
-                            "time.sleep(3); " +
-                            "loc=m.location(); " +
-                            "print(str(loc.coordinate().latitude)+','+str(loc.coordinate().longitude))" +
-                            "\\\"\"";
-
-            ProcessBuilder pb = new ProcessBuilder("osascript", "-e", script);
-            pb.redirectErrorStream(true);
-            Process proc = pb.start();
-            String output = new String(proc.getInputStream().readAllBytes()).trim();
-            proc.waitFor(8, java.util.concurrent.TimeUnit.SECONDS);
-
-            System.out.println("[Locate/Mac] osascript output: " + output);
-
-            if (output.contains(",")) {
-                String[] parts = output.split(",");
-                return new double[]{
-                        Double.parseDouble(parts[0].trim()),
-                        Double.parseDouble(parts[1].trim())
-                };
-            }
-        } catch (Exception e) {
-            System.out.println("[Locate/Mac] CoreLocation failed: " + e.getMessage());
-        }
-        return null;
-    }
-
-    /**
-     * Queries TWO IP geolocation APIs and averages the coordinates.
-     * Much more accurate than a single API — when both agree on the
-     * same district, the average is within ~5km of truth.
-     */
-    private double[] tryDualIpLocation() {
-        double lat1 = 0, lon1 = 0;
-        double lat2 = 0, lon2 = 0;
-        int count = 0;
-
-        // API 1: ip-api.com
-        try {
-            HttpRequest r = HttpRequest.newBuilder()
-                    .uri(URI.create("http://ip-api.com/json/?fields=status,lat,lon"))
-                    .timeout(java.time.Duration.ofSeconds(4)).GET().build();
-            HttpResponse<String> res = httpClient.send(r, HttpResponse.BodyHandlers.ofString());
-            JsonNode geo = objectMapper.readTree(res.body());
-            if ("success".equals(geo.path("status").asText())) {
-                lat1 = geo.path("lat").asDouble();
-                lon1 = geo.path("lon").asDouble();
-                count++;
-                System.out.printf("[Locate/IP1] ip-api: %.4f, %.4f%n", lat1, lon1);
-            }
-        } catch (Exception e) {
-            System.out.println("[Locate/IP1] Failed: " + e.getMessage());
-        }
-
-        // API 2: ipinfo.io
-        try {
-            HttpRequest r = HttpRequest.newBuilder()
-                    .uri(URI.create("https://ipinfo.io/json"))
-                    .timeout(java.time.Duration.ofSeconds(4)).GET().build();
-            HttpResponse<String> res = httpClient.send(r, HttpResponse.BodyHandlers.ofString());
-            JsonNode geo = objectMapper.readTree(res.body());
-            String loc = geo.path("loc").asText();
-            if (!loc.isEmpty() && loc.contains(",")) {
-                String[] parts = loc.split(",");
-                lat2 = Double.parseDouble(parts[0].trim());
-                lon2 = Double.parseDouble(parts[1].trim());
-                count++;
-                System.out.printf("[Locate/IP2] ipinfo: %.4f, %.4f%n", lat2, lon2);
-            }
-        } catch (Exception e) {
-            System.out.println("[Locate/IP2] Failed: " + e.getMessage());
-        }
-
-        if (count == 0) return null;
-        if (count == 1) return lat1 != 0 ? new double[]{lat1, lon1} : new double[]{lat2, lon2};
-
-        // Both succeeded — average them
-        double distance = Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
-        if (distance < 0.5) {
-            return new double[]{(lat1 + lat2) / 2.0, (lon1 + lon2) / 2.0};
-        } else {
-            // They disagree — trust ip-api (more accurate for India)
-            return lat1 != 0 ? new double[]{lat1, lon1} : new double[]{lat2, lon2};
-        }
-    }
-
-    /**
-     * Nominatim reverse geocode: coords → exact city/town name.
-     * Uses OpenStreetMap data — free, no API key, very accurate for Kerala.
-     * Falls back to "Your Location" if it fails.
-     */
-    private String reverseGeocode(double lat, double lon) {
-        try {
-            String url = String.format(
-                    "https://nominatim.openstreetmap.org/reverse" +
-                            "?lat=%.6f&lon=%.6f&format=json&zoom=10&addressdetails=1",
-                    lat, lon);
-
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("User-Agent", "AiQI-JavaFX/1.0")
-                    .timeout(java.time.Duration.ofSeconds(6))
-                    .GET().build();
-
-            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-            JsonNode addr = objectMapper.readTree(res.body()).path("address");
-
-            // Most specific → least specific
-            String[] keys = {"city", "town", "village", "suburb",
-                    "county", "state_district", "state"};
-            for (String key : keys) {
-                String val = addr.path(key).asText("");
-                if (!val.isEmpty()) {
-                    System.out.println("[Locate] Nominatim → " + key + ": " + val);
-                    return val;
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("[Locate] Nominatim failed: " + e.getMessage());
-        }
-        return "Your Location";
-    }
-
-    /**
-     * Spins up an invisible JavaFX WebView (WebKit engine).
-     * navigator.geolocation.getCurrentPosition() inside it uses the
-     * OS location stack — WiFi triangulation, GPS, cell towers —
-     * giving accuracy similar to a browser or Android app.
-     *
-     * The JS result is bridged back to Java via JSObject.setMember().
-     */
-    private void locateViaGps() {
-        WebView webView = new WebView();
-        WebEngine engine = webView.getEngine();
-
-        // ── Java bridge exposed to JavaScript as window.javaBridge ──
-        // Must be a non-anonymous class so WebKit can reflect its methods.
-        class GpsBridge {
-            /** Called by JS on success with real GPS/WiFi coordinates */
-            public void onSuccess(double lat, double lon) {
-                System.out.printf("[GPS] Got coords: %.6f, %.6f%n", lat, lon);
-                Platform.runLater(() -> resolveLocationFromCoords(lat, lon));
-            }
-
-            /** Called by JS if user denies permission or GPS times out */
-            public void onError(String message) {
-                System.out.println("[GPS] Error: " + message);
-                Platform.runLater(() -> {
-                    aqiLabel.setText("--");
-                    statusLabel.setText("Location denied");
-                    cityLabel.setText("Please allow location access or type a city.");
-                    showGpsErrorDialog(message);
-                });
-            }
-        }
-
-        GpsBridge bridge = new GpsBridge();
-
-        engine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
-            if (newState != Worker.State.SUCCEEDED) return;
-
-            // Inject bridge into JS window scope
-            JSObject win = (JSObject) engine.executeScript("window");
-            win.setMember("javaBridge", bridge);
-
-            // Request location — high accuracy, 10s timeout, no cached results
-            engine.executeScript(
-                    "navigator.geolocation.getCurrentPosition(" +
-                            "  function(pos) {" +
-                            "    window.javaBridge.onSuccess(" +
-                            "      pos.coords.latitude," +
-                            "      pos.coords.longitude" +
-                            "    );" +
-                            "  }," +
-                            "  function(err) {" +
-                            "    window.javaBridge.onError(err.message || 'Unknown error');" +
-                            "  }," +
-                            "  {" +
-                            "    enableHighAccuracy: true," +   // use GPS/WiFi, not just IP
-                            "    timeout: 10000," +             // 10 second timeout
-                            "    maximumAge: 0" +              // never use a cached position
-                            "  }" +
-                            ");"
-            );
-        });
-
-        // A real browsing context is required for geolocation to work
-        engine.loadContent("<html><body><p>Locating...</p></body></html>");
-    }
-
-    /**
-     * Called once we have accurate GPS coords.
-     * Uses Nominatim (OpenStreetMap) to reverse-geocode the exact city name
-     * — far more reliable than whatever the IP API guessed.
-     * Then fetches AQI using the raw coords (not city name) for max accuracy.
-     */
-    private void resolveLocationFromCoords(double lat, double lon) {
-        Platform.runLater(() -> cityLabel.setText("Resolving city..."));
-
-        Thread thread = new Thread(() -> {
-            // ── Step 1: Reverse geocode coords → real city name ──────
-            String cityName = "Your Location";
-            try {
-                String url = String.format(
-                        "https://nominatim.openstreetmap.org/reverse" +
-                                "?lat=%.6f&lon=%.6f&format=json&zoom=10&addressdetails=1",
-                        lat, lon);
-
-                HttpRequest req = HttpRequest.newBuilder()
-                        .uri(URI.create(url))
-                        .header("User-Agent", "AiQI-JavaFX/1.0 (contact@aiqi.app)")
-                        .timeout(java.time.Duration.ofSeconds(6))
-                        .GET().build();
-
-                HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-                JsonNode addr = objectMapper.readTree(res.body()).path("address");
-
-                // Walk from most-specific to least-specific until we find a value
-                String[] keys = {"city", "town", "village", "suburb",
-                        "county", "state_district", "state"};
-                for (String key : keys) {
-                    String val = addr.path(key).asText("");
-                    if (!val.isEmpty()) {
-                        cityName = val;
-                        System.out.println("[GPS] Nominatim → " + key + " = " + cityName);
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("[GPS] Nominatim reverse geocode failed: " + e.getMessage());
-                // Continue — we still have valid coords for the AQI call
-            }
-
-            final String finalCity = cityName;
-            Platform.runLater(() -> {
-                citySearchField.setText(finalCity);
+                HttpRequest geoReq = HttpRequest.newBuilder()
+                        .uri(URI.create("http://ip-api.com/json/")).GET().build();
+                HttpResponse<String> geoRes = httpClient.send(geoReq, HttpResponse.BodyHandlers.ofString());
+                JsonNode geo = objectMapper.readTree(geoRes.body());
+                double lat   = geo.path("lat").asDouble();
+                double lon   = geo.path("lon").asDouble();
+                String city  = geo.path("city").asText("Your Location");
+                Platform.runLater(() -> citySearchField.setText(city));
                 selectedLat = lat;
                 selectedLon = lon;
-                currentCity = finalCity;
-            });
+                currentCity = city;
 
-            // ── Step 2: Fetch AQI using raw coords (most precise) ────
-            try {
                 HttpRequest aqiReq = HttpRequest.newBuilder()
                         .uri(URI.create(BACKEND + "/aqi/locate?lat=" + lat + "&lon=" + lon))
                         .GET().build();
-
-                HttpResponse<String> aqiRes = httpClient.send(
-                        aqiReq, HttpResponse.BodyHandlers.ofString());
-
+                HttpResponse<String> aqiRes = httpClient.send(aqiReq, HttpResponse.BodyHandlers.ofString());
                 if (aqiRes.statusCode() == 200) {
                     updateUIFromResponse(aqiRes.body());
-                    loadForecastData(finalCity, lat, lon);
-                } else {
-                    Platform.runLater(() -> showError("Server error fetching AQI"));
+                    loadForecastData(city, lat, lon);
                 }
             } catch (Exception e) {
-                Platform.runLater(() -> showError("Cannot connect to server"));
+                Platform.runLater(() -> showError("Could not detect location"));
                 e.printStackTrace();
             }
         });
         thread.setDaemon(true);
         thread.start();
-    }
-
-    /** Shows a friendly dialog explaining why GPS failed and what to do */
-    private void showGpsErrorDialog(String technicalReason) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Location Access — AiQI");
-        alert.setHeaderText("Could not get your location");
-
-        String msg;
-        if (technicalReason.toLowerCase().contains("denied") ||
-                technicalReason.toLowerCase().contains("permission")) {
-            msg = "Location access was denied.\n\n" +
-                    "To fix this:\n" +
-                    "• Windows: Settings → Privacy → Location → Allow apps\n" +
-                    "• macOS: System Settings → Privacy → Location Services\n\n" +
-                    "Or just type your city in the search box.";
-        } else if (technicalReason.toLowerCase().contains("timeout")) {
-            msg = "Location request timed out.\n\n" +
-                    "This can happen if you're offline or location services are slow.\n" +
-                    "Please try again or type your city manually.";
-        } else {
-            msg = "Location unavailable: " + technicalReason + "\n\n" +
-                    "Please type your city in the search box instead.";
-        }
-
-        alert.setContentText(msg);
-        alert.show();
     }
 
     private void fetchSuggestions(String query) {
@@ -1844,11 +1440,13 @@ public class DashboardController {
 
     @FXML private void handleOpenAqiMap() {
         if (guardGuest()) return;
+        // Open WAQI live map in browser — works with Desktop API
         try {
+            String cityEnc = java.net.URLEncoder.encode(currentCity, "UTF-8");
             java.awt.Desktop.getDesktop().browse(
-                    java.net.URI.create("http://localhost:8080/map"));
+                    java.net.URI.create("https://waqi.info/#/search/" + cityEnc));
         } catch (Exception e) {
-            showInfo("Could not open map. Make sure the backend is running on port 8080.");
+            showInfo("Could not open browser. Visit https://waqi.info to see the live AQI map.");
         }
     }
 
@@ -2354,6 +1952,418 @@ public class DashboardController {
             st.setInterpolator(Interpolator.EASE_OUT); st.play();
             btn.setStyle(base);
         });
+    }
+
+    /**
+     * Hover effect for ML stat cards:
+     * - lifts 6px + scales to 1.04
+     * - white background tints to the model's brand colour
+     * - border appears in brand colour
+     * - MAE number scales up slightly
+     * - drop shadow deepens with brand glow
+     */
+    private void addMlCardHover(VBox card, String brandHex,
+                                String bgTint, String borderColor) {
+        if (card == null) return;
+        String baseStyle = "-fx-background-color: white; -fx-background-radius: 12; " +
+                "-fx-padding: 16; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),10,0,0,2);";
+        String hoverStyle = "-fx-background-color: " + bgTint + "; -fx-background-radius: 12; " +
+                "-fx-padding: 16; " +
+                "-fx-border-color: " + borderColor + "; -fx-border-width: 1.8; -fx-border-radius: 12; " +
+                "-fx-effect: dropshadow(gaussian," + borderColor + ",18,0.35,0,6); " +
+                "-fx-cursor: hand;";
+
+        // The middle Label (MAE value) is at index 1
+        card.setOnMouseEntered(e -> {
+            card.setStyle(hoverStyle);
+            // Lift + scale card
+            ScaleTransition sc = new ScaleTransition(Duration.millis(160), card);
+            sc.setToX(1.045); sc.setToY(1.045);
+            sc.setInterpolator(Interpolator.EASE_OUT); sc.play();
+            TranslateTransition tr = new TranslateTransition(Duration.millis(160), card);
+            tr.setToY(-6); tr.setInterpolator(Interpolator.EASE_OUT); tr.play();
+            // Scale up MAE label
+            if (card.getChildren().size() > 1) {
+                javafx.scene.Node maeLabel = card.getChildren().get(1);
+                ScaleTransition ls = new ScaleTransition(Duration.millis(160), maeLabel);
+                ls.setToX(1.12); ls.setToY(1.12);
+                ls.setInterpolator(Interpolator.EASE_OUT); ls.play();
+            }
+        });
+        card.setOnMouseExited(e -> {
+            card.setStyle(baseStyle);
+            ScaleTransition sc = new ScaleTransition(Duration.millis(180), card);
+            sc.setToX(1.0); sc.setToY(1.0);
+            sc.setInterpolator(Interpolator.EASE_OUT); sc.play();
+            TranslateTransition tr = new TranslateTransition(Duration.millis(180), card);
+            tr.setToY(0); tr.setInterpolator(Interpolator.EASE_OUT); tr.play();
+            if (card.getChildren().size() > 1) {
+                javafx.scene.Node maeLabel = card.getChildren().get(1);
+                ScaleTransition ls = new ScaleTransition(Duration.millis(180), maeLabel);
+                ls.setToX(1.0); ls.setToY(1.0);
+                ls.setInterpolator(Interpolator.EASE_OUT); ls.play();
+            }
+        });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // TAB 5: ML MODEL COMPARISON
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Fetches 24 hourly forecast entries from the Spring backend, then
+     * calls the Flask ML server once per model to get predicted AQI for
+     * each hour, and draws all four lines (actual + 3 models) together.
+     */
+    private void loadMlComparisonData() {
+        if (lastAqiData == null) {
+            Platform.runLater(() -> {
+                if (mlStatusLabel != null)
+                    mlStatusLabel.setText("Load AQI data first by searching a city.");
+            });
+            return;
+        }
+
+        Platform.runLater(() -> {
+            if (mlStatusLabel != null) mlStatusLabel.setText("Fetching forecast data…");
+        });
+
+        Thread t = new Thread(() -> {
+            try {
+                // ── Step 1: fetch 24h forecast from Spring backend ──────────
+                String forecastUrl = (selectedLat != 0 && selectedLon != 0)
+                        ? BACKEND + "/forecast/locate?lat=" + selectedLat + "&lon=" + selectedLon
+                        : BACKEND + "/forecast?city=" + java.net.URLEncoder.encode(currentCity, java.nio.charset.StandardCharsets.UTF_8);
+
+                HttpRequest forecastReq = HttpRequest.newBuilder()
+                        .uri(java.net.URI.create(forecastUrl)).GET().build();
+                HttpResponse<String> forecastResp = httpClient.send(forecastReq,
+                        HttpResponse.BodyHandlers.ofString());
+
+                if (forecastResp.statusCode() != 200) {
+                    Platform.runLater(() -> {
+                        if (mlStatusLabel != null)
+                            mlStatusLabel.setText("Could not load forecast data (status " + forecastResp.statusCode() + ").");
+                    });
+                    return;
+                }
+
+                com.fasterxml.jackson.databind.JsonNode forecastNode =
+                        objectMapper.readTree(forecastResp.body());
+                com.fasterxml.jackson.databind.JsonNode entries = forecastNode.path("entries");
+
+                // Take up to 24 hourly points
+                List<String>  labels     = new ArrayList<>();
+                List<Integer> actualAqi  = new ArrayList<>();
+                List<Double>  temps      = new ArrayList<>();
+                List<Double>  humids     = new ArrayList<>();
+                List<Double>  winds      = new ArrayList<>();
+                List<Double>  pm25s      = new ArrayList<>();
+                List<Double>  pm10s      = new ArrayList<>();
+                List<Double>  no2s       = new ArrayList<>();
+                List<Double>  o3s        = new ArrayList<>();
+                List<Double>  co         = new ArrayList<>();
+                List<Integer> hours      = new ArrayList<>();
+                List<Integer> dows       = new ArrayList<>();
+                List<Integer> months     = new ArrayList<>();
+
+                int count = 0;
+                for (com.fasterxml.jackson.databind.JsonNode e : entries) {
+                    if (count >= 24) break;
+                    String dtTxt = e.path("dtTxt").asText();
+                    labels.add(formatForecastLabel(dtTxt));
+                    actualAqi.add(e.path("aqi").asInt(0));
+                    temps.add(e.path("temp").asDouble(25));
+                    humids.add(e.path("humidity").asDouble(60));
+                    winds.add(e.path("windSpeed").asDouble(5));
+                    pm25s.add(e.path("pm25").asDouble(0));
+                    pm10s.add(e.path("pm10").asDouble(0));
+                    no2s.add(e.path("no2").asDouble(0));
+                    o3s.add(e.path("o3").asDouble(0));
+                    co.add(e.path("co").asDouble(0));
+                    // parse hour/dow/month from dtTxt (format: "2026-03-08 14:00:00")
+                    try {
+                        java.time.LocalDateTime ldt = java.time.LocalDateTime.parse(
+                                dtTxt.trim(), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                        hours.add(ldt.getHour());
+                        dows.add(ldt.getDayOfWeek().getValue() % 7); // Mon=1→1, Sun=7→0
+                        months.add(ldt.getMonthValue());
+                    } catch (Exception ex) {
+                        hours.add(12); dows.add(0); months.add(1);
+                    }
+                    count++;
+                }
+
+                if (labels.isEmpty()) {
+                    Platform.runLater(() -> {
+                        if (mlStatusLabel != null) mlStatusLabel.setText("No forecast entries returned.");
+                    });
+                    return;
+                }
+
+                Platform.runLater(() -> {
+                    if (mlStatusLabel != null)
+                        mlStatusLabel.setText("Querying ML models for " + labels.size() + " hours…");
+                });
+
+                // ── Step 2: call Flask /predict for each hour × 3 models ───
+                double baseAqi = lastAqiData.path("aqi").asDouble(100);
+                double lat     = selectedLat != 0 ? selectedLat : 10.0;
+                double lon     = selectedLon != 0 ? selectedLon : 76.0;
+                double so2     = lastAqiData.path("so2").asDouble(0);
+
+                List<Integer> xgbPreds = new ArrayList<>();
+                List<Integer> rfPreds  = new ArrayList<>();
+                List<Integer> lgbPreds = new ArrayList<>();
+
+                for (int i = 0; i < labels.size(); i++) {
+                    double lagAqi1 = i == 0 ? baseAqi : actualAqi.get(i - 1);
+                    double lagAqi2 = i <= 1 ? baseAqi : actualAqi.get(i - 2);
+                    double siPm25  = calcSiPm25(pm25s.get(i));
+                    double siPm10  = calcSiPm10(pm10s.get(i));
+
+                    com.fasterxml.jackson.databind.node.ObjectNode payload =
+                            objectMapper.createObjectNode();
+                    payload.put("lat",              lat);
+                    payload.put("lon",              lon);
+                    payload.put("co",               co.get(i));
+                    payload.put("no",               0.0);
+                    payload.put("no2",              no2s.get(i));
+                    payload.put("o3",               o3s.get(i));
+                    payload.put("pm10",             pm10s.get(i));
+                    payload.put("pm25",             pm25s.get(i));
+                    payload.put("relativehumidity", humids.get(i));
+                    payload.put("so2",              so2);
+                    payload.put("temperature",      temps.get(i));
+                    payload.put("si_pm25",          siPm25);
+                    payload.put("si_pm10",          siPm10);
+                    payload.put("AQI",              actualAqi.get(i));
+                    payload.put("hour",             hours.get(i));
+                    payload.put("day_of_week",      dows.get(i));
+                    payload.put("month",            months.get(i));
+                    payload.put("aqi_lag_1",        lagAqi1);
+                    payload.put("aqi_lag_2",        lagAqi2);
+                    payload.put("wind_speed",       winds.get(i));
+                    payload.put("wind_direction",   180.0);
+                    payload.put("current_aqi",      actualAqi.get(i));
+
+                    xgbPreds.add(flaskPredict(payload, "xgboost"));
+                    rfPreds.add( flaskPredict(payload, "randomforest"));
+                    lgbPreds.add(flaskPredict(payload, "lightgbm"));
+                }
+
+                // ── Step 3: compute MAE per model ───────────────────────────
+                double maeXgb = computeMae(actualAqi, xgbPreds);
+                double maeRf  = computeMae(actualAqi, rfPreds);
+                double maeLgb = computeMae(actualAqi, lgbPreds);
+
+                // ── Step 4: draw on FX thread ───────────────────────────────
+                final List<String>  fLabels    = new ArrayList<>(labels);
+                final List<Integer> fActual    = new ArrayList<>(actualAqi);
+                final List<Integer> fXgb       = new ArrayList<>(xgbPreds);
+                final List<Integer> fRf        = new ArrayList<>(rfPreds);
+                final List<Integer> fLgb       = new ArrayList<>(lgbPreds);
+
+                Platform.runLater(() -> drawMlChart(fLabels, fActual, fXgb, fRf, fLgb,
+                        maeXgb, maeRf, maeLgb));
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    if (mlStatusLabel != null)
+                        mlStatusLabel.setText("Error: " + ex.getMessage());
+                });
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
+
+    /** POST one prediction request to Flask. Returns predicted AQI or -1 on failure. */
+    private int flaskPredict(com.fasterxml.jackson.databind.node.ObjectNode payload, String modelName) {
+        try {
+            payload.put("model", modelName);
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(java.net.URI.create(ML_SERVER + "/predict"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
+                    .build();
+            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (resp.statusCode() == 200) {
+                return objectMapper.readTree(resp.body()).path("predicted_aqi").asInt(-1);
+            }
+        } catch (Exception e) {
+            System.err.println("[ML] " + modelName + " predict failed: " + e.getMessage());
+        }
+        return -1;
+    }
+
+    private double computeMae(List<Integer> actual, List<Integer> predicted) {
+        if (actual.isEmpty()) return 0;
+        double sum = 0;
+        int valid = 0;
+        for (int i = 0; i < actual.size(); i++) {
+            if (predicted.get(i) >= 0) {
+                sum += Math.abs(actual.get(i) - predicted.get(i));
+                valid++;
+            }
+        }
+        return valid > 0 ? sum / valid : 0;
+    }
+
+    private double calcSiPm25(double pm25) {
+        double[][] table = {{0,30,0,50},{30,60,51,100},{60,90,101,200},
+                {90,120,201,300},{120,250,301,400},{250,500,401,500}};
+        for (double[] r : table)
+            if (pm25 <= r[1]) return ((r[3]-r[2])/(r[1]-r[0]))*(pm25-r[0])+r[2];
+        return 500;
+    }
+
+    private double calcSiPm10(double pm10) {
+        double[][] table = {{0,50,0,50},{50,100,51,100},{100,250,101,200},
+                {250,350,201,300},{350,430,301,400},{430,600,401,500}};
+        for (double[] r : table)
+            if (pm10 <= r[1]) return ((r[3]-r[2])/(r[1]-r[0]))*(pm10-r[0])+r[2];
+        return 500;
+    }
+
+    /** Builds a LineChart with 4 series and animates each line drawing in sequence. */
+    private void drawMlChart(List<String> labels, List<Integer> actual,
+                             List<Integer> xgb, List<Integer> rf, List<Integer> lgb,
+                             double maeXgb, double maeRf, double maeLgb) {
+        if (mlChartContainer == null) return;
+        mlChartContainer.getChildren().clear();
+
+        // ── AQI-based gradient on the card background ───────────
+        int avgAqi = actual.isEmpty() ? 0
+                : (int) actual.stream().mapToInt(Integer::intValue).average().orElse(0);
+
+        String bg1, bg2;
+        if (avgAqi <= 50)       { bg1 = "#e8f8f0"; bg2 = "#d0f0e0"; }
+        else if (avgAqi <= 100) { bg1 = "#fefce8"; bg2 = "#fef08a"; }
+        else if (avgAqi <= 150) { bg1 = "#fff7ed"; bg2 = "#fed7aa"; }
+        else if (avgAqi <= 200) { bg1 = "#fff1f0"; bg2 = "#fecaca"; }
+        else if (avgAqi <= 300) { bg1 = "#faf5ff"; bg2 = "#e9d5ff"; }
+        else                    { bg1 = "#fff0f0"; bg2 = "#fca5a5"; }
+
+        if (mlChartContainer.getParent() instanceof VBox card) {
+            card.setStyle("-fx-background-color: linear-gradient(to bottom right, " + bg1 + ", " + bg2 + "); " +
+                    "-fx-background-radius: 16; -fx-padding: 20; " +
+                    "-fx-effect: dropshadow(gaussian,rgba(0,0,0,0.09),16,0,0,4);");
+        }
+
+        CategoryAxis xAxis = new CategoryAxis();
+        NumberAxis   yAxis = new NumberAxis();
+        xAxis.setTickLabelRotation(-40);
+        xAxis.setTickLabelGap(2);
+        xAxis.setStyle("-fx-tick-label-fill: #374151; -fx-font-size: 10px;");
+        yAxis.setAutoRanging(true);
+        yAxis.setLabel("AQI");
+        yAxis.setStyle("-fx-tick-label-fill: #374151; -fx-font-size: 11px;");
+
+        LineChart<String, Number> chart = new LineChart<>(xAxis, yAxis);
+        chart.setTitle(null);
+        chart.setLegendVisible(false);
+        chart.setAnimated(false);
+        chart.setPrefHeight(350);
+        chart.setCreateSymbols(false);  // no dots
+        chart.setStyle("-fx-background-color: transparent; -fx-plot-background-color: rgba(255,255,255,0.55);");
+        VBox.setVgrow(chart, javafx.scene.layout.Priority.ALWAYS);
+
+        // Start with EMPTY live series — points added one by one by the timeline
+        XYChart.Series<String, Number> sActual = new XYChart.Series<>(); sActual.setName("Actual AQI");
+        XYChart.Series<String, Number> sXgb    = new XYChart.Series<>(); sXgb.setName("XGBoost");
+        XYChart.Series<String, Number> sRf     = new XYChart.Series<>(); sRf.setName("Random Forest");
+        XYChart.Series<String, Number> sLgb    = new XYChart.Series<>(); sLgb.setName("LightGBM");
+
+        chart.getData().addAll(sActual, sXgb, sRf, sLgb);
+        mlChartContainer.getChildren().add(chart);
+
+        // Style lines once chart is in scene
+        Platform.runLater(() -> {
+            styleSeriesLine(sActual, "#1a73e8", 2.5);
+            styleSeriesLine(sXgb,   "#10b981", 2.0);
+            styleSeriesLine(sRf,    "#f59e0b", 2.0);
+            styleSeriesLine(sLgb,   "#8b5cf6", 2.0);
+
+            // ── LIVE DRAW ANIMATION ──────────────────────────────
+            // Each KeyFrame adds one point to ALL 4 series simultaneously.
+            // 3000ms spread across all points = smooth left-to-right draw.
+            int n = labels.size();
+            double msPerPoint = Math.max(20, 3000.0 / Math.max(n, 1));
+            List<KeyFrame> frames = new ArrayList<>();
+
+            for (int pi = 0; pi < n; pi++) {
+                final int idx = pi;
+                frames.add(new KeyFrame(Duration.millis(idx * msPerPoint), kfEv -> {
+                    // Add point to each series
+                    sActual.getData().add(new XYChart.Data<>(labels.get(idx), actual.get(idx)));
+                    if (xgb.get(idx)  >= 0) sXgb.getData().add(new XYChart.Data<>(labels.get(idx), xgb.get(idx)));
+                    if (rf.get(idx)   >= 0) sRf.getData().add( new XYChart.Data<>(labels.get(idx), rf.get(idx)));
+                    if (lgb.get(idx)  >= 0) sLgb.getData().add(new XYChart.Data<>(labels.get(idx), lgb.get(idx)));
+
+                    // Re-apply stroke colours — JavaFX resets them on every data change
+                    styleSeriesLine(sActual, "#1a73e8", 2.5);
+                    styleSeriesLine(sXgb,   "#10b981", 2.0);
+                    styleSeriesLine(sRf,    "#f59e0b", 2.0);
+                    styleSeriesLine(sLgb,   "#8b5cf6", 2.0);
+                }));
+            }
+
+            Timeline tl = new Timeline();
+            tl.getKeyFrames().addAll(frames);
+            tl.play();
+        });
+
+        // Update MAE labels with AQI-colored text
+        String maeColor = aqiColor(avgAqi);
+        if (mlMaeXgb  != null) {
+            mlMaeXgb.setText(String.format("MAE: %.1f", maeXgb));
+            mlMaeXgb.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: " + maeColor + ";");
+        }
+        if (mlMaeRf   != null) {
+            mlMaeRf.setText(String.format("MAE: %.1f", maeRf));
+            mlMaeRf.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: " + maeColor + ";");
+        }
+        if (mlMaeLgb  != null) {
+            mlMaeLgb.setText(String.format("MAE: %.1f", maeLgb));
+            mlMaeLgb.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: " + maeColor + ";");
+        }
+        if (mlStatusLabel != null)
+            mlStatusLabel.setText("✓  " + labels.size() + " hours · avg AQI: " + avgAqi
+                    + " (" + getAqiLevel(avgAqi) + ") · updated "
+                    + java.time.LocalTime.now().format(
+                    java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
+    }
+
+    private void styleSeriesLine(XYChart.Series<String, Number> series,
+                                 String hexColor, double width) {
+        if (series.getNode() != null) {
+            series.getNode().setStyle(
+                    "-fx-stroke: " + hexColor + "; -fx-stroke-width: " + width + "px;");
+        }
+        for (XYChart.Data<String, Number> d : series.getData()) {
+            if (d.getNode() != null) {
+                d.getNode().setStyle(
+                        "-fx-background-color: " + hexColor + ", white;" +
+                                "-fx-background-radius: 5px; -fx-padding: 4px;");
+            }
+        }
+    }
+
+    /** Colors each dot on the Actual AQI series by that point's AQI level. */
+    private void colorDataPointsByAqi(XYChart.Series<String, Number> series) {
+        for (XYChart.Data<String, Number> d : series.getData()) {
+            int val = d.getYValue().intValue();
+            String col = aqiColor(val);
+            String bg  = aqiBgColor(val);
+            if (d.getNode() != null) {
+                d.getNode().setStyle(
+                        "-fx-background-color: " + col + ", " + bg + ";" +
+                                "-fx-background-radius: 6px; -fx-padding: 5px;" +
+                                "-fx-effect: dropshadow(gaussian," + col + ",6,0.4,0,0);");
+            }
+        }
     }
 
 

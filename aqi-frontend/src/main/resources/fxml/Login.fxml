@@ -28,7 +28,23 @@
 
                 <VBox spacing="6">
                     <Label text="PASSWORD" styleClass="input-label"/>
-                    <PasswordField fx:id="passwordField" promptText="Enter password" styleClass="input-field-light"/>
+
+                    <StackPane alignment="CENTER_RIGHT">
+                        <PasswordField fx:id="passwordField"
+                                       promptText="Enter password"
+                                       styleClass="input-field-light"/>
+
+                        <TextField fx:id="passwordVisibleField"
+                                   promptText="Enter password"
+                                   styleClass="input-field-light"
+                                   visible="false"
+                                   managed="false"/>
+
+                        <Button fx:id="togglePasswordBtn"
+                                text="👁"
+                                style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0 10 0 0;"
+                                focusTraversable="false"/>
+                    </StackPane>
 
                     <HBox alignment="CENTER_LEFT" style="-fx-padding: 2 0 0 0;">
                         <CheckBox fx:id="rememberMeBox" text="Remember me" style="-fx-text-fill: #555; -fx-font-size: 12px; -fx-cursor: hand;"/>

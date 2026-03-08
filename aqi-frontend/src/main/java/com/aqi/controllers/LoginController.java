@@ -10,7 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,6 +19,8 @@ public class LoginController {
 
     @FXML private TextField     emailField;
     @FXML private PasswordField passwordField;
+    @FXML private TextField     passwordVisibleField; // Added for Eye Icon
+    @FXML private Button        togglePasswordBtn;    // Added for Eye Icon
     @FXML private Label         statusLabel;
     @FXML private CheckBox      rememberMeBox;
     @FXML private Button        loginBtn;
@@ -34,11 +35,39 @@ public class LoginController {
 
     @FXML
     public void initialize() {
-        String saved = PREFS.get("remembered_email", "");
-        if (!saved.isEmpty()) {
-            emailField.setText(saved);
+        // --- 1. SETUP EYE ICON TOGGLE ---
+        // Null checks added just in case the FXML hasn't been updated yet
+        if (passwordVisibleField != null && passwordField != null && togglePasswordBtn != null) {
+            // Keep the text synchronized between the hidden and visible fields
+            passwordVisibleField.textProperty().bindBidirectional(passwordField.textProperty());
+
+            togglePasswordBtn.setOnAction(e -> {
+                boolean isVisible = passwordVisibleField.isVisible();
+
+                // Swap visibility
+                passwordVisibleField.setVisible(!isVisible);
+                passwordVisibleField.setManaged(!isVisible);
+                passwordField.setVisible(isVisible);
+                passwordField.setManaged(isVisible);
+
+                // Change icon
+                togglePasswordBtn.setText(isVisible ? "👁" : "🙈");
+            });
+        }
+
+        // --- 2. LOAD SAVED CREDENTIALS ---
+        String savedEmail = PREFS.get("remembered_email", "");
+        String savedPassword = PREFS.get("remembered_password", ""); // Load password
+
+        if (!savedEmail.isEmpty()) {
+            emailField.setText(savedEmail);
+            if (!savedPassword.isEmpty() && passwordField != null) {
+                passwordField.setText(savedPassword);
+            }
             if (rememberMeBox != null) rememberMeBox.setSelected(true);
         }
+
+        // --- 3. UI ANIMATIONS ---
         Platform.runLater(() -> {
             // Card pop-in
             if (loginCard != null) {
@@ -87,7 +116,7 @@ public class LoginController {
     @FXML
     private void handleLogin() {
         String email    = emailField.getText().trim();
-        String password = passwordField.getText();
+        String password = passwordField.getText(); // Will get text whether visible or hidden
 
         if (email.isEmpty() || password.isEmpty()) {
             statusLabel.setText("Please enter both email and password.");
@@ -112,12 +141,18 @@ public class LoginController {
                     String username  = rs.getString("username");
 
                     if (sha256(password).equals(savedHash)) {
+                        UserSession.clearSession(); // wipe any leftover guest state
                         UserSession.setUserId(userId);
                         UserSession.setUsername(username);
 
-                        if (rememberMeBox != null && rememberMeBox.isSelected())
+                        // --- SAVE CREDENTIALS IF REMEMBER ME IS CHECKED ---
+                        if (rememberMeBox != null && rememberMeBox.isSelected()) {
                             PREFS.put("remembered_email", email);
-                        else PREFS.remove("remembered_email");
+                            PREFS.put("remembered_password", password);
+                        } else {
+                            PREFS.remove("remembered_email");
+                            PREFS.remove("remembered_password");
+                        }
 
                         boolean needsProfile = !hasHealthProfile(userId);
                         Platform.runLater(() -> {

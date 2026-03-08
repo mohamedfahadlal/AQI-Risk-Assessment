@@ -4,119 +4,162 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.paint.ImagePattern?>
+<?import javafx.geometry.Insets?>
 
-<BorderPane styleClass="main-background-light" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.aqi.controllers.AboutController">
+<BorderPane styleClass="main-background-light"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.aqi.controllers.AboutController">
 
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-nav">
+        <HBox fx:id="topNav" alignment="CENTER_LEFT" spacing="20" styleClass="top-nav">
             <Label text="AiQI" styleClass="logo-text"/>
-            <Region HBox.hgrow="ALWAYS" />
-
-            <Button text="About Us" styleClass="nav-link" style="-fx-text-fill: #0ea5e9;"/>
-            <Button text="Login" onAction="#goToLogin" styleClass="nav-link"/>
-            <Button text="Sign Up ↗" onAction="#goToSignUp" styleClass="nav-btn-login"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="About Us" styleClass="nav-link"
+                    style="-fx-text-fill: #0ea5e9;"/>
+            <Button fx:id="loginBtn"  text="Login"      onAction="#goToLogin"  styleClass="nav-link"/>
+            <Button fx:id="signUpBtn" text="Sign Up ↗"  onAction="#goToSignUp" styleClass="nav-btn-login"/>
         </HBox>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
-            <VBox alignment="TOP_CENTER" spacing="40" style="-fx-padding: 40 60 40 60;">
+        <ScrollPane fitToWidth="true"
+                    style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+            <VBox alignment="TOP_CENTER" spacing="40"
+                  style="-fx-padding: 40 60 40 60;">
 
-                <VBox alignment="CENTER" spacing="10">
-                    <Label text="Meet the Team Behind AiQI" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
-                    <Label text="We are part of TKMCE family, passionate developers dedicated to building efficient, reliable environmental software." style="-fx-font-size: 15px; -fx-text-fill: #4b5563;"/>
+                <!-- ── Hero ── -->
+                <VBox fx:id="heroSection" alignment="CENTER" spacing="10">
+                    <Label text="Meet the Team Behind AiQI"
+                           style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                    <Label text="We are part of TKMCE family, passionate developers dedicated to building efficient, reliable environmental software."
+                           style="-fx-font-size: 15px; -fx-text-fill: #4b5563;"
+                           wrapText="true"/>
                 </VBox>
 
-                <GridPane hgap="30" vgap="30" alignment="CENTER" maxWidth="950">
+                <!-- ── Team Cards ── -->
+                <GridPane fx:id="teamGrid" hgap="30" vgap="30" alignment="CENTER" maxWidth="950">
                     <columnConstraints>
                         <ColumnConstraints percentWidth="50"/>
                         <ColumnConstraints percentWidth="50"/>
                     </columnConstraints>
 
-                    <HBox GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="card-light" spacing="18" style="-fx-padding: 20; -fx-background-radius: 12;">
+                    <!-- Card 0: Sanjith -->
+                    <HBox GridPane.columnIndex="0" GridPane.rowIndex="0"
+                          styleClass="card-light" spacing="18"
+                          style="-fx-padding: 20; -fx-background-radius: 12;">
                         <Circle radius="40">
                             <fill>
                                 <ImagePattern>
-                                    <image>
-                                        <Image url="/images/member1.jpg"/>
-                                    </image>
+                                    <image><Image url="/images/member1.jpg"/></image>
                                 </ImagePattern>
                             </fill>
                         </Circle>
                         <VBox spacing="5" HBox.hgrow="ALWAYS">
-                            <Label text="SANJITH S" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
-                            <Label text="Lead Developer" style="-fx-font-size: 14px; -fx-text-fill: #374151; -fx-font-weight: bold;"/>
-                            <Label text="Architect of the core functionality. Passionate about clean code and performance." wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
+                            <Label text="SANJITH S"
+                                   style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
+                            <Label text="Lead Developer"
+                                   style="-fx-font-size: 14px; -fx-text-fill: #0ea5e9; -fx-font-weight: bold;"/>
+                            <Label text="Architect of the core functionality. Passionate about clean code and performance."
+                                   wrapText="true"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
                         </VBox>
                     </HBox>
 
-                    <HBox GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="card-light" spacing="18" style="-fx-padding: 20; -fx-background-radius: 12;">
+                    <!-- Card 1: Fahad -->
+                    <HBox GridPane.columnIndex="1" GridPane.rowIndex="0"
+                          styleClass="card-light" spacing="18"
+                          style="-fx-padding: 20; -fx-background-radius: 12;">
                         <Circle radius="40">
                             <fill>
                                 <ImagePattern>
-                                    <image>
-                                        <Image url="/images/member2.jpg"/>
-                                    </image>
+                                    <image><Image url="/images/member2.jpg"/></image>
                                 </ImagePattern>
                             </fill>
                         </Circle>
                         <VBox spacing="5" HBox.hgrow="ALWAYS">
-                            <Label text="MOHAMMED FAHAD LAL" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
-                            <Label text="UI/UX Designer" style="-fx-font-size: 14px; -fx-text-fill: #374151; -fx-font-weight: bold;"/>
-                            <Label text="Crafting intuitive and elegant user experiences. Focused on user-centric design principles." wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
+                            <Label text="MOHAMMED FAHAD LAL"
+                                   style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
+                            <Label text="UI/UX Designer"
+                                   style="-fx-font-size: 14px; -fx-text-fill: #8b5cf6; -fx-font-weight: bold;"/>
+                            <Label text="Crafting intuitive and elegant user experiences. Focused on user-centric design principles."
+                                   wrapText="true"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
                         </VBox>
                     </HBox>
 
-                    <HBox GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="card-light" spacing="18" style="-fx-padding: 20; -fx-background-radius: 12;">
+                    <!-- Card 2: Jobin -->
+                    <HBox GridPane.columnIndex="0" GridPane.rowIndex="1"
+                          styleClass="card-light" spacing="18"
+                          style="-fx-padding: 20; -fx-background-radius: 12;">
                         <Circle radius="40">
                             <fill>
                                 <ImagePattern>
-                                    <image>
-                                        <Image url="/images/member3.jpg"/>
-                                    </image>
+                                    <image><Image url="/images/member3.jpg"/></image>
                                 </ImagePattern>
                             </fill>
                         </Circle>
                         <VBox spacing="5" HBox.hgrow="ALWAYS">
-                            <Label text="JOBIN M JOHN" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
-                            <Label text="Database Administrator" style="-fx-font-size: 14px; -fx-text-fill: #374151; -fx-font-weight: bold;"/>
-                            <Label text="Guiding the vision and database roadmap. Dedicated to delivering secure data." wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
+                            <Label text="JOBIN M JOHN"
+                                   style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
+                            <Label text="Database Administrator"
+                                   style="-fx-font-size: 14px; -fx-text-fill: #10b981; -fx-font-weight: bold;"/>
+                            <Label text="Guiding the vision and database roadmap. Dedicated to delivering secure data."
+                                   wrapText="true"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
                         </VBox>
                     </HBox>
 
-                    <HBox GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="card-light" spacing="18" style="-fx-padding: 20; -fx-background-radius: 12;">
+                    <!-- Card 3: Jerin -->
+                    <HBox GridPane.columnIndex="1" GridPane.rowIndex="1"
+                          styleClass="card-light" spacing="18"
+                          style="-fx-padding: 20; -fx-background-radius: 12;">
                         <Circle radius="40">
                             <fill>
                                 <ImagePattern>
-                                    <image>
-                                        <Image url="/images/member4.jpg"/>
-                                    </image>
+                                    <image><Image url="/images/member4.jpg"/></image>
                                 </ImagePattern>
                             </fill>
                         </Circle>
                         <VBox spacing="5" HBox.hgrow="ALWAYS">
-                            <Label text="JERIN ABRAHAM" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
-                            <Label text="Full-Stack Engineer" style="-fx-font-size: 14px; -fx-text-fill: #374151; -fx-font-weight: bold;"/>
-                            <Label text="Ensuring seamless performance from back-end to front-end. Problem-solver and innovator." wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
+                            <Label text="JERIN ABRAHAM"
+                                   style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
+                            <Label text="Full-Stack Engineer"
+                                   style="-fx-font-size: 14px; -fx-text-fill: #f59e0b; -fx-font-weight: bold;"/>
+                            <Label text="Ensuring seamless performance from back-end to front-end. Problem-solver and innovator."
+                                   wrapText="true"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
                         </VBox>
                     </HBox>
+
                 </GridPane>
 
-                <VBox alignment="CENTER_LEFT" spacing="12" maxWidth="950" style="-fx-padding: 20 0 0 0;">
-                    <Label text="Our Mission" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
-                    <Label text="The AQI Dashboard was built to simplify environmental awareness and enhance productivity. We believe in creating tools that empower users with a seamless, powerful, and intuitive desktop experience. We are committed to continuous improvement, security, and user satisfaction." wrapText="true" style="-fx-font-size: 15px; -fx-text-fill: #4b5563; -fx-line-spacing: 6px;"/>
+                <!-- ── Mission ── -->
+                <VBox fx:id="missionSection" alignment="CENTER_LEFT" spacing="12"
+                      maxWidth="950"
+                      style="-fx-padding: 20 0 0 0;">
+                    <Label text="Our Mission"
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                    <Label text="The AQI Dashboard was built to simplify environmental awareness and enhance productivity. We believe in creating tools that empower users with a seamless, powerful, and intuitive desktop experience. We are committed to continuous improvement, security, and user satisfaction."
+                           wrapText="true"
+                           style="-fx-font-size: 15px; -fx-text-fill: #4b5563; -fx-line-spacing: 6px;"/>
                 </VBox>
 
-                <VBox alignment="CENTER_LEFT" maxWidth="950" style="-fx-padding: 20 0 20 0;">
+                <!-- ── Footer ── -->
+                <VBox alignment="CENTER_LEFT" maxWidth="950"
+                      style="-fx-padding: 20 0 20 0;">
                     <Separator style="-fx-padding: 0 0 15 0;"/>
                     <HBox alignment="CENTER_LEFT">
-                        <Label text="AQI Dashboard v1.0 | 2026" style="-fx-font-size: 13px; -fx-text-fill: #9ca3af;"/>
+                        <Label text="AiQI v1.0 | 2026"
+                               style="-fx-font-size: 13px; -fx-text-fill: #9ca3af;"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label text="☁" style="-fx-font-size: 20px; -fx-text-fill: #0ea5e9;"/>
+                        <Label fx:id="cloudIcon" text="☁"
+                               style="-fx-font-size: 22px; -fx-text-fill: #0ea5e9;"/>
                     </HBox>
                 </VBox>
 
             </VBox>
         </ScrollPane>
     </center>
+
 </BorderPane>

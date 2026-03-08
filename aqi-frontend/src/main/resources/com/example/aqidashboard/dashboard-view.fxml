@@ -73,7 +73,9 @@
                     style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
             <Button fx:id="tabBtn4" text="🇮🇳  India Cities" onAction="#handleTabSwitch"
                     style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
-            <Button fx:id="tabBtn5" text="ℹ  About AQI" onAction="#handleTabSwitch"
+            <Button fx:id="tabBtn5" text="🤖  ML Models" onAction="#handleTabSwitch"
+                    style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
+            <Button fx:id="tabBtn6" text="ℹ  About AQI" onAction="#handleTabSwitch"
                     style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
         </HBox>
     </HBox>
@@ -403,7 +405,7 @@
                 </VBox>
             </ScrollPane>
         </VBox>
-        <VBox fx:id="tabContent5" visible="false" managed="false" VBox.vgrow="ALWAYS">
+        <VBox fx:id="tabContent6" visible="false" managed="false" VBox.vgrow="ALWAYS">
             <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
                 <VBox spacing="24" style="-fx-padding: 30 60; -fx-background-color: #f0f4f8;">
 
@@ -682,6 +684,88 @@
                 </VBox>
             </ScrollPane>
         </VBox>
+
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!--  TAB 6 — ML Model Comparison                          -->
+        <!-- ══════════════════════════════════════════════════════ -->
+        <VBox fx:id="tabContent5" visible="false" managed="false" VBox.vgrow="ALWAYS"
+              style="-fx-background-color: #f0f4f8;">
+            <ScrollPane fitToWidth="true"
+                        style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+                <VBox spacing="20" style="-fx-padding: 28 48 28 48;">
+
+                    <!-- Header -->
+                    <VBox spacing="4">
+                        <Label text="ML Model AQI Comparison"
+                               style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                        <Label text="Predicted AQI vs actual readings over the last 24 hours — across all three models."
+                               style="-fx-font-size: 13px; -fx-text-fill: #6b7280;" wrapText="true"/>
+                    </VBox>
+
+                    <!-- Legend + Refresh -->
+                    <HBox spacing="20" alignment="CENTER_LEFT">
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Region prefWidth="28" prefHeight="4" style="-fx-background-color: #1a73e8; -fx-background-radius: 2;"/>
+                            <Label text="Actual AQI" style="-fx-font-size: 12px; -fx-text-fill: #374151; -fx-font-weight: bold;"/>
+                        </HBox>
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Region prefWidth="28" prefHeight="4" style="-fx-background-color: #10b981; -fx-background-radius: 2;"/>
+                            <Label text="XGBoost" style="-fx-font-size: 12px; -fx-text-fill: #374151; -fx-font-weight: bold;"/>
+                        </HBox>
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Region prefWidth="28" prefHeight="4" style="-fx-background-color: #f59e0b; -fx-background-radius: 2;"/>
+                            <Label text="Random Forest" style="-fx-font-size: 12px; -fx-text-fill: #374151; -fx-font-weight: bold;"/>
+                        </HBox>
+                        <HBox spacing="6" alignment="CENTER_LEFT">
+                            <Region prefWidth="28" prefHeight="4" style="-fx-background-color: #8b5cf6; -fx-background-radius: 2;"/>
+                            <Label text="LightGBM" style="-fx-font-size: 12px; -fx-text-fill: #374151; -fx-font-weight: bold;"/>
+                        </HBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="mlRefreshBtn" text="↻  Refresh" onAction="#handleMlRefresh"
+                                style="-fx-background-color: #1a73e8; -fx-text-fill: white; -fx-background-radius: 20;
+                                       -fx-padding: 7 18; -fx-font-size: 12px; -fx-cursor: hand;"/>
+                    </HBox>
+
+                    <!-- Chart card -->
+                    <VBox style="-fx-background-color: white; -fx-background-radius: 16;
+                                 -fx-padding: 20; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.07),14,0,0,3);">
+                        <VBox fx:id="mlChartContainer" prefHeight="360" VBox.vgrow="ALWAYS"/>
+                        <Label fx:id="mlStatusLabel" text="Loading predictions…"
+                               style="-fx-font-size: 12px; -fx-text-fill: #9ca3af; -fx-padding: 8 0 0 0;"/>
+                    </VBox>
+
+                    <!-- MAE stat cards -->
+                    <HBox spacing="16" alignment="CENTER">
+                        <VBox fx:id="mlCardXgb" alignment="CENTER" spacing="4" prefWidth="190"
+                              style="-fx-background-color: white; -fx-background-radius: 12;
+                                     -fx-padding: 16; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),10,0,0,2);">
+                            <Label text="XGBoost" style="-fx-font-size: 12px; -fx-text-fill: #10b981; -fx-font-weight: bold;"/>
+                            <Label fx:id="mlMaeXgb" text="MAE: —"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                            <Label text="Mean Abs. Error" style="-fx-font-size: 11px; -fx-text-fill: #9ca3af;"/>
+                        </VBox>
+                        <VBox fx:id="mlCardRf" alignment="CENTER" spacing="4" prefWidth="190"
+                              style="-fx-background-color: white; -fx-background-radius: 12;
+                                     -fx-padding: 16; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),10,0,0,2);">
+                            <Label text="Random Forest" style="-fx-font-size: 12px; -fx-text-fill: #f59e0b; -fx-font-weight: bold;"/>
+                            <Label fx:id="mlMaeRf" text="MAE: —"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                            <Label text="Mean Abs. Error" style="-fx-font-size: 11px; -fx-text-fill: #9ca3af;"/>
+                        </VBox>
+                        <VBox fx:id="mlCardLgb" alignment="CENTER" spacing="4" prefWidth="190"
+                              style="-fx-background-color: white; -fx-background-radius: 12;
+                                     -fx-padding: 16; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),10,0,0,2);">
+                            <Label text="LightGBM" style="-fx-font-size: 12px; -fx-text-fill: #8b5cf6; -fx-font-weight: bold;"/>
+                            <Label fx:id="mlMaeLgb" text="MAE: —"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                            <Label text="Mean Abs. Error" style="-fx-font-size: 11px; -fx-text-fill: #9ca3af;"/>
+                        </VBox>
+                    </HBox>
+
+                </VBox>
+            </ScrollPane>
+        </VBox>
+
     </StackPane>
 
 </VBox>
