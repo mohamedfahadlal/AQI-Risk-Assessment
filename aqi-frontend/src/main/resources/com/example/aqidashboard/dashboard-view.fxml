@@ -5,6 +5,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
+<?import javafx.scene.canvas.*?>
 <?import javafx.scene.chart.*?>
 
 <VBox alignment="TOP_CENTER" spacing="0"
@@ -75,7 +76,9 @@
                     style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
             <Button fx:id="tabBtn5" text="🤖  ML Models" onAction="#handleTabSwitch"
                     style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
-            <Button fx:id="tabBtn6" text="ℹ  About AQI" onAction="#handleTabSwitch"
+            <Button fx:id="tabBtn6" text="🫁  Health Impact" onAction="#handleTabSwitch"
+                    style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
+            <Button fx:id="tabBtn7" text="ℹ  About AQI" onAction="#handleTabSwitch"
                     style="-fx-background-radius: 22; -fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;"/>
         </HBox>
     </HBox>
@@ -296,6 +299,139 @@
                         </StackPane>
                     </VBox>
 
+
+                    <!-- CIGARETTE EQUIVALENT CARD -->
+                    <HBox fx:id="cigCard" spacing="30" alignment="CENTER_LEFT"
+                          style="-fx-background-color: white; -fx-background-radius: 20;
+                                 -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.1),24,0,0,6);
+                                 -fx-padding: 30 40;">
+                        <!-- Animated cigarette canvas -->
+                        <Canvas fx:id="cigCanvas" width="160" height="200"/>
+                        <!-- Numbers + text -->
+                        <VBox spacing="16" HBox.hgrow="ALWAYS">
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Label text="Cigarette Equivalent"
+                                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                                <Label text="(Berkeley Earth)"
+                                       style="-fx-font-size: 14px; -fx-text-fill: #9ca3af;"/>
+                            </HBox>
+                            <HBox spacing="40" alignment="CENTER_LEFT">
+                                <VBox spacing="2" alignment="CENTER" minWidth="130">
+                                    <Label fx:id="cigCountLabel" text="--"
+                                           style="-fx-font-size: 52px; -fx-font-weight: 900; -fx-text-fill: #e53e3e;"/>
+                                    <Label text="Cigarettes / day"
+                                           style="-fx-font-size: 13px; -fx-text-fill: #e53e3e; -fx-font-weight: bold;"/>
+                                </VBox>
+                                <Region minWidth="1" prefWidth="1" minHeight="60"
+                                        style="-fx-background-color: #e2e8f0;"/>
+                                <HBox spacing="32">
+                                    <VBox spacing="3">
+                                        <Label text="Weekly" style="-fx-font-size: 15px; -fx-text-fill: #6b7280;"/>
+                                        <HBox spacing="4" alignment="CENTER_LEFT">
+                                            <Label fx:id="cigWeeklyLabel" text="--"
+                                                   style="-fx-font-size: 28px; -fx-font-weight: 900; -fx-text-fill: #e53e3e;"/>
+                                            <Label text="cigs"
+                                                   style="-fx-font-size: 13px; -fx-text-fill: #9ca3af; -fx-padding: 8 0 0 0;"/>
+                                        </HBox>
+                                    </VBox>
+                                    <VBox spacing="3">
+                                        <Label text="Monthly" style="-fx-font-size: 15px; -fx-text-fill: #6b7280;"/>
+                                        <HBox spacing="4" alignment="CENTER_LEFT">
+                                            <Label fx:id="cigMonthlyLabel" text="--"
+                                                   style="-fx-font-size: 28px; -fx-font-weight: 900; -fx-text-fill: #e53e3e;"/>
+                                            <Label text="cigs"
+                                                   style="-fx-font-size: 13px; -fx-text-fill: #9ca3af; -fx-padding: 8 0 0 0;"/>
+                                        </HBox>
+                                    </VBox>
+                                </HBox>
+                                <Label fx:id="cigDescLabel" text="--" wrapText="true" maxWidth="320"
+                                       HBox.hgrow="ALWAYS"
+                                       style="-fx-font-size: 15px; -fx-text-fill: #4b5563;"/>
+                            </HBox>
+                            <Label text="Disclaimer: PM2.5 / 22 = cigarettes per day (continuous 24h exposure, Berkeley Earth)."
+                                   wrapText="true"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #9ca3af; -fx-font-style: italic;"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- HEALTH RISK CARD -->
+                    <HBox fx:id="healthCard" spacing="30" alignment="CENTER_LEFT"
+                          style="-fx-background-color: white; -fx-background-radius: 20;
+                                 -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.1),24,0,0,6);
+                                 -fx-padding: 30 40;">
+                        <!-- AQI character image matching current risk -->
+                        <VBox alignment="BOTTOM_CENTER" prefWidth="200">
+                            <ImageView fx:id="condImageView" fitHeight="230" fitWidth="200" preserveRatio="true"/>
+                        </VBox>
+                        <!-- Content -->
+                        <VBox spacing="16" HBox.hgrow="ALWAYS">
+                            <!-- Header -->
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Health Risk by Condition"
+                                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                                <Label fx:id="healthCityLabel" text=""
+                                       style="-fx-font-size: 12px; -fx-text-fill: #1a73e8; -fx-font-weight: bold;"/>
+                            </HBox>
+                            <!-- Condition selector -->
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Button fx:id="condBtn0" text="Asthma"     onAction="#handleConditionSwitch"
+                                        style="-fx-background-radius: 18; -fx-background-color: #1a73e8; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                                <Button fx:id="condBtn1" text="Heart"      onAction="#handleConditionSwitch"
+                                        style="-fx-background-radius: 18; -fx-background-color: #f1f5f9; -fx-text-fill: #555; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                                <Button fx:id="condBtn2" text="Allergies"  onAction="#handleConditionSwitch"
+                                        style="-fx-background-radius: 18; -fx-background-color: #f1f5f9; -fx-text-fill: #555; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                                <Button fx:id="condBtn3" text="Sinus"      onAction="#handleConditionSwitch"
+                                        style="-fx-background-radius: 18; -fx-background-color: #f1f5f9; -fx-text-fill: #555; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                                <Button fx:id="condBtn4" text="Cold / Flu" onAction="#handleConditionSwitch"
+                                        style="-fx-background-radius: 18; -fx-background-color: #f1f5f9; -fx-text-fill: #555; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                                <Button fx:id="condBtn5" text="COPD"       onAction="#handleConditionSwitch"
+                                        style="-fx-background-radius: 18; -fx-background-color: #f1f5f9; -fx-text-fill: #555; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                            </HBox>
+                            <!-- Detail panel -->
+                            <HBox spacing="20" alignment="TOP_LEFT">
+                                <!-- Risk badge -->
+                                <VBox alignment="CENTER" spacing="8" minWidth="130"
+                                      fx:id="condBadgeBox"
+                                      style="-fx-background-color: #fefce8; -fx-background-radius: 12; -fx-padding: 16;">
+                                    <Canvas fx:id="condCircleCanvas" width="56" height="56"/>
+                                    <Label fx:id="condRiskBadge" text="Low Risk"
+                                           style="-fx-background-color: #22c55e; -fx-text-fill: white;
+                                                  -fx-font-size: 13px; -fx-font-weight: bold;
+                                                  -fx-background-radius: 8; -fx-padding: 5 12;"/>
+                                </VBox>
+                                <!-- Text -->
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="condNameLabel" text="Asthma"
+                                           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                                    <Label fx:id="condRiskLabel" text="--" wrapText="true" maxWidth="460"
+                                           style="-fx-font-size: 15px; -fx-text-fill: #374151;"/>
+                                    <Label fx:id="condDescLabel" text="--" wrapText="true" maxWidth="460"
+                                           style="-fx-font-size: 15px; -fx-text-fill: #6b7280;"/>
+                                    <HBox spacing="28" style="-fx-padding: 4 0 0 0;">
+                                        <VBox spacing="5">
+                                            <Label text="Do's"
+                                                   style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #16a34a;"/>
+                                            <Label fx:id="condDo1" text="--" wrapText="true" maxWidth="200"
+                                                   style="-fx-font-size: 14px; -fx-text-fill: #374151;"/>
+                                            <Label fx:id="condDo2" text="--" wrapText="true" maxWidth="200"
+                                                   style="-fx-font-size: 14px; -fx-text-fill: #374151;"/>
+                                            <Label fx:id="condDo3" text="--" wrapText="true" maxWidth="200"
+                                                   style="-fx-font-size: 14px; -fx-text-fill: #374151;"/>
+                                        </VBox>
+                                        <VBox spacing="5">
+                                            <Label text="Don'ts"
+                                                   style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #dc2626;"/>
+                                            <Label fx:id="condDont1" text="--" wrapText="true" maxWidth="200"
+                                                   style="-fx-font-size: 14px; -fx-text-fill: #374151;"/>
+                                            <Label fx:id="condDont2" text="--" wrapText="true" maxWidth="200"
+                                                   style="-fx-font-size: 14px; -fx-text-fill: #374151;"/>
+                                        </VBox>
+                                    </HBox>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+
                 </VBox>
             </ScrollPane>
         </VBox>
@@ -405,7 +541,132 @@
                 </VBox>
             </ScrollPane>
         </VBox>
-        <VBox fx:id="tabContent6" visible="false" managed="false" VBox.vgrow="ALWAYS">
+        <!-- TAB 6 - Health Impact (content is in AQI & Weather tab scroll) -->
+        <VBox fx:id="tabContent6" visible="false" managed="false" VBox.vgrow="ALWAYS"
+              style="-fx-background-color: #f0f4f8; -fx-padding: 20;">
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                        style="-fx-background: transparent; -fx-background-color: transparent;">
+                <VBox spacing="20" style="-fx-padding: 0 0 30 0;">
+
+                    <!-- Cigarette Equivalent Card (Tab 6 standalone) -->
+                    <HBox spacing="30" alignment="CENTER_LEFT"
+                          style="-fx-background-color: white; -fx-background-radius: 20;
+                                 -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.1),24,0,0,6);
+                                 -fx-padding: 30 40;">
+                        <Canvas fx:id="cigCanvas2" width="160" height="200"/>
+                        <VBox spacing="16" HBox.hgrow="ALWAYS">
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Label text="Cigarette Equivalent"
+                                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                                <Label text="(Berkeley Earth)"
+                                       style="-fx-font-size: 14px; -fx-text-fill: #9ca3af;"/>
+                            </HBox>
+                            <HBox spacing="40" alignment="CENTER_LEFT">
+                                <VBox spacing="2" alignment="CENTER" minWidth="130">
+                                    <Label fx:id="cigCountLabel2" text="--"
+                                           style="-fx-font-size: 52px; -fx-font-weight: 900; -fx-text-fill: #e53e3e;"/>
+                                    <Label text="Cigarettes / day"
+                                           style="-fx-font-size: 13px; -fx-text-fill: #e53e3e; -fx-font-weight: bold;"/>
+                                </VBox>
+                                <Region minWidth="1" prefWidth="1" minHeight="60"
+                                        style="-fx-background-color: #e2e8f0;"/>
+                                <HBox spacing="32">
+                                    <VBox spacing="3">
+                                        <Label text="Weekly" style="-fx-font-size: 15px; -fx-text-fill: #6b7280;"/>
+                                        <HBox spacing="4" alignment="CENTER_LEFT">
+                                            <Label fx:id="cigWeeklyLabel2" text="--"
+                                                   style="-fx-font-size: 28px; -fx-font-weight: 900; -fx-text-fill: #e53e3e;"/>
+                                            <Label text="cigs" style="-fx-font-size: 13px; -fx-text-fill: #9ca3af; -fx-padding: 8 0 0 0;"/>
+                                        </HBox>
+                                    </VBox>
+                                    <VBox spacing="3">
+                                        <Label text="Monthly" style="-fx-font-size: 15px; -fx-text-fill: #6b7280;"/>
+                                        <HBox spacing="4" alignment="CENTER_LEFT">
+                                            <Label fx:id="cigMonthlyLabel2" text="--"
+                                                   style="-fx-font-size: 28px; -fx-font-weight: 900; -fx-text-fill: #e53e3e;"/>
+                                            <Label text="cigs" style="-fx-font-size: 13px; -fx-text-fill: #9ca3af; -fx-padding: 8 0 0 0;"/>
+                                        </HBox>
+                                    </VBox>
+                                </HBox>
+                                <Label fx:id="cigDescLabel2" text="--" wrapText="true" maxWidth="340"
+                                       HBox.hgrow="ALWAYS"
+                                       style="-fx-font-size: 15px; -fx-text-fill: #4b5563;"/>
+                            </HBox>
+                            <Label text="Disclaimer: PM2.5 / 22 = cigarettes per day (continuous 24h exposure, Berkeley Earth)."
+                                   wrapText="true"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #9ca3af; -fx-font-style: italic;"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Health Risk Card (standalone) -->
+                    <VBox spacing="0"
+                          style="-fx-background-color: white; -fx-background-radius: 16;
+                                 -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.08),12,0,0,4);">
+                        <HBox spacing="0">
+                            <Region prefWidth="6" style="-fx-background-color: #1a73e8; -fx-background-radius: 16 0 0 16;"/>
+                            <VBox spacing="14" style="-fx-padding: 20 24;" HBox.hgrow="ALWAYS">
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="&#x1FAB7;" style="-fx-font-size: 18px;"/>
+                                    <Label text="Health Risk by Condition"
+                                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                                    <Label fx:id="healthCityLabel2" text=""
+                                           style="-fx-font-size: 12px; -fx-text-fill: #1a73e8; -fx-font-weight: bold;"/>
+                                </HBox>
+                                <HBox spacing="8" alignment="CENTER_LEFT">
+                                    <Button fx:id="condBtn6"  text="Asthma"     onAction="#handleConditionSwitch2"
+                                            style="-fx-background-radius: 18; -fx-background-color: #1a73e8; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                                    <Button fx:id="condBtn7"  text="Heart"      onAction="#handleConditionSwitch2"
+                                            style="-fx-background-radius: 18; -fx-background-color: #f1f5f9; -fx-text-fill: #555; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                                    <Button fx:id="condBtn8"  text="Allergies"  onAction="#handleConditionSwitch2"
+                                            style="-fx-background-radius: 18; -fx-background-color: #f1f5f9; -fx-text-fill: #555; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                                    <Button fx:id="condBtn9"  text="Sinus"      onAction="#handleConditionSwitch2"
+                                            style="-fx-background-radius: 18; -fx-background-color: #f1f5f9; -fx-text-fill: #555; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                                    <Button fx:id="condBtn10" text="Cold / Flu" onAction="#handleConditionSwitch2"
+                                            style="-fx-background-radius: 18; -fx-background-color: #f1f5f9; -fx-text-fill: #555; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                                    <Button fx:id="condBtn11" text="COPD"       onAction="#handleConditionSwitch2"
+                                            style="-fx-background-radius: 18; -fx-background-color: #f1f5f9; -fx-text-fill: #555; -fx-font-size: 14px; -fx-padding: 7 16; -fx-cursor: hand;"/>
+                                </HBox>
+                                <HBox spacing="20" alignment="TOP_LEFT">
+                                    <VBox alignment="CENTER" spacing="8" minWidth="140" minHeight="140"
+                                          fx:id="condBadgeBox2"
+                                          style="-fx-background-color: #fefce8; -fx-background-radius: 12; -fx-padding: 16;">
+                                        <Canvas fx:id="condCircleCanvas2" width="56" height="56"/>
+                                        <Label fx:id="condRiskBadge2" text="Low Risk"
+                                               style="-fx-background-color: #22c55e; -fx-text-fill: white;
+                                                      -fx-font-size: 11px; -fx-font-weight: bold;
+                                                      -fx-background-radius: 8; -fx-padding: 4 10;"/>
+                                    </VBox>
+                                    <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                        <Label fx:id="condNameLabel2" text="Asthma"
+                                               style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                                        <Label fx:id="condRiskLabel2" text="--" wrapText="true" maxWidth="500"
+                                               style="-fx-font-size: 12px; -fx-text-fill: #374151;"/>
+                                        <Label fx:id="condDescLabel2" text="--" wrapText="true" maxWidth="500"
+                                               style="-fx-font-size: 15px; -fx-text-fill: #6b7280;"/>
+                                        <HBox spacing="24" style="-fx-padding: 4 0 0 0;">
+                                            <VBox spacing="5">
+                                                <Label text="Do's" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #16a34a;"/>
+                                                <Label fx:id="condDo1b" text="--" wrapText="true" maxWidth="210" style="-fx-font-size: 14px; -fx-text-fill: #374151;"/>
+                                                <Label fx:id="condDo2b" text="--" wrapText="true" maxWidth="210" style="-fx-font-size: 14px; -fx-text-fill: #374151;"/>
+                                                <Label fx:id="condDo3b" text="--" wrapText="true" maxWidth="210" style="-fx-font-size: 14px; -fx-text-fill: #374151;"/>
+                                            </VBox>
+                                            <VBox spacing="5">
+                                                <Label text="Don'ts" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #dc2626;"/>
+                                                <Label fx:id="condDont1b" text="--" wrapText="true" maxWidth="210" style="-fx-font-size: 14px; -fx-text-fill: #374151;"/>
+                                                <Label fx:id="condDont2b" text="--" wrapText="true" maxWidth="210" style="-fx-font-size: 14px; -fx-text-fill: #374151;"/>
+                                            </VBox>
+                                        </HBox>
+                                    </VBox>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                </VBox>
+            </ScrollPane>
+        </VBox>
+
+        <VBox fx:id="tabContent7" visible="false" managed="false" VBox.vgrow="ALWAYS">
             <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
                 <VBox spacing="24" style="-fx-padding: 30 60; -fx-background-color: #f0f4f8;">
 
@@ -699,7 +960,7 @@
                         <Label text="ML Model AQI Comparison"
                                style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
                         <Label text="Predicted AQI vs actual readings over the last 24 hours — across all three models."
-                               style="-fx-font-size: 13px; -fx-text-fill: #6b7280;" wrapText="true"/>
+                               style="-fx-font-size: 15px; -fx-text-fill: #6b7280;" wrapText="true"/>
                     </VBox>
 
                     <!-- Legend + Refresh -->
@@ -767,5 +1028,12 @@
         </VBox>
 
     </StackPane>
+
+
+
+    <!-- Ripple overlay: transparent click layer, covers whole app -->
+    <Pane fx:id="rippleOverlay" mouseTransparent="true"
+          style="-fx-background-color: transparent;"
+          VBox.vgrow="ALWAYS"/>
 
 </VBox>
