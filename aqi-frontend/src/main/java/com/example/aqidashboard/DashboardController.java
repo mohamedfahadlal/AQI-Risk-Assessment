@@ -19,6 +19,12 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.animation.*;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
 import javafx.scene.transform.Rotate;
@@ -47,9 +53,39 @@ public class DashboardController {
     @FXML private Button darkModeBtn;
 
     // ── Capsule tab switcher ──────────────────────────────────────
-    @FXML private Button tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5, tabBtn6;
-    @FXML private VBox tabContent1, tabContent2, tabContent3, tabContent4, tabContent5, tabContent6;
+    @FXML private Button tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5, tabBtn6, tabBtn7;
+    @FXML private VBox tabContent1, tabContent2, tabContent3, tabContent4, tabContent5, tabContent6, tabContent7;
+
+    // ── Health card FXML fields (Tab 1 inline) ─────────────────────
+    @FXML private javafx.scene.control.Label cigCountLabel, cigWeeklyLabel, cigMonthlyLabel, cigDescLabel;
+    @FXML private javafx.scene.control.Label healthCityLabel;
+    @FXML private javafx.scene.control.Label condNameLabel, condRiskLabel, condDescLabel;
+    @FXML private Canvas condCircleCanvas;
+    @FXML private javafx.scene.control.Label condRiskBadge;
+    @FXML private javafx.scene.control.Label condDo1, condDo2, condDo3, condDont1, condDont2;
+    @FXML private Button condBtn0, condBtn1, condBtn2, condBtn3, condBtn4, condBtn5;
+    @FXML private Canvas cigCanvas;
+    @FXML private Canvas cigCanvas2;
+    @FXML private ImageView condImageView;
+    private javafx.animation.AnimationTimer cigAnimTimer;
+    private javafx.animation.AnimationTimer cigAnimTimer2;
+
+    // ── Health card FXML fields (Tab 6 standalone) ─────────────────
+    @FXML private javafx.scene.control.Label cigCountLabel2, cigWeeklyLabel2, cigMonthlyLabel2, cigDescLabel2;
+    @FXML private javafx.scene.control.Label healthCityLabel2;
+    @FXML private javafx.scene.control.Label condNameLabel2, condRiskLabel2, condDescLabel2;
+    @FXML private Canvas condCircleCanvas2;
+    @FXML private javafx.scene.control.Label condRiskBadge2;
+    @FXML private javafx.scene.control.Label condDo1b, condDo2b, condDo3b, condDont1b, condDont2b;
+    @FXML private Button condBtn6, condBtn7, condBtn8, condBtn9, condBtn10, condBtn11;
+
+    private int currentCondition  = 0;
+    private int currentCondition2 = 0;
+    private int lastHealthAqi     = 0;
+
     private Button[] tabBtns;
+    @FXML private Pane rippleOverlay;
+    private String currentRippleColor = "rgba(26,115,232,0.3)";
     private VBox[]   tabContents;
 
     private static final String TAB_ACTIVE   =
@@ -227,8 +263,21 @@ public class DashboardController {
         });
 
         // Wire capsule tab switcher
-        tabBtns     = new Button[]{tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5, tabBtn6};
-        tabContents = new VBox[]{tabContent1, tabContent2, tabContent3, tabContent4, tabContent5, tabContent6};
+        tabBtns     = new Button[]{tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5, tabBtn6, tabBtn7};
+        tabContents = new VBox[]{tabContent1, tabContent2, tabContent3, tabContent4, tabContent5, tabContent6, tabContent7};
+
+        // ── Ripple effect: wired to scene after layout ──────────────────
+        javafx.application.Platform.runLater(() -> {
+            if (rippleOverlay != null && rippleOverlay.getScene() != null) {
+                rippleOverlay.getScene().addEventFilter(
+                        javafx.scene.input.MouseEvent.MOUSE_PRESSED, evt -> {
+                            // Convert scene coords to rippleOverlay local coords
+                            javafx.geometry.Point2D local =
+                                    rippleOverlay.sceneToLocal(evt.getSceneX(), evt.getSceneY());
+                            spawnRipple(local.getX(), local.getY());
+                        });
+            }
+        });
 
         // Tab button hovers
         for (Button tb : tabBtns) {
@@ -851,6 +900,7 @@ public class DashboardController {
             updateRisk(aqi);
             updateLastRefreshed();
             updatePollutantsTab();
+            updateHealthCards(aqi, pm25, cityName);
             applyRiskGradient(aqi);
             checkAlert(aqi);
             if (weatherView.isVisible()) updateWeatherView(data);
@@ -1723,6 +1773,7 @@ public class DashboardController {
             imageName = "hazardous.png";
         }
 
+        currentRippleColor = hexColor + "66"; // 40% opacity hex alpha
         final String fHex = hexColor;
         final String fGrad = gradientStyle;
         final String fRisk = risk;
@@ -2385,5 +2436,301 @@ public class DashboardController {
         }
     }
 
+
+
+    // ─────────────────────────────────────────────────────────────
+    // HEALTH IMPACT CARDS
+    // ─────────────────────────────────────────────────────────────
+
+    private static final String[][] CONDITION_DATA = {
+            {"Asthma",       "O",
+                    "Pollutants trigger airway inflammation causing wheezing, shortness of breath, and chest tightness.",
+                    "Carry your inhaler at all times.", "Stay indoors and keep windows closed.", "Use an air purifier indoors.",
+                    "Exercise outdoors without a mask.", "Stay near high-traffic roads."},
+            {"Heart Issues",  "H",
+                    "Fine particles enter the bloodstream raising risk of arrhythmia, blood pressure spikes, and clotting.",
+                    "Monitor blood pressure regularly.", "Avoid strenuous outdoor activity.", "Stay well hydrated.",
+                    "Ignore chest pain or palpitations.", "Exercise intensely outdoors."},
+            {"Allergies",     "A",
+                    "Pollutants act as allergens causing sneezing, runny nose, itchy eyes, and skin reactions.",
+                    "Wear an N95 mask outdoors.", "Keep antihistamines handy.", "Shower after outdoor exposure.",
+                    "Rub eyes with unwashed hands.", "Open windows during peak pollution hours."},
+            {"Sinus",         "S",
+                    "Irritants inflame nasal passages causing congestion, pressure, headaches, and post-nasal drip.",
+                    "Use saline nasal rinse daily.", "Stay hydrated to thin mucus.", "Sleep with head elevated.",
+                    "Use decongestants long-term without advice.", "Smoke or be near smokers."},
+            {"Cold / Flu",    "C",
+                    "Poor air quality weakens immune response, making you more vulnerable to viral infections.",
+                    "Wash hands frequently.", "Boost immunity with Vitamin C and zinc.", "Wear a mask in crowded spaces.",
+                    "Touch your face with unwashed hands.", "Share utensils or drinks."},
+            {"COPD",          "P",
+                    "Air pollutants trigger severe flare-ups reducing lung capacity and raising hospitalisation risk.",
+                    "Keep rescue medication accessible.", "Monitor oxygen with a pulse oximeter.", "Avoid all smoke exposure.",
+                    "Go outside during high AQI days.", "Skip prescribed medications."},
+    };
+
+    private static String getRiskLevel(int aqi) {
+        if (aqi <= 50)  return "Low Risk";
+        if (aqi <= 100) return "Mild Risk";
+        if (aqi <= 200) return "Moderate Risk";
+        if (aqi <= 300) return "High Risk";
+        return "Severe Risk";
+    }
+
+    private static String getRiskColor(int aqi) {
+        if (aqi <= 50)  return "#22c55e";
+        if (aqi <= 100) return "#f59e0b";
+        if (aqi <= 200) return "#f97316";
+        if (aqi <= 300) return "#ef4444";
+        return "#7c3aed";
+    }
+
+    private void updateHealthCards(int aqi, double pm25, String city) {
+        if (cigCountLabel == null) return;
+        lastHealthAqi = aqi;
+        double cigsPerDay  = pm25 / 22.0;
+        double cigsWeekly  = cigsPerDay * 7;
+        double cigsMonthly = cigsPerDay * 30;
+        String desc = String.format(
+                "Breathing the air in %s is as harmful as smoking %.1f cigarettes a day.", city, cigsPerDay);
+        // Tab1 cards
+        startCigAnimation();
+        updateConditionImage(aqi);
+        cigCountLabel.setText(String.format("%.1f", cigsPerDay));
+        cigWeeklyLabel.setText(String.format("%.1f", cigsWeekly));
+        cigMonthlyLabel.setText(String.format("%.1f", cigsMonthly));
+        cigDescLabel.setText(desc);
+        healthCityLabel.setText(city);
+        applyCondition(currentCondition, aqi,
+                condNameLabel, condRiskLabel, condDescLabel, condCircleCanvas, condRiskBadge,
+                condDo1, condDo2, condDo3, condDont1, condDont2);
+        // Tab6 cards
+        if (cigCountLabel2 != null) {
+            cigCountLabel2.setText(String.format("%.1f", cigsPerDay));
+            cigWeeklyLabel2.setText(String.format("%.1f", cigsWeekly));
+            cigMonthlyLabel2.setText(String.format("%.1f", cigsMonthly));
+            cigDescLabel2.setText(desc);
+            if (healthCityLabel2 != null) healthCityLabel2.setText(city);
+            applyCondition(currentCondition2, aqi,
+                    condNameLabel2, condRiskLabel2, condDescLabel2, condCircleCanvas2, condRiskBadge2,
+                    condDo1b, condDo2b, condDo3b, condDont1b, condDont2b);
+        }
+    }
+
+    private void applyCondition(int idx, int aqi,
+                                javafx.scene.control.Label name, javafx.scene.control.Label risk,
+                                javafx.scene.control.Label desc, Canvas circle,
+                                javafx.scene.control.Label badge,
+                                javafx.scene.control.Label do1, javafx.scene.control.Label do2,
+                                javafx.scene.control.Label do3,
+                                javafx.scene.control.Label dont1, javafx.scene.control.Label dont2) {
+        String[] c = CONDITION_DATA[idx];
+        String riskLevel = getRiskLevel(aqi);
+        String riskColor = getRiskColor(aqi);
+        name.setText(c[0]);
+        drawRiskCircle(circle, riskColor);
+        risk.setText("Risk of " + c[0] + " is " + riskLevel + " (AQI " + aqi + ").");
+        desc.setText(c[2]);
+        do1.setText("+ " + c[3]);
+        do2.setText("+ " + c[4]);
+        do3.setText("+ " + c[5]);
+        dont1.setText("x " + c[6]);
+        dont2.setText("x " + c[7]);
+        badge.setText(riskLevel);
+        badge.setStyle("-fx-background-color: " + riskColor + "; -fx-text-fill: white; " +
+                "-fx-font-size: 11px; -fx-font-weight: bold; " +
+                "-fx-background-radius: 8; -fx-padding: 4 10;");
+    }
+
+
+    private void drawRiskCircle(Canvas canvas, String hexColor) {
+        if (canvas == null) return;
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        double w = canvas.getWidth(), h = canvas.getHeight();
+        gc.clearRect(0, 0, w, h);
+        // Outer glow ring
+        gc.setFill(Color.web(hexColor, 0.18));
+        gc.fillOval(2, 2, w - 4, h - 4);
+        // Solid filled circle
+        gc.setFill(Color.web(hexColor));
+        gc.fillOval(8, 8, w - 16, h - 16);
+        // Inner highlight
+        gc.setFill(Color.web("#ffffff", 0.30));
+        gc.fillOval(14, 12, (w - 16) * 0.45, (h - 16) * 0.38);
+    }
+    private void highlightCondBtn(Button[] btns, int active) {
+        for (int i = 0; i < btns.length; i++) {
+            btns[i].setStyle(i == active
+                    ? "-fx-background-radius: 18; -fx-background-color: #1a73e8; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 6 14; -fx-cursor: hand;"
+                    : "-fx-background-radius: 18; -fx-background-color: #f1f5f9; -fx-text-fill: #555; -fx-font-size: 12px; -fx-padding: 6 14; -fx-cursor: hand;");
+        }
+    }
+
+    @FXML
+    private void handleConditionSwitch(javafx.event.ActionEvent e) {
+        Button[] btns = {condBtn0, condBtn1, condBtn2, condBtn3, condBtn4, condBtn5};
+        for (int i = 0; i < btns.length; i++) {
+            if (e.getSource() == btns[i]) {
+                currentCondition = i;
+                highlightCondBtn(btns, i);
+                applyCondition(i, lastHealthAqi,
+                        condNameLabel, condRiskLabel, condDescLabel, condCircleCanvas, condRiskBadge,
+                        condDo1, condDo2, condDo3, condDont1, condDont2);
+                updateConditionImage(lastHealthAqi);
+                break;
+            }
+        }
+    }
+
+    @FXML
+    private void handleConditionSwitch2(javafx.event.ActionEvent e) {
+        Button[] btns = {condBtn6, condBtn7, condBtn8, condBtn9, condBtn10, condBtn11};
+        for (int i = 0; i < btns.length; i++) {
+            if (e.getSource() == btns[i]) {
+                currentCondition2 = i;
+                highlightCondBtn(btns, i);
+                applyCondition(i, lastHealthAqi,
+                        condNameLabel2, condRiskLabel2, condDescLabel2, condCircleCanvas2, condRiskBadge2,
+                        condDo1b, condDo2b, condDo3b, condDont1b, condDont2b);
+                break;
+            }
+        }
+    }
+
+
+    private void startCigAnimation() {
+        startCigOn(cigCanvas, false);
+        startCigOn(cigCanvas2, true);
+    }
+
+    private void startCigOn(Canvas canvas, boolean isSecond) {
+        if (canvas == null) return;
+        javafx.animation.AnimationTimer existing = isSecond ? cigAnimTimer2 : cigAnimTimer;
+        if (existing != null) existing.stop();
+
+        // Canvas 160w x 200h.
+        // gc.rotate(-30) = 30deg CCW tilt → lit tip goes upper-LEFT.
+        // Formula for CW rotation matrix with angle -30:
+        //   litWX = pivX + (-CIG_LEN)*sin(-30) = pivX - CIG_LEN*sin(30)
+        //   litWY = pivY + (-CIG_LEN)*cos(-30) = pivY - CIG_LEN*cos(30)
+        // pivot=(90,175): litWX=35, litWY=80 — both inside canvas.
+        final double CIG_LEN = 110.0;
+        final double TIP_LEN = 22.0;
+        final double CIG_W   = 9.0;
+        final double pivX    = 90.0;
+        final double pivY    = 175.0;
+        final double litWX   = 35.0;   // pivX - CIG_LEN*sin(30)
+        final double litWY   = 80.0;   // pivY - CIG_LEN*cos(30)
+
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        final int N = 14;
+        double[] sx = new double[N];
+        double[] sy = new double[N];
+        double[] sa = new double[N];
+        for (int i = 0; i < N; i++) {
+            sx[i] = litWX + (Math.random() - 0.5) * 6;
+            sy[i] = litWY - i * 7;
+            sa[i] = Math.max(0, 0.65 - i * 0.045);
+        }
+
+        javafx.animation.AnimationTimer newTimer = new javafx.animation.AnimationTimer() {
+            @Override public void handle(long now) {
+                gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+                // ── Smoke FIRST (drawn behind cigarette) ───────────────
+                for (int i = 0; i < N; i++) {
+                    sy[i] -= 0.9 + Math.random() * 0.5;
+                    sx[i] += (Math.random() - 0.5) * 1.8;
+                    sa[i] -= 0.005;
+                    if (sa[i] <= 0 || sy[i] < 2) {
+                        sx[i] = litWX + (Math.random() - 0.5) * 5;
+                        sy[i] = litWY;
+                        sa[i] = 0.60 + Math.random() * 0.20;
+                    }
+                    double age = litWY - sy[i];
+                    double r   = 5.5 + age * 0.38;
+                    gc.setFill(Color.web("#64748b", Math.max(0, sa[i])));
+                    gc.fillOval(sx[i] - r / 2, sy[i] - r / 2, r, r);
+                }
+
+                // ── Cigarette ON TOP of smoke ──────────────────────────
+                gc.save();
+                gc.translate(pivX, pivY);
+                gc.rotate(-30);   // CCW: lit tip goes upper-left
+                // Brown filter tip at origin going "up" in local space
+                gc.setFill(Color.web("#c8854a"));
+                gc.fillRoundRect(-CIG_W / 2, -TIP_LEN, CIG_W, TIP_LEN, 3, 3);
+                // White paper body
+                double bodyLen = CIG_LEN - TIP_LEN;
+                gc.setFill(Color.WHITE);
+                gc.fillRoundRect(-CIG_W / 2 + 1, -CIG_LEN, CIG_W - 2, bodyLen, 3, 3);
+                // Outline
+                gc.setStroke(Color.web("#d1d5db"));
+                gc.setLineWidth(0.8);
+                gc.strokeRoundRect(-CIG_W / 2 + 1, -CIG_LEN, CIG_W - 2, bodyLen, 3, 3);
+                // Ash band
+                gc.setFill(Color.web("#b0b8c4"));
+                gc.fillRoundRect(-CIG_W / 2 + 1, -CIG_LEN, CIG_W - 2, 7, 2, 2);
+                // Ember
+                gc.setFill(Color.web("#f97316", 0.95));
+                gc.fillOval(-CIG_W / 2, -CIG_LEN - 6, CIG_W, 8);
+                gc.setFill(Color.web("#fde68a", 0.75));
+                gc.fillOval(-CIG_W / 2 + 2, -CIG_LEN - 5, CIG_W - 4, 5);
+                gc.restore();
+            }
+        };
+        if (isSecond) { cigAnimTimer2 = newTimer; } else { cigAnimTimer = newTimer; }
+        newTimer.start();
+    }
+
+    private void updateConditionImage(int aqi) {
+        if (condImageView == null) return;
+        String imageName;
+        if      (aqi <= 50)  imageName = "good.png";
+        else if (aqi <= 100) imageName = "moderate.png";
+        else if (aqi <= 150) imageName = "poor.png";
+        else if (aqi <= 200) imageName = "unhealthy.png";
+        else if (aqi <= 300) imageName = "severe.png";
+        else                 imageName = "hazardous.png";
+        try {
+            Image img = new Image(Objects.requireNonNull(
+                    getClass().getResourceAsStream("/images/" + imageName)));
+            condImageView.setImage(img);
+        } catch (Exception e) {
+            System.out.println("condImage not found: " + imageName);
+        }
+    }
+
+
+    // ─────────────────────────────────────────────────────────────
+    // RIPPLE EFFECT
+    // ─────────────────────────────────────────────────────────────
+    private void spawnRipple(double x, double y) {
+        if (rippleOverlay == null) return;
+
+        javafx.scene.shape.Circle ripple = new javafx.scene.shape.Circle(x, y, 1);
+        ripple.setFill(javafx.scene.paint.Color.web(currentRippleColor));
+        ripple.setMouseTransparent(true);
+
+        // Clip so it doesn't exceed overlay bounds
+        rippleOverlay.getChildren().add(ripple);
+
+        // Scale up
+        ScaleTransition grow = new ScaleTransition(Duration.millis(500), ripple);
+        grow.setFromX(1); grow.setFromY(1);
+        grow.setToX(25);  grow.setToY(25);
+        grow.setInterpolator(Interpolator.EASE_OUT);
+
+        // Fade out
+        FadeTransition fade = new FadeTransition(Duration.millis(500), ripple);
+        fade.setFromValue(0.55);
+        fade.setToValue(0.0);
+        fade.setInterpolator(Interpolator.EASE_IN);
+
+        ParallelTransition pt = new ParallelTransition(grow, fade);
+        pt.setOnFinished(e -> rippleOverlay.getChildren().remove(ripple));
+        pt.play();
+    }
 
 }
