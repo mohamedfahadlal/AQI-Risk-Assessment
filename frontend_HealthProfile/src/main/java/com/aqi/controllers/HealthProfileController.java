@@ -2,7 +2,10 @@ package com.aqi.controllers;
 
 import com.aqi.services.ApiService;
 import com.aqi.utils.UserSession;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;

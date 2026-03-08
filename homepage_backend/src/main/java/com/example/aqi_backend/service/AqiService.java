@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -74,7 +75,6 @@ public class AqiService {
     // ── Fetch weather + air pollution ─────────────────────────────
     private Map<String, Object> fetchAllData(double lat, double lon, String cityName) throws Exception {
 
-        // Weather
         String weatherUrl = "https://api.openweathermap.org/data/2.5/weather?lat="
                 + lat + "&lon=" + lon + "&units=metric&appid=" + owmKey;
         String weatherResponse = restTemplate.getForObject(weatherUrl, String.class);
@@ -88,14 +88,14 @@ public class AqiService {
         double pressure    = weatherRoot.path("main").path("pressure").asDouble();
         double windSpeed   = weatherRoot.path("wind").path("speed").asDouble() * 3.6;
         double windDeg     = weatherRoot.path("wind").path("deg").asDouble();
-        double visibility  = weatherRoot.path("visibility").asDouble() / 1000.0; // m → km
+        double visibility  = weatherRoot.path("visibility").asDouble() / 1000.0;
         double clouds      = weatherRoot.path("clouds").path("all").asDouble();
         long sunrise       = weatherRoot.path("sys").path("sunrise").asLong();
         long sunset        = weatherRoot.path("sys").path("sunset").asLong();
         String description = weatherRoot.path("weather").get(0).path("description").asText();
         String icon        = weatherRoot.path("weather").get(0).path("icon").asText();
         double windDirection = weatherRoot.path("wind").path("deg").asDouble(180);
-        // Air Pollution
+
         String pollutionUrl = "https://api.openweathermap.org/data/2.5/air_pollution?lat="
                 + lat + "&lon=" + lon + "&appid=" + owmKey;
         String pollutionResponse = restTemplate.getForObject(pollutionUrl, String.class);
@@ -111,7 +111,6 @@ public class AqiService {
         double nh3  = components.path("nh3").asDouble();
         double no   = components.path("no").asDouble();
 
-        // CPCB AQI
         Map<String, Double> subIndices = new HashMap<>();
         if (pm25 > 0) subIndices.put("pm25", calcPm25(pm25));
         if (pm10 > 0) subIndices.put("pm10", calcPm10(pm10));
@@ -123,11 +122,11 @@ public class AqiService {
         int cpcbAqi = subIndices.isEmpty() ? 0
                 : (int) Math.round(Collections.max(subIndices.values()));
 
-        // Build response
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("aqi",         cpcbAqi);
         result.put("city",        cityName);
-        // Pollutants
+        result.put("lat",         lat);
+        result.put("lon",         lon);
         result.put("pm25",        pm25);
         result.put("pm10",        pm10);
         result.put("no2",         no2);
@@ -136,7 +135,6 @@ public class AqiService {
         result.put("so2",         so2);
         result.put("nh3",         nh3);
         result.put("no",          no);
-        // Weather
         result.put("temperature", temp);
         result.put("feelsLike",   feelsLike);
         result.put("tempMin",     tempMin);
@@ -157,10 +155,73 @@ public class AqiService {
         return result;
     }
 
-    // ── NEW: Forecast (5-day / 3-hour) ────────────────────────────
+    // ── Historical AQI (past 5 days, hourly) ──────────────────────
+    // Returns ~120 readings: [{ dt, pm25, pm10, no2, o3, co, so2, nh3, no, aqi }, ...]
+    // Used by Flask /metrics endpoint as real y_true ground truth values.
+    public List<Map<String, Object>> getAqiHistory(double lat, double lon) {
+        try {
+            long end   = Instant.now().getEpochSecond();
+            long start = end - (5L * 24 * 60 * 60); // 5 days back
+
+            String histUrl = "http://api.openweathermap.org/data/2.5/air_pollution/history"
+                    + "?lat=" + lat
+                    + "&lon=" + lon
+                    + "&start=" + start
+                    + "&end=" + end
+                    + "&appid=" + owmKey;
+
+            String response = restTemplate.getForObject(histUrl, String.class);
+            JsonNode root   = objectMapper.readTree(response);
+            JsonNode list   = root.path("list");
+
+            List<Map<String, Object>> readings = new ArrayList<>();
+            for (JsonNode item : list) {
+                long dt       = item.path("dt").asLong();
+                JsonNode comp = item.path("components");
+
+                double pm25 = comp.path("pm2_5").asDouble();
+                double pm10 = comp.path("pm10").asDouble();
+                double no2  = comp.path("no2").asDouble();
+                double o3   = comp.path("o3").asDouble();
+                double co   = comp.path("co").asDouble();
+                double so2  = comp.path("so2").asDouble();
+                double nh3  = comp.path("nh3").asDouble();
+                double no   = comp.path("no").asDouble();
+
+                Map<String, Double> sub = new HashMap<>();
+                if (pm25 > 0) sub.put("pm25", calcPm25(pm25));
+                if (pm10 > 0) sub.put("pm10", calcPm10(pm10));
+                if (no2  > 0) sub.put("no2",  calcNo2(no2));
+                if (o3   > 0) sub.put("o3",   calcO3(o3));
+                if (co   > 0) sub.put("co",   calcCo(co));
+                if (so2  > 0) sub.put("so2",  calcSo2(so2));
+
+                int aqi = sub.isEmpty() ? 0 : (int) Math.round(Collections.max(sub.values()));
+
+                Map<String, Object> reading = new LinkedHashMap<>();
+                reading.put("dt",   dt);
+                reading.put("pm25", pm25);
+                reading.put("pm10", pm10);
+                reading.put("no2",  no2);
+                reading.put("o3",   o3);
+                reading.put("co",   co);
+                reading.put("so2",  so2);
+                reading.put("nh3",  nh3);
+                reading.put("no",   no);
+                reading.put("aqi",  aqi);
+                readings.add(reading);
+            }
+
+            return readings;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to fetch AQI history: " + e.getMessage());
+        }
+    }
+
+    // ── Forecast ──────────────────────────────────────────────────
     public Map<String, Object> getForecast(String city) {
         try {
-            // Geocode
             String geoUrl = "https://api.openweathermap.org/geo/1.0/direct?q="
                     + city.replace(" ", "+") + "&limit=1&appid=" + owmKey;
             JsonNode geoRoot = objectMapper.readTree(
@@ -195,19 +256,16 @@ public class AqiService {
     }
 
     private Map<String, Object> fetchForecastData(double lat, double lon, String cityName) throws Exception {
-        // 5-day weather forecast (3-hour intervals)
         String forecastUrl = "https://api.openweathermap.org/data/2.5/forecast?lat="
                 + lat + "&lon=" + lon + "&units=metric&appid=" + owmKey;
         JsonNode forecastRoot = objectMapper.readTree(
                 restTemplate.getForObject(forecastUrl, String.class));
 
-        // Air pollution forecast (hourly, 4 days ahead)
         String pollForecastUrl = "https://api.openweathermap.org/data/2.5/air_pollution/forecast?lat="
                 + lat + "&lon=" + lon + "&appid=" + owmKey;
         JsonNode pollForecastRoot = objectMapper.readTree(
                 restTemplate.getForObject(pollForecastUrl, String.class));
 
-        // Build a map of timestamp → AQI for pollution
         Map<Long, Integer> pollutionByTime = new LinkedHashMap<>();
         for (JsonNode item : pollForecastRoot.path("list")) {
             long dt = item.path("dt").asLong();
@@ -231,17 +289,14 @@ public class AqiService {
             pollutionByTime.put(dt, aqi);
         }
 
-        // Build forecast entries
         List<Map<String, Object>> entries = new ArrayList<>();
         for (JsonNode item : forecastRoot.path("list")) {
-            long dt       = item.path("dt").asLong();
-            double temp   = item.path("main").path("temp").asDouble();
+            long dt         = item.path("dt").asLong();
+            double temp     = item.path("main").path("temp").asDouble();
             double humidity = item.path("main").path("humidity").asDouble();
-            String desc   = item.path("weather").get(0).path("description").asText();
-            String icon   = item.path("weather").get(0).path("icon").asText();
-            String dtTxt  = item.path("dt_txt").asText();
-
-            // Find closest pollution timestamp
+            String desc     = item.path("weather").get(0).path("description").asText();
+            String icon     = item.path("weather").get(0).path("icon").asText();
+            String dtTxt    = item.path("dt_txt").asText();
             int aqi = findClosestAqi(dt, pollutionByTime);
 
             Map<String, Object> entry = new LinkedHashMap<>();
@@ -255,11 +310,10 @@ public class AqiService {
             entries.add(entry);
         }
 
-        // Daily summary (min/max AQI per day)
         Map<String, Map<String, Object>> dailySummary = new LinkedHashMap<>();
         for (Map<String, Object> entry : entries) {
-            String day = ((String) entry.get("dtTxt")).substring(0, 10);
-            int aqi    = (int) entry.get("aqi");
+            String day  = ((String) entry.get("dtTxt")).substring(0, 10);
+            int aqi     = (int) entry.get("aqi");
             double temp = (double) entry.get("temp");
 
             dailySummary.computeIfAbsent(day, k -> {
@@ -293,7 +347,7 @@ public class AqiService {
         return closest == -1 ? 0 : pollutionByTime.get(closest);
     }
 
-    // ── NEW: All pollutants for a city ────────────────────────────
+    // ── All pollutants for a city ─────────────────────────────────
     public Map<String, Object> getPollutants(String city) {
         try {
             String geoUrl = "https://api.openweathermap.org/geo/1.0/direct?q="
@@ -329,7 +383,7 @@ public class AqiService {
         }
     }
 
-    // ── NEW: India cities AQI (parallel fetch) ────────────────────
+    // ── India cities AQI (parallel fetch) ────────────────────────
     public List<Map<String, Object>> getIndiaCities() {
         ExecutorService executor = Executors.newFixedThreadPool(8);
         List<Future<Map<String, Object>>> futures = new ArrayList<>();
@@ -338,7 +392,6 @@ public class AqiService {
             futures.add(executor.submit(() -> {
                 try {
                     Map<String, Object> data = getAqiByCity(city);
-                    // Keep only what we need for city cards
                     Map<String, Object> card = new LinkedHashMap<>();
                     card.put("city",  data.get("city"));
                     card.put("aqi",   data.get("aqi"));
@@ -363,7 +416,6 @@ public class AqiService {
             catch (Exception e) { /* skip failed city */ }
         }
 
-        // Sort by AQI descending (worst first)
         results.sort((a, b) -> {
             int aqiA = (int) a.getOrDefault("aqi", -1);
             int aqiB = (int) b.getOrDefault("aqi", -1);
