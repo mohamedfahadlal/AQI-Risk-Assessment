@@ -7,19 +7,19 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.0)
 
-2026-03-08T12:53:37.484+05:30  INFO 36888 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : Starting AqiBackendApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 36888 (C:\Users\Fahad\Desktop\my works\Java AP project\AQI-Risk-Assessment\homepage_backend\target\aqi-backend-0.0.1-SNAPSHOT.jar started by Fahad in C:\Users\Fahad\Desktop\my works\Java AP project\AQI-Risk-Assessment\aqi-frontend)
-2026-03-08T12:53:37.487+05:30  INFO 36888 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : No active profile set, falling back to 1 default profile: "default"
-2026-03-08T12:53:39.451+05:30  INFO 36888 --- [aqi-backend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2026-03-08T12:53:39.462+05:30  INFO 36888 --- [aqi-backend] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-03-08T12:53:39.463+05:30  INFO 36888 --- [aqi-backend] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
-2026-03-08T12:53:39.514+05:30  INFO 36888 --- [aqi-backend] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-03-08T12:53:39.515+05:30  INFO 36888 --- [aqi-backend] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1936 ms
-2026-03-08T12:53:40.589+05:30  INFO 36888 --- [aqi-backend] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
-2026-03-08T12:53:40.674+05:30  WARN 36888 --- [aqi-backend] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2026-03-08T12:53:40.707+05:30  INFO 36888 --- [aqi-backend] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+2026-03-09T01:00:50.770+05:30  INFO 11172 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : Starting AqiBackendApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 11172 (C:\Users\sanji\IdeaProjects\Aqi\AQI-Risk-Assessment\homepage_backend\target\aqi-backend-0.0.1-SNAPSHOT.jar started by sanji in C:\Users\sanji\IdeaProjects\Aqi\AQI-Risk-Assessment\aqi-frontend)
+2026-03-09T01:00:50.776+05:30  INFO 11172 --- [aqi-backend] [           main] c.e.aqi_backend.AqiBackendApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-03-09T01:00:53.026+05:30  INFO 11172 --- [aqi-backend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-09T01:00:53.039+05:30  INFO 11172 --- [aqi-backend] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-09T01:00:53.039+05:30  INFO 11172 --- [aqi-backend] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-03-09T01:00:53.090+05:30  INFO 11172 --- [aqi-backend] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-09T01:00:53.091+05:30  INFO 11172 --- [aqi-backend] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2203 ms
+2026-03-09T01:00:54.322+05:30  INFO 11172 --- [aqi-backend] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-03-09T01:00:54.424+05:30  WARN 11172 --- [aqi-backend] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-03-09T01:00:54.451+05:30  INFO 11172 --- [aqi-backend] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
 
 Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2026-03-08T12:53:40.735+05:30 ERROR 36888 --- [aqi-backend] [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
+2026-03-09T01:00:54.481+05:30 ERROR 11172 --- [aqi-backend] [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
 
 ***************************
 APPLICATION FAILED TO START
