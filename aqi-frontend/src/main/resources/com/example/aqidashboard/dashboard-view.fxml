@@ -32,7 +32,7 @@
                         style="-fx-background-radius: 20; -fx-background-color: white; -fx-border-color: #1a73e8; -fx-border-radius: 20; -fx-text-fill: #1a73e8; -fx-padding: 8 16; -fx-cursor: hand;"/>
             </HBox>
             <HBox alignment="CENTER_RIGHT" spacing="8" minWidth="380">
-                <Button fx:id="darkModeBtn" text="Dark Mode" onAction="#handleDarkMode"
+                <Button fx:id="aboutBtn" text="About Us" onAction="#handleAbout"
                         style="-fx-background-radius: 20; -fx-background-color: #f1f3f4; -fx-text-fill: #444; -fx-padding: 8 14; -fx-cursor: hand;"/>
                 <Button fx:id="predictBtn" text="Predict AQI" onAction="#handleOpenPrediction"
                         style="-fx-background-radius: 20; -fx-background-color: #f3e8ff; -fx-text-fill: #7c3aed; -fx-font-weight: bold; -fx-padding: 8 14; -fx-cursor: hand;"/>
@@ -800,7 +800,50 @@
                             </VBox>
                         </GridPane>
                     </VBox>
+                    <VBox spacing="14"
+                          style="-fx-background-color: white; -fx-background-radius: 16;
+             -fx-padding: 24;
+             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 2);">
 
+                        <!-- Title -->
+                        <Label text="Data Sources &amp; Credits"
+                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+
+                        <!-- OpenWeather -->
+                        <VBox spacing="6"
+                              style="-fx-background-color: #f0f4ff;
+                 -fx-background-radius: 10;
+                 -fx-padding: 12 16;">
+                            <Label text="OpenWeather API"
+                                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
+
+                            <Label text="Weather and air pollution data used in this dashboard is powered by the OpenWeather API."
+                                   wrapText="true"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #444;"/>
+
+                            <Hyperlink text="https://openweathermap.org/api"
+                                       style="-fx-font-size: 12px;"
+                                       onAction="#openOpenWeatherLink"/>
+                        </VBox>
+
+                        <!-- CPCB -->
+                        <VBox spacing="6"
+                              style="-fx-background-color: #f0f4ff;
+                 -fx-background-radius: 10;
+                 -fx-padding: 12 16;">
+                            <Label text="Central Pollution Control Board (CPCB)"
+                                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a73e8;"/>
+
+                            <Label text="Air quality datasets used for analysis and machine learning model training were sourced from the Central Pollution Control Board (CPCB), Government of India."
+                                   wrapText="true"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #444;"/>
+
+                            <Hyperlink text="https://app.cpcbccr.com/ccr/#/caaqm-dashboard-all/caaqm-landing"
+                                       style="-fx-font-size: 12px;"
+                                       onAction="#openCpcbLink"/>
+                        </VBox>
+
+                    </VBox>
                     <!-- FAQ — Modern styled accordion -->
                     <VBox spacing="16"
                           style="-fx-background-color: white; -fx-background-radius: 20;
