@@ -1,7 +1,9 @@
 package com.example.aqidashboard;
 
 import com.aqi.utils.EmailUtil;
+import com.aqi.controllers.AboutController;
 import com.aqi.utils.SceneManager;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import com.aqi.utils.UserSession;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,6 +32,9 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -356,8 +361,23 @@ public class DashboardController {
     }
 
     @FXML
-    private void handleAbout() {
-        SceneManager.switchScene("/fxml/About.fxml", "About Us");
+    private void handleAboutUs() {
+
+        try {
+
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/fxml/About.fxml")
+            );
+
+            Parent root = loader.load();
+
+            Stage stage = (Stage) searchBtn.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("About Us");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // ─────────────────────────────────────────────────────────────

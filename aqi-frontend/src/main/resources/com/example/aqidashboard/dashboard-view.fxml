@@ -32,7 +32,7 @@
                         style="-fx-background-radius: 20; -fx-background-color: white; -fx-border-color: #1a73e8; -fx-border-radius: 20; -fx-text-fill: #1a73e8; -fx-padding: 8 16; -fx-cursor: hand;"/>
             </HBox>
             <HBox alignment="CENTER_RIGHT" spacing="8" minWidth="380">
-                <Button fx:id="aboutBtn" text="About Us" onAction="#handleAbout"
+                <Button fx:id="aboutUsBtn" text="About Us" onAction="#handleAboutUs"
                         style="-fx-background-radius: 20; -fx-background-color: #f1f3f4; -fx-text-fill: #444; -fx-padding: 8 14; -fx-cursor: hand;"/>
                 <Button fx:id="predictBtn" text="Predict AQI" onAction="#handleOpenPrediction"
                         style="-fx-background-radius: 20; -fx-background-color: #f3e8ff; -fx-text-fill: #7c3aed; -fx-font-weight: bold; -fx-padding: 8 14; -fx-cursor: hand;"/>
