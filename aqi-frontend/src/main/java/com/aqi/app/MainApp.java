@@ -30,7 +30,7 @@ public class MainApp extends Application {
                     projectRoot + "\\..\\homepage_backend\\src\\main\\resources\\application.properties"
             ).getCanonicalFile();
 
-            File logFile = new File(projectRoot + "\\backend.log");
+
 
             System.out.println("JAR:   " + jarFile.getAbsolutePath());
             System.out.println("Props: " + propsFile.getAbsolutePath());
@@ -44,7 +44,6 @@ public class MainApp extends Application {
                     "--spring.config.location=file:" + propsFile.getAbsolutePath()
             );
             pb.redirectErrorStream(true);
-            pb.redirectOutput(logFile);
 
             backendProcess = pb.start();
             System.out.println("Backend starting... check backend.log for details");
@@ -62,7 +61,6 @@ public class MainApp extends Application {
                     projectRoot + "\\..\\ml\\server.py"
             ).getCanonicalFile();
 
-            File logFile = new File(projectRoot + "\\ml.log");
 
             System.out.println("ML server: " + serverFile.getAbsolutePath());
 
@@ -77,13 +75,13 @@ public class MainApp extends Application {
             try {
                 pb = new ProcessBuilder("python", serverFile.getAbsolutePath());
                 pb.redirectErrorStream(true);
-                pb.redirectOutput(logFile);
+
                 mlProcess = pb.start();
                 System.out.println("ML server starting with 'python'... check ml.log for details");
             } catch (Exception e) {
                 pb = new ProcessBuilder("python3", serverFile.getAbsolutePath());
                 pb.redirectErrorStream(true);
-                pb.redirectOutput(logFile);
+
                 mlProcess = pb.start();
                 System.out.println("ML server starting with 'python3'... check ml.log for details");
             }
