@@ -2,6 +2,7 @@ package com.example.aqidashboard;
 
 import com.aqi.utils.EmailUtil;
 import com.aqi.utils.SceneManager;
+import javafx.scene.Node;
 import com.aqi.utils.UserSession;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,7 +51,6 @@ public class DashboardController {
     @FXML private Label lastRefreshedLabel;
     @FXML private Label autoRefreshLabel;
     @FXML private Label alertStatusLabel;
-    @FXML private Button darkModeBtn;
 
     // ── Capsule tab switcher ──────────────────────────────────────
     @FXML private Button tabBtn1, tabBtn2, tabBtn3, tabBtn4, tabBtn5, tabBtn6, tabBtn7;
@@ -188,7 +188,6 @@ public class DashboardController {
     private JsonNode lastAqiData = null;
     private JsonNode lastForecastData = null;
     private boolean sortWorstFirst = true;
-    private boolean isDarkMode = false;
     private int alertThreshold = -1;
     private int refreshCountdown = 900;
     private ScheduledExecutorService scheduler;
@@ -238,8 +237,8 @@ public class DashboardController {
 
         // Nav button hover glow — applied after scene is ready
         Platform.runLater(() -> {
-            if (darkModeBtn.getParent() != null) {
-                for (javafx.scene.Node n : darkModeBtn.getParent().getChildrenUnmodifiable()) {
+            if (searchBtn != null && searchBtn.getParent() instanceof HBox navBar) {
+                for (Node n : navBar.getChildren()) {
                     if (n instanceof Button navBtn) {
                         addButtonHover(navBtn, "rgba(26,115,232,0.32)");
                     }
@@ -356,7 +355,8 @@ public class DashboardController {
         return true;
     }
 
-    @FXML private void handleAbout() {
+    @FXML
+    private void handleAbout() {
         SceneManager.switchScene("/fxml/About.fxml", "About Us");
     }
 
@@ -501,203 +501,6 @@ public class DashboardController {
         addButtonHover(aqiToggleBtn, "rgba(26,115,232,0.28)");
         if (lastAqiData != null) updateWeatherView(lastAqiData);
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // DARK MODE
-    // ─────────────────────────────────────────────────────────────
-    @FXML private void handleDarkMode() {
-        isDarkMode = !isDarkMode;
-        darkModeBtn.setText(isDarkMode ? "☀  Light" : "🌙  Dark");
-
-        // Button style feedback
-        darkModeBtn.setStyle(isDarkMode
-                ? "-fx-background-color: #252838; -fx-text-fill: #e2e8f0; -fx-background-radius: 12;" +
-                "-fx-border-color: #3a3f55; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 7 16; -fx-cursor: hand;"
-                : "-fx-background-color: #f0f4f8; -fx-text-fill: #1a1a2e; -fx-background-radius: 12;" +
-                "-fx-border-color: #cbd5e1; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 7 16; -fx-cursor: hand;");
-
-        Platform.runLater(() -> {
-            if (darkModeBtn.getScene() == null) return;
-            var stylesheets = darkModeBtn.getScene().getStylesheets();
-            var url = getClass().getResource("/css/dark-theme.css");
-            if (url != null) {
-                String darkCss = url.toExternalForm();
-                if (isDarkMode) { if (!stylesheets.contains(darkCss)) stylesheets.add(darkCss); }
-                else            { stylesheets.remove(darkCss); }
-            }
-            applyDarkModeInlineStyles(isDarkMode);
-        });
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // DARK MODE — override inline styles CSS can't reach
-    // ─────────────────────────────────────────────────────────────
-    private void applyDarkModeInlineStyles(boolean dark) {
-        // Colours
-        String pageBg      = dark ? "#13151f" : "#f0f4f8";
-        String cardBg      = dark ? "#1e2130" : "white";
-        String cardBgAlt   = dark ? "#252838" : "#f4f7ff";
-        String pillBg      = dark ? "#252838" : "#e2e8f0";
-        String tileBg      = dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)";
-        String tileText    = dark ? "#e2e8f0"  : "#1a1a2e";
-        String labelMuted  = dark ? "#94a3b8"  : "#666";
-        String cardShadow  = dark
-                ? "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 20, 0, 0, 4);"
-                : "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);";
-        String navBg       = dark ? "#1a1d2e"  : "white";
-        String navBorder   = dark ? "-fx-border-color: #2a2d3e; -fx-border-width: 0 0 1 0;" : "";
-        String forecastBg  = dark ? "#1e2130"  : "white";
-        String tabBarBg    = dark ? "#1a1d2e"  : "#f0f4f8";
-        String pillInner   = dark ? "#1e2130"  : "#e2e8f0";
-        String separatorC  = dark ? "#2e3347"  : "rgba(0,0,0,0.15)";
-
-        // ── Navbar
-        if (darkModeBtn.getParent() != null && darkModeBtn.getParent().getParent() instanceof javafx.scene.Node nav) {
-            if (nav instanceof javafx.scene.layout.HBox navbar) {
-                navbar.setStyle("-fx-background-color: " + navBg + "; -fx-padding: 14 30; " +
-                        "-fx-alignment: CENTER_LEFT; -fx-spacing: 16; " +
-                        (dark ? "-fx-border-color: #2a2d3e; -fx-border-width: 0 0 1 0;" : ""));
-            }
-        }
-
-        // ── Tab switcher bar + pill container
-        if (tabBtns != null && tabBtns[0] != null) {
-            var pillHBox = tabBtns[0].getParent(); // inner HBox (pill)
-            if (pillHBox != null) {
-                pillHBox.setStyle("-fx-background-color: " + pillInner + "; -fx-background-radius: 26; " +
-                        "-fx-padding: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 8, 0, 0, 2);");
-                var tabBar = pillHBox.getParent(); // outer HBox centering it
-                if (tabBar instanceof javafx.scene.layout.HBox hb)
-                    hb.setStyle("-fx-padding: 14 0 8 0; -fx-background-color: " + tabBarBg + ";");
-            }
-            // Re-style inactive tab buttons
-            for (int i = 0; i < tabBtns.length; i++) {
-                if (!tabBtns[i].getStyle().contains("#1a73e8")) {
-                    tabBtns[i].setStyle(
-                            "-fx-background-radius: 22; -fx-background-color: transparent; " +
-                                    "-fx-text-fill: " + (dark ? "#94a3b8" : "#555") + "; " +
-                                    "-fx-font-size: 13px; -fx-padding: 9 22; -fx-cursor: hand;");
-                }
-            }
-        }
-
-        // ── All tab content scroll backgrounds
-        for (VBox tc : tabContents) {
-            if (tc == null) continue;
-            // ScrollPane > VBox (the page bg)
-            if (tc.getChildren().size() > 0 && tc.getChildren().get(0) instanceof javafx.scene.control.ScrollPane sp) {
-                sp.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
-                if (sp.getContent() instanceof javafx.scene.layout.VBox vb) {
-                    vb.setStyle("-fx-padding: 20; -fx-background-color: " + pageBg + ";");
-                    // Inner white cards
-                    styleChildCards(vb, dark, cardBg, cardBgAlt, tileBg, tileText, labelMuted, cardShadow, separatorC);
-                }
-            }
-        }
-
-        // ── AQI/Weather toggle pill bar
-        if (aqiToggleBtn != null && aqiToggleBtn.getParent() instanceof javafx.scene.layout.HBox togglePill) {
-            togglePill.setStyle("-fx-background-color: " + pillInner + "; -fx-background-radius: 25; " +
-                    "-fx-padding: 4; -fx-max-width: 340; " +
-                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 6, 0, 0, 1);");
-            // Inactive toggle button
-            weatherToggleBtn.setStyle("-fx-background-radius: 22; -fx-background-color: transparent; " +
-                    "-fx-text-fill: " + (dark ? "#94a3b8" : "#666") + "; -fx-padding: 8 36; -fx-cursor: hand;");
-        }
-
-        // ── Forecast chart chart-plot background via CSS class — handled by CSS
-        // But re-style the container card
-        if (forecastChartContainer != null)
-            forecastChartContainer.setStyle("-fx-background-color: " + forecastBg + "; -fx-background-radius: 20; " +
-                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0," + (dark?"0.35":"0.08") + "), 20, 0, 0, 4); -fx-padding: 28 35;");
-
-        // ── Chart text colours (for current live chart)
-        if (forecastChart != null) {
-            forecastChart.lookupAll(".chart-legend-item").forEach(n ->
-                    n.setStyle("-fx-text-fill: " + (dark?"#cbd5e1":"#111") + "; -fx-font-size: 13px; -fx-font-weight: bold;"));
-            forecastChart.lookupAll("Text").forEach(n ->
-                    n.setStyle("-fx-fill: " + (dark?"#94a3b8":"#111") + "; -fx-font-size: 11px;"));
-        }
-
-        // ── Weather card overlay
-        if (weatherCardOverlay != null)
-            weatherCardOverlay.setStyle("-fx-background-color: " +
-                    (dark ? "rgba(10,12,20,0.50)" : "rgba(255,255,255,0.42)") +
-                    "; -fx-background-radius: 20;");
-    }
-
-    /** Recursively style white card VBoxes and their stat tiles */
-    private void styleChildCards(javafx.scene.layout.VBox parent, boolean dark,
-                                 String cardBg, String cardBgAlt, String tileBg,
-                                 String tileText, String labelMuted, String cardShadow, String separatorC) {
-
-        String cardStyle = "-fx-background-color: " + cardBg + "; -fx-background-radius: 20; " + cardShadow + " -fx-padding: 28 35;";
-        String tileStyle = tileBg + "; -fx-padding: 14 24; -fx-background-radius: 16;";
-        // "rgba..." bg style for the AQI badge tiles
-        String inlineTile = "-fx-background-color: " + tileBg + "; -fx-padding: 14 24; -fx-background-radius: 16;";
-
-        for (javafx.scene.Node child : parent.getChildren()) {
-            if (child instanceof javafx.scene.layout.VBox vb) {
-                String s = vb.getStyle();
-                // Top-level white cards
-                if (s != null && (s.contains("white") || s.contains("#ffffff") || s.contains("background-color: white"))) {
-                    vb.setStyle("-fx-background-color: " + cardBg + "; -fx-background-radius: 20; " +
-                            cardShadow + " -fx-padding: 28 35;");
-                }
-                // Stat tiles with semi-transparent bg
-                if (s != null && s.contains("rgba(0,0,0,0.07)")) {
-                    vb.setStyle(inlineTile);
-                }
-                // f0f4ff mini-tiles in weather grid
-                if (s != null && (s.contains("#f0f4ff") || s.contains("#fff8e1") || s.contains("#fff3e0"))) {
-                    vb.setStyle("-fx-background-color: " + cardBgAlt + "; -fx-padding: 12 18; -fx-background-radius: 12;");
-                }
-                styleChildCards(vb, dark, cardBg, cardBgAlt, tileBg, tileText, labelMuted, cardShadow, separatorC);
-            }
-            if (child instanceof javafx.scene.layout.HBox hb) {
-                String s = hb.getStyle();
-                // #e4e9f0 sort/filter bar
-                if (s != null && (s.contains("#e4e9f0") || s.contains("#e2e8f0"))) {
-                    hb.setStyle("-fx-background-color: " + (dark?"#252838":"#e4e9f0") +
-                            "; -fx-background-radius: 25; -fx-padding: 4; -fx-max-width: 340; " +
-                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 1);");
-                }
-                styleChildCards2(hb, dark, cardBgAlt, tileBg);
-            }
-            if (child instanceof javafx.scene.control.Separator sep) {
-                sep.setStyle("-fx-background-color: " + separatorC + ";");
-            }
-            if (child instanceof javafx.scene.control.Label lbl) {
-                String s = lbl.getStyle();
-                if (s != null && (s.contains("#666") || s.contains("#555") || s.contains("#888"))) {
-                    lbl.setStyle(s.replaceAll("#666|#555|#888", dark ? "#94a3b8" : "#666"));
-                }
-                if (s != null && s.contains("#1a1a2e")) {
-                    lbl.setStyle(s.replace("#1a1a2e", dark ? "#e2e8f0" : "#1a1a2e"));
-                }
-            }
-        }
-    }
-
-    private void styleChildCards2(javafx.scene.layout.HBox parent, boolean dark, String cardBgAlt, String tileBg) {
-        for (javafx.scene.Node child : parent.getChildren()) {
-            if (child instanceof javafx.scene.layout.VBox vb) {
-                String s = vb.getStyle();
-                if (s != null && (s.contains("#f0f4ff") || s.contains("#fff8e1") || s.contains("#fff3e0"))) {
-                    vb.setStyle("-fx-background-color: " + cardBgAlt + "; -fx-padding: 12 18; -fx-background-radius: 12;");
-                }
-                if (s != null && s.contains("rgba(0,0,0,0.06)")) {
-                    vb.setStyle("-fx-background-color: " + tileBg + "; -fx-padding: 14 24; -fx-background-radius: 16;");
-                }
-                if (s != null && s.contains("rgba(0,0,0,0.07)")) {
-                    vb.setStyle("-fx-background-color: " + tileBg + "; -fx-padding: 14 24; -fx-background-radius: 16;");
-                }
-            }
-            if (child instanceof javafx.scene.layout.HBox hb)
-                styleChildCards2(hb, dark, cardBgAlt, tileBg);
-        }
-    }
-
     // ─────────────────────────────────────────────────────────────
     // AQI ALERT
     // ─────────────────────────────────────────────────────────────
@@ -718,7 +521,27 @@ public class DashboardController {
             }
         });
     }
+    @FXML
+    private void openOpenWeatherLink() {
+        try {
+            java.awt.Desktop.getDesktop().browse(
+                    new java.net.URI("https://openweathermap.org/api")
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    @FXML
+    private void openCpcbLink() {
+        try {
+            java.awt.Desktop.getDesktop().browse(
+                    new java.net.URI("https://app.cpcbccr.com/ccr/#/caaqm-dashboard-all/caaqm-landing")
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     private void checkAlert(int aqi) {
         if (alertThreshold > 0 && aqi > alertThreshold) {
             Platform.runLater(() -> {
@@ -1262,8 +1085,6 @@ public class DashboardController {
                     });
                     p.play();
                 });
-                // Re-apply dark theme to newly drawn chart nodes
-                if (isDarkMode) applyDarkModeInlineStyles(true);
             });
         });
     }
