@@ -1,14 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
 
-<StackPane styleClass="main-background" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.aqi.controllers.IntroController">
-    <VBox styleClass="card" alignment="CENTER" spacing="20" maxWidth="400" maxHeight="300">
-        <Label text="Welcome to AQI Monitor" styleClass="title-label"/>
-        <Label text="Stay informed about the air you breathe." textFill="#666666"/>
-        <HBox spacing="15" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
-            <Button text="Login" onAction="#goToLogin" styleClass="btn-primary" prefWidth="100"/>
-            <Button text="Sign Up" onAction="#goToSignUp" styleClass="btn-secondary" prefWidth="100"/>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.media.MediaView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.shape.Rectangle?>
+
+<StackPane
+        xmlns="http://javafx.com/javafx/21"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="com.aqi.controllers.SplashController"
+        fx:id="rootPane"
+        style="-fx-background-color: black;"
+        prefWidth="1200"
+        prefHeight="750">
+
+    <!-- Full-window video — sized programmatically in controller -->
+    <MediaView
+            fx:id="mediaView"
+            preserveRatio="false"
+            smooth="true" />
+
+    <!-- Dark pill background behind label for readability -->
+    <AnchorPane style="-fx-background-color: transparent;" pickOnBounds="false">
+
+        <HBox
+                AnchorPane.bottomAnchor="24"
+                AnchorPane.rightAnchor="28"
+                style="
+                -fx-background-color: rgba(0,0,0,0.55);
+                -fx-background-radius: 20;
+                -fx-padding: 7 16 7 16;
+            ">
+            <Label
+                    fx:id="skipLabel"
+                    text="🖱  Click anywhere to continue"
+                    style="
+                    -fx-text-fill: white;
+                    -fx-font-size: 13px;
+                    -fx-font-family: 'Segoe UI';
+                    -fx-font-weight: bold;
+                "/>
         </HBox>
-    </VBox>
+
+    </AnchorPane>
+
 </StackPane>

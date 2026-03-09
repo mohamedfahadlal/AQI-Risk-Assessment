@@ -18,6 +18,7 @@ public class MainApp extends Application {
         launch(args);
     }
 
+    // ── Start Spring Boot backend ──────────────────────────────────────────────
     private static void startBackend() {
         try {
             String projectRoot = System.getProperty("user.dir");
@@ -35,7 +36,7 @@ public class MainApp extends Application {
             System.out.println("JAR:   " + jarFile.getAbsolutePath());
             System.out.println("Props: " + propsFile.getAbsolutePath());
 
-            if (!jarFile.exists()) { System.err.println("JAR not found!"); return; }
+            if (!jarFile.exists())   { System.err.println("JAR not found!"); return; }
             if (!propsFile.exists()) { System.err.println("application.properties not found!"); return; }
 
             ProcessBuilder pb = new ProcessBuilder(
@@ -45,15 +46,15 @@ public class MainApp extends Application {
             );
             pb.redirectErrorStream(true);
             pb.redirectOutput(logFile);
-
             backendProcess = pb.start();
-            System.out.println("Backend starting... check backend.log for details");
+            System.out.println("Backend starting... check backend.log");
 
         } catch (Exception e) {
             System.err.println("Failed to start backend: " + e.getMessage());
         }
     }
 
+    // ── Start Flask / Python ML server ────────────────────────────────────────
     private static void startMLServer() {
         try {
             String projectRoot = System.getProperty("user.dir");
@@ -67,46 +68,42 @@ public class MainApp extends Application {
             System.out.println("ML server: " + serverFile.getAbsolutePath());
 
             if (!serverFile.exists()) {
-                System.err.println("ML server.py not found at: " + serverFile.getAbsolutePath());
-                System.err.println("Prediction will use fallback mode.");
+                System.err.println("ML server.py not found — prediction uses fallback mode.");
                 return;
             }
 
             // Try 'python' first, then 'python3'
-            ProcessBuilder pb;
             try {
-                pb = new ProcessBuilder("python", serverFile.getAbsolutePath());
+                ProcessBuilder pb = new ProcessBuilder("python", serverFile.getAbsolutePath());
                 pb.redirectErrorStream(true);
                 pb.redirectOutput(logFile);
                 mlProcess = pb.start();
-                System.out.println("ML server starting with 'python'... check ml.log for details");
+                System.out.println("ML server starting with 'python'... check ml.log");
             } catch (Exception e) {
-                pb = new ProcessBuilder("python3", serverFile.getAbsolutePath());
+                ProcessBuilder pb = new ProcessBuilder("python3", serverFile.getAbsolutePath());
                 pb.redirectErrorStream(true);
                 pb.redirectOutput(logFile);
                 mlProcess = pb.start();
-                System.out.println("ML server starting with 'python3'... check ml.log for details");
+                System.out.println("ML server starting with 'python3'... check ml.log");
             }
 
         } catch (Exception e) {
             System.err.println("Failed to start ML server: " + e.getMessage());
-            System.err.println("Prediction will use fallback mode.");
         }
     }
 
+    // ── Poll Spring Boot /actuator/health until it responds ───────────────────
     private static void waitForBackend() {
         java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
-
         for (int i = 0; i < 30; i++) {
             try {
                 Thread.sleep(1000);
-                java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                java.net.http.HttpRequest req = java.net.http.HttpRequest.newBuilder()
                         .uri(java.net.URI.create("http://localhost:8080/actuator/health"))
                         .timeout(java.time.Duration.ofSeconds(2))
                         .build();
-                var response = client.send(request,
-                        java.net.http.HttpResponse.BodyHandlers.ofString());
-                if (response.statusCode() == 200) {
+                var res = client.send(req, java.net.http.HttpResponse.BodyHandlers.ofString());
+                if (res.statusCode() == 200) {
                     System.out.println("Backend is ready!");
                     return;
                 }
@@ -114,16 +111,25 @@ public class MainApp extends Application {
                 System.out.println("Waiting for backend... attempt " + (i + 1));
             }
         }
-        System.err.println("Backend did not start in time. Continuing anyway...");
+        System.err.println("Backend did not start in time — continuing anyway.");
     }
 
+    // ── JavaFX entry: show splash video first ─────────────────────────────────
     @Override
     public void start(Stage primaryStage) throws Exception {
         SceneManager.setPrimaryStage(primaryStage);
-        SceneManager.switchScene("/fxml/Intro.fxml", "AQI Dashboard");
+
+        primaryStage.setTitle("AiQI — Intelligence in Every Breath");
+        primaryStage.setFullScreen(true);
+        primaryStage.setFullScreenExitHint(""); // hide the "Press ESC" hint
+        primaryStage.setResizable(true);
+
+        // Load splash/intro video screen
+        SceneManager.switchScene("/fxml/Intro.fxml", "AiQI — Intelligence in Every Breath");
         primaryStage.show();
     }
 
+    // ── Shutdown: kill both sub-processes ─────────────────────────────────────
     @Override
     public void stop() {
         if (backendProcess != null && backendProcess.isAlive()) {
