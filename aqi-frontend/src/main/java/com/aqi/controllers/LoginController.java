@@ -220,7 +220,7 @@ public class LoginController {
 
     @FXML
     private void handleForgotPassword() {
-        statusLabel.setText("Please contact support to reset your password.");
+        SceneManager.switchScene("/fxml/ForgotPassword.fxml", "Forgot Password");
     }
 
     // ── Guest login ───────────────────────────────────────────────
