@@ -22,6 +22,8 @@ public class AboutController {
     @FXML private Label    cloudIcon;
     @FXML private Button   loginBtn;
     @FXML private Button   signUpBtn;
+    @FXML private Button backBtn;
+    @FXML private Button aboutNavBtn;
 
     @FXML
     public void initialize() {
@@ -113,7 +115,41 @@ public class AboutController {
     // ─────────────────────────────────────────────────────────────
     // NAV BUTTON HOVERS
     // ─────────────────────────────────────────────────────────────
+    public void setDashboardMode(boolean fromDashboard) {
 
+        if (fromDashboard) {
+
+            loginBtn.setVisible(false);
+            loginBtn.setManaged(false);
+
+            signUpBtn.setVisible(false);
+            signUpBtn.setManaged(false);
+
+            aboutNavBtn.setVisible(false);
+            aboutNavBtn.setManaged(false);
+
+            backBtn.setVisible(true);
+            backBtn.setManaged(true);
+
+        } else {
+
+            loginBtn.setVisible(true);
+            loginBtn.setManaged(true);
+
+            signUpBtn.setVisible(true);
+            signUpBtn.setManaged(true);
+
+            aboutNavBtn.setVisible(true);
+            aboutNavBtn.setManaged(true);
+
+            backBtn.setVisible(false);
+            backBtn.setManaged(false);
+        }
+    }
+    @FXML
+    private void goBackToDashboard() {
+        SceneManager.switchScene("/com/example/aqidashboard/dashboard-view.fxml", "Dashboard");
+    }
     private void wireNavHovers() {
         if (loginBtn  != null) addButtonHover(loginBtn,  "rgba(14,165,233,0.38)");
         if (signUpBtn != null) addButtonHover(signUpBtn, "rgba(14,165,233,0.55)");
@@ -147,7 +183,6 @@ public class AboutController {
             "rgba(16,185,129,0.50)",    // green  — card 2
             "rgba(245,158,11,0.50)"     // amber  — card 3
     };
-
     private void wireCardHovers() {
         if (teamGrid == null) return;
         int idx = 0;

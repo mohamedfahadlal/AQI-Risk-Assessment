@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
@@ -14,11 +15,32 @@
     <top>
         <HBox fx:id="topNav" alignment="CENTER_LEFT" spacing="20" styleClass="top-nav">
             <Label text="AiQI" styleClass="logo-text"/>
+
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="About Us" styleClass="nav-link"
+
+            <!-- Back button for dashboard mode -->
+            <Button fx:id="backBtn"
+                    text="← Back"
+                    onAction="#goBackToDashboard"
+                    visible="false"
+                    managed="false"
+                    styleClass="nav-link"/>
+
+            <!-- Public navigation -->
+            <Button fx:id="aboutNavBtn"
+                    text="About Us"
+                    styleClass="nav-link"
                     style="-fx-text-fill: #0ea5e9;"/>
-            <Button fx:id="loginBtn"  text="Login"      onAction="#goToLogin"  styleClass="nav-link"/>
-            <Button fx:id="signUpBtn" text="Sign Up ↗"  onAction="#goToSignUp" styleClass="nav-btn-login"/>
+
+            <Button fx:id="loginBtn"
+                    text="Login"
+                    onAction="#goToLogin"
+                    styleClass="nav-link"/>
+
+            <Button fx:id="signUpBtn"
+                    text="Sign Up ↗"
+                    onAction="#goToSignUp"
+                    styleClass="nav-btn-login"/>
         </HBox>
     </top>
 
@@ -58,9 +80,9 @@
                         <VBox spacing="5" HBox.hgrow="ALWAYS">
                             <Label text="SANJITH S"
                                    style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
-                            <Label text="Lead Developer"
+                            <Label text="Frontend Developer"
                                    style="-fx-font-size: 14px; -fx-text-fill: #0ea5e9; -fx-font-weight: bold;"/>
-                            <Label text="Architect of the core functionality. Passionate about clean code and performance."
+                            <Label text="Data Collection and Preprocessing, Designed User Login, Signup pages, Configured Database Authentication ."
                                    wrapText="true"
                                    style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
                         </VBox>
@@ -78,11 +100,11 @@
                             </fill>
                         </Circle>
                         <VBox spacing="5" HBox.hgrow="ALWAYS">
-                            <Label text="MOHAMMED FAHAD LAL"
+                            <Label text="MOHAMED FAHAD LAL"
                                    style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
-                            <Label text="UI/UX Designer"
+                            <Label text="Backend Dev"
                                    style="-fx-font-size: 14px; -fx-text-fill: #8b5cf6; -fx-font-weight: bold;"/>
-                            <Label text="Crafting intuitive and elegant user experiences. Focused on user-centric design principles."
+                            <Label text="Used different ML models and compared the best out of it, Backend integration, developed Homepage, Prediction page, Map."
                                    wrapText="true"
                                    style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
                         </VBox>
@@ -102,9 +124,9 @@
                         <VBox spacing="5" HBox.hgrow="ALWAYS">
                             <Label text="JOBIN M JOHN"
                                    style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
-                            <Label text="Database Administrator"
+                            <Label text="Database Designer"
                                    style="-fx-font-size: 14px; -fx-text-fill: #10b981; -fx-font-weight: bold;"/>
-                            <Label text="Guiding the vision and database roadmap. Dedicated to delivering secure data."
+                            <Label text="Built and Managed the Database, Designed the Health Profile Management Model Dashboard and Homepage."
                                    wrapText="true"
                                    style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
                         </VBox>
@@ -124,9 +146,9 @@
                         <VBox spacing="5" HBox.hgrow="ALWAYS">
                             <Label text="JERIN ABRAHAM"
                                    style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #111827;"/>
-                            <Label text="Full-Stack Engineer"
+                            <Label text="Data Engineer"
                                    style="-fx-font-size: 14px; -fx-text-fill: #f59e0b; -fx-font-weight: bold;"/>
-                            <Label text="Ensuring seamless performance from back-end to front-end. Problem-solver and innovator."
+                            <Label text="Collected Data from various sources, Preprocessed it, Designed Prediction page and Health Advisory card."
                                    wrapText="true"
                                    style="-fx-font-size: 13px; -fx-text-fill: #6b7280; -fx-line-spacing: 3px;"/>
                         </VBox>
@@ -140,7 +162,7 @@
                       style="-fx-padding: 20 0 0 0;">
                     <Label text="Our Mission"
                            style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
-                    <Label text="The AQI Dashboard was built to simplify environmental awareness and enhance productivity. We believe in creating tools that empower users with a seamless, powerful, and intuitive desktop experience. We are committed to continuous improvement, security, and user satisfaction."
+                    <Label text="Our mission is to put the power of environmental intelligence in everyone's hands. AiQI was built on the belief that knowing what you breathe should never require a science degree — just an internet connection and the will to act. We combine cutting-edge machine learning with real-time data to deliver clarity where there was once only numbers."
                            wrapText="true"
                            style="-fx-font-size: 15px; -fx-text-fill: #4b5563; -fx-line-spacing: 6px;"/>
                 </VBox>
